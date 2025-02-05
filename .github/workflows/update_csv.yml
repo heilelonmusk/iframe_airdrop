@@ -1,0 +1,25 @@
+name: Update CSV Files from Google Sheets
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Esegui ogni ora
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install Dependencies
+        run: pip install requests github3.py pandas
+
+      - name: Run Update Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python update_csv_github.py
