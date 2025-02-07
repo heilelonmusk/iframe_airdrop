@@ -7,15 +7,15 @@
   <!-- Include canvas-confetti for the confetti effect -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <style>
-    /* Universal box-sizing */
+    /* Regola universale per il box-sizing */
     *, *::before, *::after {
       box-sizing: border-box;
     }
-    /* Imposta html e body per occupare 300px di altezza con background trasparente e forza il testo bianco */
+    /* Imposta html e body per occupare 300px di altezza, background trasparente, e forza il testo in bianco */
     html, body {
       margin: 0;
       padding: 0;
-      height: 300px;  /* Altezza fissa dell'iframe */
+      height: 300px;
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
@@ -36,7 +36,7 @@
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Contenitori per input e pulsante */
+    /* Contenitori per input e pulsante, centrati */
     .input-container, .button-container {
       width: 100%;
       margin: 5px auto;
@@ -73,7 +73,7 @@
       font-weight: bold;
       font-size: 16px;
       color: white !important;
-      min-height: 24px; /* Per evitare spostamenti del layout */
+      min-height: 24px; /* Previene spostamenti del layout quando appare il messaggio */
     }
     /* Effetto shake per tutto il modulo */
     .shake {
@@ -86,7 +86,7 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    /* Media query per dispositivi mobili: riduce l'ampiezza dello shake */
+    /* Riduci l'ampiezza dello shake sui dispositivi mobili */
     @media (max-width: 600px) {
       @keyframes shake {
         0% { transform: translateX(0); }
@@ -123,7 +123,7 @@
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
-      // Se l'input è vuoto, mostra errore, applica shake e evidenzia l'input in rosso
+      // If no wallet is provided, trigger shake and highlight the input in red.
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -136,15 +136,15 @@
       }
       
       try {
-        // Recupera il file CSV della whitelist tramite jsDelivr
+        // Fetch the whitelist CSV from GitHub via jsDelivr
         const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const csvText = await response.text();
+        // Split the CSV into rows, rimuovendo eventuali righe vuote
         const rows = csvText.split("\n").filter(line => line.trim() !== "");
-        
-        // Assumi che la prima riga sia l'intestazione e cerca la colonna "Wallet Address"
+        // Assume the first row is header and search for the "Wallet Address" column (case-insensitive)
         const header = rows[0].split(",").map(h => h.trim().toLowerCase());
         const walletIndex = header.indexOf("wallet address");
         let isWhitelisted = false;
@@ -156,22 +156,33 @@
           }
         }
         
-        if (wallet.startsWith("0x1")) {
-  resultElem.innerText = "✅ You are eligible! Final airdrop details will be announced by 23:59 CET on February 28.";
-  // Invia un messaggio al parent per attivare il confetti
-  window.parent.postMessage({ action: 'triggerConfetti' }, '*');
-} else {
-  resultElem.innerText = "❌ Not whitelisted, but stay tuned for future opportunities! Join our community channels for updates.";
-  container.classList.add("shake");
-  setTimeout(() => {
-    container.classList.remove("shake");
-  }, 700);
-}
+        if (isWhitelisted) {
+          resultElem.innerText = "✅ You are eligible! Final airdrop details will be announced by 23:59 CET on February 28.";
+          // Trigger confetti in the parent context if needed:
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ action: 'triggerConfetti' }, '*');
+          } else {
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 }
+            });
+          }
+        } else {
+          resultElem.innerText = "❌ Not whitelisted, but stay tuned for future opportunities! Join our community channels for updates.";
+          container.classList.add("shake");
+          setTimeout(() => {
+            container.classList.remove("shake");
+          }, 700);
+        }
       } catch (error) {
         resultElem.innerText = "⚠️ Error checking whitelist. Please try again later.";
         console.error(error);
       }
     }
+    
+    // Optionally, listen for messages in the parent page to trigger confetti there.
+    // In the parent page (outside this iframe), add a listener for postMessage if needed.
   </script>
 </body>
 </html>
