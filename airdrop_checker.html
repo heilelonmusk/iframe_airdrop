@@ -15,21 +15,18 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 400px;  /* Altezza fissa a 400px */
+      height: 400px;  /* Fixed height matching the iframe */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    /* Main container: centrato, con larghezza massima e margine auto per l'allineamento orizzontale */
+    /* Main container centered using flexbox */
     .module-container {
+      height: 100%;
       width: 100%;
       max-width: 400px;
-      margin: 0 auto;  /* Centra il contenitore orizzontalmente */
-      height: 100%;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -79,7 +76,7 @@
       font-weight: bold;
       font-size: 16px;
       color: white !important;
-      min-height: 40px; /* To avoid layout shifts when the message appears */
+      min-height: 40px; /* Space for a two-line message */
     }
     /* Shake effect for the entire module */
     .shake {
@@ -116,7 +113,7 @@
 <body>
   <div class="module-container" id="moduleContainer">
     <h2>🔍 Check Your Airdrop</h2>
-    <!-- Breaking the positive message into two lines -->
+    <!-- Break positive message into two lines -->
     <p>Enter your wallet address to verify<br>if you're whitelisted:</p>
     
     <!-- Input container -->
@@ -139,7 +136,7 @@
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
-      // If input is empty, trigger shake and mark input in red.
+      // If no wallet is provided, trigger shake and highlight input in red.
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -152,7 +149,7 @@
       }
       
       try {
-        // Fetch the whitelist CSV from GitHub via jsDelivr
+        // Fetch the whitelist CSV via jsDelivr
         const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -171,7 +168,8 @@
         }
         
         if (isWhitelisted) {
-          resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on February 28.";
+          // Message on two lines
+          resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
           if (window.innerWidth > 600) {
             // Desktop: trigger confetti
             confetti({
