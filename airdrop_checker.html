@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Regola universale per includere padding e border nel calcolo delle dimensioni */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-    /* Imposta html e body per occupare 300px di altezza (corrispondenti all'iframe) */
+    /* Impostazioni base per una finestra di 300px di altezza */
     html, body {
       margin: 0;
       padding: 0;
@@ -34,7 +30,7 @@
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Contenitori per input e pulsante, entrambi centrati */
+    /* Contenitori per input e pulsante */
     .input-container, .button-container {
       width: 100%;
       margin: 5px auto;
@@ -72,7 +68,7 @@
       font-size: 16px;
       color: white !important;
     }
-    /* Effetto shake aumentato per tutto il modulo */
+    /* Effetto shake per tutto il modulo */
     .shake {
       animation: shake 0.7s;
     }
@@ -104,12 +100,13 @@
   </div>
   
   <script>
-    function checkAirdrop() {
+    async function checkAirdrop() {
       const walletInput = document.getElementById("walletInput");
       const wallet = walletInput.value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
+      // Se l'input è vuoto, attiva shake e mostra errore
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -121,15 +118,41 @@
         return;
       }
       
-      // Simulation: wallets starting with "0x1" are eligible.
-      if (wallet.startsWith("0x1")) {
-        resultElem.innerText = "✅ You are eligible! Final allocation will be announced soon.";
-      } else {
-        resultElem.innerText = "❌ Not whitelisted, but stay tuned for surprises!";
-        container.classList.add("shake");
-        setTimeout(() => {
-          container.classList.remove("shake");
-        }, 700);
+      try {
+        // Usa jsDelivr per prelevare il file CSV della whitelist da GitHub
+        const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const csvText = await response.text();
+        const lines = csvText.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+        
+        // Assumiamo che la prima riga sia l'intestazione e che la colonna "Wallet Address" sia la prima
+        const header = lines[0].split(",");
+        const walletIndex = header.indexOf("Wallet Address");
+        let isWhitelisted = false;
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(",");
+          // Confronto case-insensitive
+          if (columns[walletIndex].toLowerCase() === wallet.toLowerCase()) {
+            isWhitelisted = true;
+            break;
+          }
+        }
+        
+        if (isWhitelisted) {
+          resultElem.innerText = "✅ You are eligible! Final allocation will be announced soon.";
+          // Qui puoi attivare l'animazione dei confetti se desideri
+        } else {
+          resultElem.innerText = "❌ Not whitelisted, but stay tuned for surprises!";
+          container.classList.add("shake");
+          setTimeout(() => {
+            container.classList.remove("shake");
+          }, 700);
+        }
+      } catch (error) {
+        resultElem.innerText = "⚠️ Error checking whitelist. Please try again later.";
+        console.error(error);
       }
     }
   </script>
