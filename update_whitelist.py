@@ -27,7 +27,8 @@ def update_whitelist(wallet_address):
     try:
         # Leggi il contenuto attuale del file whitelist.csv
         file_content = repo.file_contents(file_path, ref=BRANCH)
-        csv_data = file_content.decoded_content.decode("utf-8")
+        # Usa 'decoded' anziché 'decoded_content'
+        csv_data = file_content.decoded.decode("utf-8")
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found.")
         sys.exit(1)
@@ -38,6 +39,7 @@ def update_whitelist(wallet_address):
     
     updated = False
     for row in rows:
+        # Confronto case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
             now = datetime.now()
@@ -57,6 +59,7 @@ def update_whitelist(wallet_address):
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
+    # Aggiorna il file su GitHub
     try:
         repo.update_file(file_path, f"Update whitelist for wallet {wallet_address}", new_csv, file_content.sha, branch=BRANCH)
         print(f"Whitelist updated for wallet {wallet_address}.")
