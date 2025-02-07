@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Assicura che html e body occupino l'intera altezza e forzino il testo in bianco */
+    /* Forza il background trasparente e il testo bianco su tutta la pagina */
     html, body {
       margin: 0;
       padding: 0;
-      height: 100vh;
-      background: transparent;
-      font-family: 'Poppins', sans-serif;
+      height: 100%;
+      background: transparent !important;
+      font-family: 'Poppins', sans-serif !important;
       color: white !important;
     }
     /* Forza il colore bianco per titoli e paragrafi */
@@ -29,7 +29,7 @@
       padding: 20px;
       box-sizing: border-box;
     }
-    /* Contenitori per input e pulsante centrati */
+    /* Contenitore per l'input e il pulsante */
     .input-container, .button-container {
       width: 90%;
       max-width: 400px;
@@ -43,7 +43,7 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
-      background-color: transparent;
+      background-color: transparent !important;
       color: white !important;
     }
     .button-container button {
@@ -52,9 +52,9 @@
       font-size: 16px;
       border-radius: 8px;
       border: none;
-      background-color: #ffcc00;
-      color: black;
-      font-weight: bold;
+      background-color: #ffcc00 !important;
+      color: black !important;
+      font-weight: bold !important;
       cursor: pointer;
     }
     #result {
@@ -86,7 +86,7 @@
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
     
-    <!-- Contenitore per il pulsante, in un livello separato -->
+    <!-- Contenitore per il pulsante in un livello separato -->
     <div class="button-container">
       <button onclick="checkAirdrop()">Verifica</button>
     </div>
@@ -108,7 +108,7 @@
       // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui potresti attivare l'animazione dei coriandoli
+        // Qui puoi attivare l'animazione dei coriandoli se desideri
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         container.classList.add("shake");
