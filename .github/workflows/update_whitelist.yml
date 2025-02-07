@@ -1,0 +1,30 @@
+name: Update Whitelist Status
+
+# Trigger manuale tramite workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      wallet:
+        description: 'Wallet address to update'
+        required: true
+        default: ''
+
+jobs:
+  update-whitelist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install github3.py
+
+      - name: Update Whitelist
+        env:
+          MY_GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+        run: python update_whitelist.py "${{ github.event.inputs.wallet }}"
