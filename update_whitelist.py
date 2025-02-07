@@ -25,9 +25,9 @@ def update_whitelist(wallet_address):
     file_path = "data/whitelist.csv"
     
     try:
-        # Leggi il contenuto attuale del file whitelist.csv
+        # Legge il contenuto attuale del file whitelist.csv
         file_content = repo.file_contents(file_path, ref=BRANCH)
-        # Usa la proprietà "decoded" anziché "decoded_content"
+        # Usa la proprietà "decoded" per ottenere il contenuto in bytes e decodificarlo in stringa UTF-8
         csv_data = file_content.decoded.decode("utf-8")
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found.")
@@ -39,7 +39,7 @@ def update_whitelist(wallet_address):
     
     updated = False
     for row in rows:
-        # Confronto case-insensitive
+        # Confronto case-insensitive per trovare il wallet
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
             now = datetime.now()
@@ -51,22 +51,21 @@ def update_whitelist(wallet_address):
         print(f"Wallet address {wallet_address} not found in whitelist.")
         sys.exit(1)
     
-    # Scrive i dati aggiornati in una stringa CSV e codifica in bytes
+    # Scrive i dati aggiornati in una stringa CSV
     output = io.StringIO()
     fieldnames = reader.fieldnames
     writer = csv.DictWriter(output, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(rows)
-    new_csv = output.getvalue().encode("utf-8")
+    new_csv_str = output.getvalue()  # Mantenuto come stringa
     
-    # Aggiorna il file su GitHub usando il metodo update_file() sul repository
+    # Aggiorna il file su GitHub usando file_content.update()
     try:
-        repo.update_file(
-            file_path,
+        file_content.update(
             f"Update whitelist for wallet {wallet_address}",
-            new_csv,  # new_csv è già in formato bytes
+            new_csv_str,  # Passa la stringa (non bytes)
             file_content.sha,
-            branch=BRANCH
+            BRANCH
         )
         print(f"Whitelist updated for wallet {wallet_address}.")
     except Exception as e:
