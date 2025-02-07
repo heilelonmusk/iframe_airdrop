@@ -5,35 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Impostazioni base: non usiamo flex sul body per evitare conflitti con il contenuto dell'iframe */
+    /* Regola universale per includere padding e border nel calcolo delle dimensioni */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    /* Imposta html e body per occupare 300px di altezza (corrispondenti all'iframe) */
     html, body {
       margin: 0;
       padding: 0;
+      height: 300px;
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
-    }
-    /* Contenitore principale con altezza fissa pari a 300px e centrato con flex */
-    .module-container {
-      height: 300px;              /* Altezza fissa per corrispondere all'iframe */
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
+    }
+    /* Contenitore principale centrato */
+    .module-container {
+      width: 90%;
+      max-width: 400px;
       text-align: center;
-      padding: 20px;
+      padding: 10px;
       box-sizing: border-box;
     }
-    /* Titoli e paragrafi forzati a bianco */
     h2, p {
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Contenitore per l'input e per il pulsante */
+    /* Contenitori per input e pulsante, entrambi centrati */
     .input-container, .button-container {
       width: 100%;
-      max-width: 400px;
       margin: 5px auto;
       text-align: center;
     }
@@ -107,7 +110,6 @@
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
-      // Se l'input è vuoto, mostra un messaggio, attiva shake e evidenzia l'input in rosso
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -119,7 +121,7 @@
         return;
       }
       
-      // Simulation: wallets starting with "0x1" are eligible
+      // Simulation: wallets starting with "0x1" are eligible.
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ You are eligible! Final allocation will be announced soon.";
       } else {
