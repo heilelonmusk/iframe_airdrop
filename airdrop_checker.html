@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
-  <!-- Include canvas-confetti in caso si voglia un fallback se il parent non interviene -->
+  <!-- Include canvas-confetti per l'effetto confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <style>
-    /* Universal box-sizing */
+    /* Impostazione universale per includere padding e border nel calcolo delle dimensioni */
     *, *::before, *::after {
       box-sizing: border-box;
     }
-    /* Set the document to have a fixed height (300px) to match the iframe */
+    /* Imposta html e body per occupare 300px di altezza, con background trasparente e testo bianco */
     html, body {
       margin: 0;
       padding: 0;
@@ -20,9 +20,9 @@
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
-      /* Non usiamo flex direttamente sul body per evitare conflitti con il parent, ma sul contenitore interno */
+      /* Non usiamo flex sul body, ma sul contenitore interno */
     }
-    /* Main container centered within 300px */
+    /* Contenitore principale centrato, che occupa l'intera altezza disponibile (300px) */
     .module-container {
       height: 100%;
       display: flex;
@@ -37,7 +37,7 @@
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Containers for input and button */
+    /* Contenitori per input e pulsante, centrati */
     .input-container, .button-container {
       width: 100%;
       max-width: 400px;
@@ -75,9 +75,9 @@
       font-weight: bold;
       font-size: 16px;
       color: white !important;
-      min-height: 24px; /* To avoid layout shifts when message appears */
+      min-height: 24px; /* Per evitare spostamenti del layout quando appare il messaggio */
     }
-    /* Shake effect for the whole module */
+    /* Effetto shake per tutto il modulo */
     .shake {
       animation: shake 0.7s;
     }
@@ -88,15 +88,14 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    /* On mobile, reduce shake amplitude */
-    @media (max-width: 600px) {
-      @keyframes shake {
-        0% { transform: translateX(0); }
-        25% { transform: translateX(10px); }
-        50% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-        100% { transform: translateX(0); }
-      }
+    /* Effetto eligible pulse per mobile */
+    .eligible-mobile {
+      animation: eligiblePulse 1s ease-out;
+    }
+    @keyframes eligiblePulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.8); }
+      50% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
     }
   </style>
 </head>
@@ -125,7 +124,7 @@
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
-      // If no wallet is provided, trigger shake and mark input in red.
+      // If input is empty, show error, trigger shake and mark input in red
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -138,15 +137,15 @@
       }
       
       try {
-        // Fetch the whitelist CSV from GitHub via jsDelivr.
+        // Fetch the whitelist CSV from GitHub via jsDelivr
         const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const csvText = await response.text();
-        // Split CSV into rows and filter out any empty lines.
+        // Split CSV into rows and filter out empty lines
         const rows = csvText.split("\n").filter(line => line.trim() !== "");
-        // Assume the first row is header and find the index for "Wallet Address" (case-insensitive).
+        // Assume the first row is header and find the index for "Wallet Address" (case-insensitive)
         const header = rows[0].split(",").map(h => h.trim().toLowerCase());
         const walletIndex = header.indexOf("wallet address");
         let isWhitelisted = false;
@@ -160,11 +159,15 @@
         
         if (isWhitelisted) {
           resultElem.innerText = "✅ You are eligible! Final airdrop details will be announced by 23:59 CET on February 28.";
-          // Trigger confetti in the parent context so they are not clipped by the iframe.
-          if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ action: 'triggerConfetti' }, '*');
+          // Check if it's a mobile device based on viewport width
+          if (window.innerWidth <= 600) {
+            // Apply a pulse effect for mobile
+            container.classList.add("eligible-mobile");
+            setTimeout(() => {
+              container.classList.remove("eligible-mobile");
+            }, 1000);
           } else {
-            // Fallback: trigger confetti in the current context.
+            // Desktop: trigger confetti using canvas-confetti
             confetti({
               particleCount: 100,
               spread: 70,
