@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Rimuove margini e padding di default e imposta lo sfondo trasparente */
+    /* Imposta html e body per occupare l'intera viewport e avere uno sfondo trasparente */
     html, body {
       margin: 0;
       padding: 0;
       background: transparent;
-      height: 100%;
+      height: 100vh;
     }
     /* Contenitore principale centrato verticalmente e orizzontalmente */
     .module-container {
@@ -18,7 +18,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;       /* Altezza pari alla viewport per centrare verticalmente */
+      height: 100vh; /* Utilizza 100vh per centrare verticalmente */
       text-align: center;
       padding: 20px;
     }
@@ -28,7 +28,7 @@
     p {
       margin-bottom: 20px;
     }
-    /* Contenitore per l'input: occupa una riga */
+    /* Contenitore per l'input */
     .input-container {
       width: 90%;
       max-width: 400px;
@@ -42,7 +42,7 @@
       border: 1px solid #ccc;
       outline: none;
     }
-    /* Contenitore per il pulsante: occupa una riga separata */
+    /* Contenitore per il pulsante */
     .button-container {
       width: 90%;
       max-width: 400px;
@@ -64,7 +64,7 @@
       font-weight: bold;
       font-size: 18px;
     }
-    /* Effetto shake sull'intero modulo */
+    /* Effetto shake per l'intero modulo */
     .shake {
       animation: shake 0.5s;
     }
@@ -82,12 +82,12 @@
     <h2>🔍 Verifica il Tuo Airdrop</h2>
     <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
     
-    <!-- Barra di ricerca in un contenitore dedicato -->
+    <!-- Contenitore per la barra di ricerca -->
     <div class="input-container">
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
     
-    <!-- Pulsante di verifica in un contenitore separato -->
+    <!-- Contenitore per il pulsante, su un livello separato -->
     <div class="button-container">
       <button onclick="checkAirdrop()">Verifica</button>
     </div>
@@ -100,7 +100,7 @@
       const wallet = document.getElementById("walletInput").value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
-
+      
       if (!wallet) {
         resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
         return;
@@ -109,7 +109,7 @@
       // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui puoi inserire l'animazione dei coriandoli
+        // Aggiungi qui l'animazione dei coriandoli se desideri
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         container.classList.add("shake");
