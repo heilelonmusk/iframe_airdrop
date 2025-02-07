@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>$HELON Airdrop Checker</title>
-  <!-- Puoi includere qui eventuali librerie per animazioni, ad esempio confetti.js o un semplice CSS per lo shake -->
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -12,7 +11,7 @@
       padding: 40px;
       line-height: 2.5;
       color: white;
-      background-color: black;
+      background: transparent; /* Background impostato a trasparente */
     }
     h2 {
       margin-bottom: 20px;
@@ -41,7 +40,6 @@
       font-weight: bold;
       font-size: 18px;
     }
-    /* Esempio di effetto shake per il campo input (per indirizzo non trovato) */
     .shake {
       animation: shake 0.5s;
     }
@@ -65,41 +63,26 @@
   
   <script>
     async function checkAirdrop() {
-      // Leggi il valore inserito
       const wallet = document.getElementById("walletInput").value.trim();
       const resultElem = document.getElementById("result");
 
-      // Se l'input è vuoto, mostra un messaggio di errore
       if (!wallet) {
         resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
         return;
       }
       
-      // In una versione completa, qui potresti effettuare una richiesta (fetch)
-      // per recuperare la whitelist (ad es. da un file CSV su GitHub) e controllare se il wallet è presente.
-      // Per questo esempio, simuliamo il controllo:
-      // Supponiamo che gli indirizzi che iniziano con "0x1" siano considerati idonei.
-
+      // Simulazione del controllo: wallet che inizia con "0x1" è considerato idoneo
       if (wallet.startsWith("0x1")) {
-        // Azione in caso di wallet idoneo
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui potresti aggiungere l'animazione dei coriandoli
-        // ad esempio: triggerConfetti();
+        // Qui puoi attivare un'animazione, per esempio, dei coriandoli.
       } else {
-        // Azione in caso di wallet non idoneo: fai tremare l'input
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         document.getElementById("walletInput").classList.add("shake");
-        // Rimuovi la classe dopo l'animazione (0.5 secondi)
         setTimeout(() => {
           document.getElementById("walletInput").classList.remove("shake");
         }, 500);
       }
     }
-
-    // (Opzionale) Funzione per attivare i coriandoli
-    // function triggerConfetti() {
-    //   // Includi qui il codice per un'animazione di coriandoli, ad esempio utilizzando una libreria come canvas-confetti.
-    // }
   </script>
 </body>
 </html>
