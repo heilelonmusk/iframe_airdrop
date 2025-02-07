@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
     /* Rimuove margini e padding di default e imposta lo sfondo trasparente */
@@ -18,9 +18,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
+      height: 100vh;       /* Altezza pari alla viewport per centrare verticalmente */
       text-align: center;
+      padding: 20px;
     }
     h2 {
       margin-bottom: 20px;
@@ -28,19 +28,25 @@
     p {
       margin-bottom: 20px;
     }
-    /* Contenitori separati per l'input e il pulsante */
-    .input-container, .button-container {
+    /* Contenitore per l'input: occupa una riga */
+    .input-container {
       width: 90%;
       max-width: 400px;
-      margin: 10px auto;
+      margin-bottom: 20px;
     }
     .input-container input {
       width: 100%;
       padding: 12px;
       font-size: 16px;
       border-radius: 8px;
-      border: none;
+      border: 1px solid #ccc;
       outline: none;
+    }
+    /* Contenitore per il pulsante: occupa una riga separata */
+    .button-container {
+      width: 90%;
+      max-width: 400px;
+      margin-bottom: 20px;
     }
     .button-container button {
       width: 100%;
@@ -48,7 +54,6 @@
       font-size: 16px;
       border-radius: 8px;
       border: none;
-      outline: none;
       background-color: #ffcc00;
       color: black;
       font-weight: bold;
@@ -59,7 +64,7 @@
       font-weight: bold;
       font-size: 18px;
     }
-    /* Effetto shake applicato all'intero modulo */
+    /* Effetto shake sull'intero modulo */
     .shake {
       animation: shake 0.5s;
     }
@@ -77,12 +82,12 @@
     <h2>🔍 Verifica il Tuo Airdrop</h2>
     <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
     
-    <!-- Contenitore per la barra di ricerca -->
+    <!-- Barra di ricerca in un contenitore dedicato -->
     <div class="input-container">
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
     
-    <!-- Contenitore per il pulsante di verifica -->
+    <!-- Pulsante di verifica in un contenitore separato -->
     <div class="button-container">
       <button onclick="checkAirdrop()">Verifica</button>
     </div>
@@ -91,24 +96,22 @@
   </div>
   
   <script>
-    async function checkAirdrop() {
+    function checkAirdrop() {
       const wallet = document.getElementById("walletInput").value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
-      
-      // Se l'input è vuoto, mostra un messaggio di errore
+
       if (!wallet) {
         resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
         return;
       }
       
-      // Simulazione di controllo: per questo esempio, consideriamo idonei i wallet che iniziano con "0x1"
+      // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui potresti attivare un'animazione (ad esempio, dei coriandoli)
+        // Qui puoi inserire l'animazione dei coriandoli
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
-        // Aggiunge l'effetto shake all'intero modulo
         container.classList.add("shake");
         setTimeout(() => {
           container.classList.remove("shake");
