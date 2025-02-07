@@ -4,29 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
-  <!-- Include canvas-confetti for desktop confetti effect -->
+  <!-- Include canvas-confetti for desktop effect -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <style>
     /* Universal box-sizing */
     *, *::before, *::after {
       box-sizing: border-box;
     }
-    /* Set html and body to fixed height (400px), background transparent, and force text white */
+    /* Imposta html e body per occupare 400px di altezza, con background trasparente e testo bianco */
     html, body {
       margin: 0;
       padding: 0;
-      height: 400px;  /* Fixed height matching the iframe */
+      height: 400px;  /* Altezza fissa a 400px */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
     }
-    /* Main container centered using flexbox */
+    /* Contenitore principale centrato */
     .module-container {
       height: 100%;
       width: 100%;
       max-width: 400px;
-      margin: 0 auto;
+      margin: 0 auto;  /* Centra orizzontalmente */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -39,7 +39,11 @@
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Containers for input and button */
+    /* Spezza il messaggio positivo su due righe */
+    p.description {
+      white-space: pre-line;
+    }
+    /* Contenitori per input e pulsante */
     .input-container, .button-container {
       width: 100%;
       margin: 5px auto;
@@ -76,9 +80,9 @@
       font-weight: bold;
       font-size: 16px;
       color: white !important;
-      min-height: 40px; /* Space for a two-line message */
+      min-height: 40px; /* Spazio per un messaggio su due linee */
     }
-    /* Shake effect for the entire module */
+    /* Effetto shake per il modulo */
     .shake {
       animation: shake 0.7s;
     }
@@ -89,7 +93,7 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    /* Mobile: reduce shake amplitude */
+    /* Riduci ampiezza shake su mobile */
     @media (max-width: 600px) {
       @keyframes shake {
         0% { transform: translateX(0); }
@@ -99,7 +103,7 @@
         100% { transform: translateX(0); }
       }
     }
-    /* Pulse effect for eligible mobile users */
+    /* Effetto pulse per mobile quando il wallet è eligible */
     .eligible-mobile {
       animation: eligiblePulse 1s ease-out;
     }
@@ -113,8 +117,7 @@
 <body>
   <div class="module-container" id="moduleContainer">
     <h2>🔍 Check Your Airdrop</h2>
-    <!-- Break positive message into two lines -->
-    <p>Enter your wallet address to verify<br>if you're whitelisted:</p>
+    <p class="description">Enter your wallet address to verify<br>if you're whitelisted:</p>
     
     <!-- Input container -->
     <div class="input-container">
@@ -130,13 +133,31 @@
   </div>
   
   <script>
+    // Funzione per triggerare il workflow tramite l'endpoint serverless su Netlify
+    async function triggerWorkflow(wallet, updateType) {
+      // Usa l'URL del tuo endpoint Netlify (modifica <your-netlify-site> con il dominio corretto)
+      const endpoint = "https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/triggerWhitelistUpdate";
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ wallet: wallet, updateType: updateType })
+        });
+        const data = await response.json();
+        console.log("Dispatch response:", data);
+      } catch (error) {
+        console.error("Error triggering workflow:", error);
+      }
+    }
+
     async function checkAirdrop() {
       const walletInput = document.getElementById("walletInput");
       const wallet = walletInput.value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
-      // If no wallet is provided, trigger shake and highlight input in red.
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -149,7 +170,7 @@
       }
       
       try {
-        // Fetch the whitelist CSV via jsDelivr
+        // Fetch the whitelist CSV from GitHub via jsDelivr
         const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -168,8 +189,9 @@
         }
         
         if (isWhitelisted) {
-          // Message on two lines
           resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
+          // Trigger workflow update for whitelist
+          triggerWorkflow(wallet, "update_whitelist");
           if (window.innerWidth > 600) {
             // Desktop: trigger confetti
             confetti({
@@ -178,7 +200,7 @@
               origin: { y: 0.6 }
             });
           } else {
-            // Mobile: trigger a pulse effect
+            // Mobile: trigger pulse effect
             container.classList.add("eligible-mobile");
             setTimeout(() => {
               container.classList.remove("eligible-mobile");
@@ -190,6 +212,8 @@
           setTimeout(() => {
             container.classList.remove("shake");
           }, 700);
+          // Trigger workflow update for non-eligible
+          triggerWorkflow(wallet, "update_noneligible");
         }
       } catch (error) {
         resultElem.innerText = "⚠️ Error checking whitelist. Please try again later.";
