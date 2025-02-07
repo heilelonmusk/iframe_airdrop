@@ -32,6 +32,17 @@ if repo is None:
     exit(1)
 
 # ------------------------------
+# LINK PER I FILE CSV
+# ------------------------------
+
+# Questi file saranno aggiornati su GitHub
+WHITELIST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ6WoIqrzoUdPh922uKFA08fuTTOWH2xreDmx18E2lpGioH9z_eVJ034ul3DJixg/pub?output=csv"
+NON_ELIGIBLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRHfqtGOIR-87zaRJhuqjN70N-tRSe2QOV6lb-vfECg9SqJ6q3aclTVp6vJDaGgIg/pub?output=csv"
+
+# Il file di stile rimane su Google Drive per aggiornamenti diretti dal team design
+IFRAME_SETTINGS_URL = "https://drive.google.com/uc?export=download&id=12qqeSqcli6NNbD7dx8wr7S0mmx_OSZAz"
+
+# ------------------------------
 # FUNZIONE DI UPLOAD SU GITHUB
 # ------------------------------
 
@@ -78,7 +89,7 @@ def upload_to_github(local_file, github_file):
         print(f"❌ ERRORE durante l'upload di {github_file}: {e}")
 
 # ------------------------------
-# ESECUZIONE DELL'UPLOAD
+# ESECUZIONE DELLE OPERAZIONI
 # ------------------------------
 
 upload_to_github("whitelist.csv", "data/whitelist.csv")
