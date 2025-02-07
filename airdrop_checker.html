@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Imposta html e body per occupare 600px di altezza (l'altezza dell'iframe) e forza il background trasparente */
+    /* Imposta html e body per occupare 300px di altezza (corrispondenti all'iframe) */
     html, body {
       margin: 0;
       padding: 0;
-      height: 600px; /* Altezza fissa per corrispondere all'iframe */
+      height: 300px;
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
@@ -23,24 +23,24 @@
       width: 90%;
       max-width: 400px;
       text-align: center;
-      padding: 20px;
+      padding: 10px;
       box-sizing: border-box;
     }
-    /* Forza il testo bianco per titoli e paragrafi */
     h2, p {
       color: white !important;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      /* Puoi regolare le dimensioni del font se necessario */
     }
-    /* Contenitori separati per input e pulsante */
+    /* Contenitori per input e pulsante, entrambi centrati */
     .input-container, .button-container {
       width: 100%;
-      margin: 10px 0;
+      margin: 5px auto;
       text-align: center;
     }
     .input-container input {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
@@ -48,15 +48,14 @@
       color: white !important;
       transition: border-color 0.3s;
     }
-    /* Classe per evidenziare l'input in caso di errore */
     .input-error {
       border-color: red !important;
       color: red !important;
     }
     .button-container button {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 8px;
       border: none;
       background-color: #ffcc00 !important;
@@ -65,12 +64,12 @@
       cursor: pointer;
     }
     #result {
-      margin-top: 20px;
+      margin-top: 10px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
       color: white !important;
     }
-    /* Aumenta l'effetto shake: maggiore durata e ampiezza */
+    /* Effetto shake più forte sull'intero modulo */
     .shake {
       animation: shake 0.7s;
     }
@@ -85,17 +84,17 @@
 </head>
 <body>
   <div class="module-container" id="moduleContainer">
-    <h2>🔍 Verifica il Tuo Airdrop</h2>
-    <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
+    <h2>🔍 Check Your Airdrop</h2>
+    <p>Enter your wallet address to verify if you're whitelisted:</p>
     
-    <!-- Contenitore per la barra di ricerca -->
+    <!-- Input container -->
     <div class="input-container">
-      <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
+      <input type="text" id="walletInput" placeholder="Enter your wallet address" required>
     </div>
     
-    <!-- Contenitore per il pulsante di verifica -->
+    <!-- Button container -->
     <div class="button-container">
-      <button onclick="checkAirdrop()">Verifica</button>
+      <button onclick="checkAirdrop()">Verify</button>
     </div>
     
     <p id="result"></p>
@@ -107,10 +106,9 @@
       const wallet = walletInput.value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
-
-      // Se l'input è vuoto, mostra un messaggio di errore, applica l'effetto shake e evidenzia l'input in rosso
+      
       if (!wallet) {
-        resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
+        resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
         walletInput.classList.add("input-error");
         setTimeout(() => {
@@ -120,12 +118,11 @@
         return;
       }
       
-      // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
+      // Simulation: wallets starting with "0x1" are considered eligible.
       if (wallet.startsWith("0x1")) {
-        resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui potresti attivare l'animazione dei coriandoli
+        resultElem.innerText = "✅ You are eligible! Final allocation will be announced soon.";
       } else {
-        resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
+        resultElem.innerText = "❌ Not whitelisted, but stay tuned for surprises!";
         container.classList.add("shake");
         setTimeout(() => {
           container.classList.remove("shake");
