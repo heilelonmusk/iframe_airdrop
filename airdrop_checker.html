@@ -11,18 +11,24 @@
     *, *::before, *::after {
       box-sizing: border-box;
     }
-    /* Imposta html e body per occupare 400px di altezza, con background trasparente e testo bianco */
+    /* Set html and body to fixed height (400px), background transparent, and force text white */
     html, body {
       margin: 0;
       padding: 0;
-      height: 400px;  /* Altezza fissa modificata a 400px */
+      height: 400px;  /* Altezza fissa a 400px */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    /* Contenitore principale centrato */
+    /* Main container: centrato, con larghezza massima e margine auto per l'allineamento orizzontale */
     .module-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;  /* Centra il contenitore orizzontalmente */
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -36,10 +42,9 @@
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Contenitori per input e pulsante */
+    /* Containers for input and button */
     .input-container, .button-container {
       width: 100%;
-      max-width: 400px;
       margin: 5px auto;
       text-align: center;
     }
@@ -74,9 +79,9 @@
       font-weight: bold;
       font-size: 16px;
       color: white !important;
-      min-height: 40px; /* Per evitare spostamenti del layout quando appare il messaggio */
+      min-height: 40px; /* To avoid layout shifts when the message appears */
     }
-    /* Effetto shake per tutto il modulo */
+    /* Shake effect for the entire module */
     .shake {
       animation: shake 0.7s;
     }
@@ -87,7 +92,7 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    /* Media query per dispositivi mobili: riduce l'ampiezza dello shake */
+    /* Mobile: reduce shake amplitude */
     @media (max-width: 600px) {
       @keyframes shake {
         0% { transform: translateX(0); }
@@ -111,7 +116,8 @@
 <body>
   <div class="module-container" id="moduleContainer">
     <h2>🔍 Check Your Airdrop</h2>
-    <p>Enter your wallet address to verify if you're whitelisted:</p>
+    <!-- Breaking the positive message into two lines -->
+    <p>Enter your wallet address to verify<br>if you're whitelisted:</p>
     
     <!-- Input container -->
     <div class="input-container">
@@ -133,6 +139,7 @@
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
+      // If input is empty, trigger shake and mark input in red.
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -145,7 +152,7 @@
       }
       
       try {
-        // Fetch the whitelist CSV via jsDelivr
+        // Fetch the whitelist CSV from GitHub via jsDelivr
         const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
         if (!response.ok) {
           throw new Error("Network response was not ok");
