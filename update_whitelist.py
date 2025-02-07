@@ -39,7 +39,6 @@ def update_whitelist(wallet_address):
     
     updated = False
     for row in rows:
-        # Confronto case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
             now = datetime.now()
