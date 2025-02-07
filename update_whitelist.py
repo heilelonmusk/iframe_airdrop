@@ -39,6 +39,7 @@ def update_whitelist(wallet_address):
     
     updated = False
     for row in rows:
+        # Confronta in modo case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
             now = datetime.now()
@@ -50,7 +51,7 @@ def update_whitelist(wallet_address):
         print(f"Wallet address {wallet_address} not found in whitelist.")
         sys.exit(1)
     
-    # Scrive i dati aggiornati in una stringa CSV
+    # Scrivi i dati aggiornati in una stringa CSV
     output = io.StringIO()
     fieldnames = reader.fieldnames
     writer = csv.DictWriter(output, fieldnames=fieldnames)
@@ -58,9 +59,13 @@ def update_whitelist(wallet_address):
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
-    # Aggiorna il file su GitHub
+    # Aggiorna il file su GitHub utilizzando il metodo update() sull'oggetto file_content
     try:
-        repo.update_file(file_path, f"Update whitelist for wallet {wallet_address}", new_csv, file_content.sha, branch=BRANCH)
+        # Il metodo update accetta (message, new_content, sha, branch)
+        file_content.update(f"Update whitelist for wallet {wallet_address}",
+                            new_csv.decode("utf-8"),
+                            file_content.sha,
+                            branch=BRANCH)
         print(f"Whitelist updated for wallet {wallet_address}.")
     except Exception as e:
         print(f"Error updating whitelist: {e}")
