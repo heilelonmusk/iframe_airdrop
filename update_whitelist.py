@@ -27,7 +27,7 @@ def update_whitelist(wallet_address):
     try:
         # Leggi il contenuto attuale del file whitelist.csv
         file_content = repo.file_contents(file_path, ref=BRANCH)
-        # Usa 'decoded' anziché 'decoded_content'
+        # Usa la proprietà "decoded" anziché "decoded_content"
         csv_data = file_content.decoded.decode("utf-8")
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found.")
