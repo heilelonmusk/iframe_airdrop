@@ -11,17 +11,17 @@
     *, *::before, *::after {
       box-sizing: border-box;
     }
-    /* Document settings: fixed height of 300px, background transparent, text white */
+    /* Imposta html e body per occupare 400px di altezza, con background trasparente e testo bianco */
     html, body {
       margin: 0;
       padding: 0;
-      height: 300px;  /* Fixed height to match the iframe */
+      height: 400px;  /* Altezza fissa modificata a 400px */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
     }
-    /* Main container centered using flexbox */
+    /* Contenitore principale centrato */
     .module-container {
       height: 100%;
       display: flex;
@@ -36,7 +36,7 @@
       color: white !important;
       margin-bottom: 10px;
     }
-    /* Input and button containers */
+    /* Contenitori per input e pulsante */
     .input-container, .button-container {
       width: 100%;
       max-width: 400px;
@@ -74,9 +74,9 @@
       font-weight: bold;
       font-size: 16px;
       color: white !important;
-      min-height: 40px; /* Forza spazio sufficiente per un messaggio su 2 linee */
+      min-height: 40px; /* Per evitare spostamenti del layout quando appare il messaggio */
     }
-    /* Shake effect for the entire module */
+    /* Effetto shake per tutto il modulo */
     .shake {
       animation: shake 0.7s;
     }
@@ -87,7 +87,7 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    /* Mobile adjustment for shake effect */
+    /* Media query per dispositivi mobili: riduce l'ampiezza dello shake */
     @media (max-width: 600px) {
       @keyframes shake {
         0% { transform: translateX(0); }
@@ -133,7 +133,6 @@
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
-      // If no wallet is provided, trigger shake and highlight input in red.
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -146,7 +145,7 @@
       }
       
       try {
-        // Fetch the whitelist CSV via jsDelivr (ensure the file is accessible)
+        // Fetch the whitelist CSV via jsDelivr
         const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -165,16 +164,16 @@
         }
         
         if (isWhitelisted) {
-          // Positive message on two lines
           resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on February 28.";
-          // For desktop, trigger confetti; for mobile, trigger a pulse effect.
           if (window.innerWidth > 600) {
+            // Desktop: trigger confetti
             confetti({
               particleCount: 150,
               spread: 100,
               origin: { y: 0.6 }
             });
           } else {
+            // Mobile: trigger a pulse effect
             container.classList.add("eligible-mobile");
             setTimeout(() => {
               container.classList.remove("eligible-mobile");
