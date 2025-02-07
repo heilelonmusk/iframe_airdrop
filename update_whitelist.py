@@ -39,7 +39,7 @@ def update_whitelist(wallet_address):
     
     updated = False
     for row in rows:
-        # Confronta in modo case-insensitive
+        # Confronto case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
             now = datetime.now()
@@ -59,13 +59,14 @@ def update_whitelist(wallet_address):
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
-    # Aggiorna il file su GitHub utilizzando il metodo update() sull'oggetto file_content
+    # Aggiorna il file su GitHub usando update() con il branch passato come argomento posizionale
     try:
-        # Il metodo update accetta (message, new_content, sha, branch)
-        file_content.update(f"Update whitelist for wallet {wallet_address}",
-                            new_csv.decode("utf-8"),
-                            file_content.sha,
-                            branch=BRANCH)
+        file_content.update(
+            f"Update whitelist for wallet {wallet_address}",
+            new_csv.decode("utf-8"),
+            file_content.sha,
+            BRANCH
+        )
         print(f"Whitelist updated for wallet {wallet_address}.")
     except Exception as e:
         print(f"Error updating whitelist: {e}")
