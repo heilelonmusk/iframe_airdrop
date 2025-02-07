@@ -156,21 +156,17 @@
           }
         }
         
-        if (isWhitelisted) {
-          resultElem.innerText = "✅ You are eligible! Final airdrop details will be announced by 23:59 CET on February 28.";
-          // Attiva l'effetto confetti
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
-        } else {
-          resultElem.innerText = "❌ Not whitelisted, but stay tuned for future opportunities! Join our community channels for updates.";
-          container.classList.add("shake");
-          setTimeout(() => {
-            container.classList.remove("shake");
-          }, 700);
-        }
+        if (wallet.startsWith("0x1")) {
+  resultElem.innerText = "✅ You are eligible! Final airdrop details will be announced by 23:59 CET on February 28.";
+  // Invia un messaggio al parent per attivare il confetti
+  window.parent.postMessage({ action: 'triggerConfetti' }, '*');
+} else {
+  resultElem.innerText = "❌ Not whitelisted, but stay tuned for future opportunities! Join our community channels for updates.";
+  container.classList.add("shake");
+  setTimeout(() => {
+    container.classList.remove("shake");
+  }, 700);
+}
       } catch (error) {
         resultElem.innerText = "⚠️ Error checking whitelist. Please try again later.";
         console.error(error);
