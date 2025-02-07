@@ -2,15 +2,17 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Imposta html e body per occupare l'intera viewport e avere uno sfondo trasparente */
+    /* Assicura che html e body occupino tutta l'altezza e abbiano background trasparente */
     html, body {
       margin: 0;
       padding: 0;
-      background: transparent;
       height: 100vh;
+      background: transparent;
+      color: white;
+      font-family: 'Poppins', sans-serif;
     }
     /* Contenitore principale centrato verticalmente e orizzontalmente */
     .module-container {
@@ -18,7 +20,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh; /* Utilizza 100vh per centrare verticalmente */
+      height: 100vh;  /* Utilizza l'intera altezza della viewport */
       text-align: center;
       padding: 20px;
     }
@@ -28,12 +30,14 @@
     p {
       margin-bottom: 20px;
     }
-    /* Contenitore per l'input */
-    .input-container {
+    /* Contenitore per l'input e il pulsante, entrambi centrati */
+    .input-container, .button-container {
       width: 90%;
       max-width: 400px;
-      margin-bottom: 20px;
+      margin: 10px auto;
+      text-align: center;
     }
+    /* Stile per il campo di input: sfondo trasparente e testo bianco */
     .input-container input {
       width: 100%;
       padding: 12px;
@@ -41,13 +45,10 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
+      background-color: transparent;
+      color: white;
     }
-    /* Contenitore per il pulsante */
-    .button-container {
-      width: 90%;
-      max-width: 400px;
-      margin-bottom: 20px;
-    }
+    /* Stile per il pulsante: larghezza uguale a quella dell'input */
     .button-container button {
       width: 100%;
       padding: 12px;
@@ -64,7 +65,7 @@
       font-weight: bold;
       font-size: 18px;
     }
-    /* Effetto shake per l'intero modulo */
+    /* Effetto shake sull'intero modulo */
     .shake {
       animation: shake 0.5s;
     }
@@ -87,7 +88,7 @@
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
     
-    <!-- Contenitore per il pulsante, su un livello separato -->
+    <!-- Contenitore per il pulsante in un livello separato -->
     <div class="button-container">
       <button onclick="checkAirdrop()">Verifica</button>
     </div>
@@ -100,16 +101,16 @@
       const wallet = document.getElementById("walletInput").value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
-      
+
       if (!wallet) {
         resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
         return;
       }
       
-      // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
+      // Simulazione: wallet che inizia con "0x1" sono considerati idonei
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Aggiungi qui l'animazione dei coriandoli se desideri
+        // Qui puoi attivare un'animazione di coriandoli se desideri
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         container.classList.add("shake");
