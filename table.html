@@ -1,63 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Viewer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: black;
-            color: white;
-            text-align: center;
-        }
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background: #222;
-            color: white;
-        }
-        th, td {
-            border: 1px solid white;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background: #333;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizzatore CSV</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: #222;
+    }
+    th, td {
+      border: 1px solid white;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #333;
+    }
+  </style>
 </head>
 <body>
-
-<h2>CSV Data Viewer</h2>
-<table id="csvTable"></table>
-
-<script>
+  <h2>Impostazioni iFrame</h2>
+  <table id="csvTable"></table>
+  <script>
     async function fetchCSV() {
-        const response = await fetch('https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/iframe_settings.csv');
-        const text = await response.text();
-        const rows = text.split("\n").map(row => row.split(","));
-        
-        let tableHTML = "<tr>";
-        rows[0].forEach(header => {
-            tableHTML += `<th>${header}</th>`;
+      const response = await fetch("https://drive.google.com/uc?export=download&id=12qqeSqcli6NNbD7dx8wr7S0mmx_OSZAz");
+      const text = await response.text();
+      const rows = text.split("\n").map(row => row.split(","));
+      let tableHTML = "<tr>";
+      // Genera le intestazioni della tabella
+      rows[0].forEach(header => {
+        tableHTML += `<th>${header}</th>`;
+      });
+      tableHTML += "</tr>";
+      // Genera le righe della tabella
+      rows.slice(1).forEach(row => {
+        tableHTML += "<tr>";
+        row.forEach(cell => {
+          tableHTML += `<td>${cell}</td>`;
         });
         tableHTML += "</tr>";
-        
-        rows.slice(1).forEach(row => {
-            tableHTML += "<tr>";
-            row.forEach(cell => {
-                tableHTML += `<td>${cell}</td>`;
-            });
-            tableHTML += "</tr>";
-        });
-
-        document.getElementById("csvTable").innerHTML = tableHTML;
+      });
+      document.getElementById("csvTable").innerHTML = tableHTML;
     }
-
     fetchCSV();
-</script>
-
+  </script>
 </body>
 </html>
