@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Forza l'altezza del documento pari all'altezza dell'iframe (600px) e centrare il contenuto */
+    /* Imposta html e body per occupare 600px di altezza (l'altezza dell'iframe) e forza il background trasparente */
     html, body {
       margin: 0;
       padding: 0;
-      height: 600px; /* Altezza fissa per far corrispondere l'iframe */
+      height: 600px; /* Altezza fissa per corrispondere all'iframe */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
@@ -18,7 +18,7 @@
       align-items: center;
       justify-content: center;
     }
-    /* Contenitore principale per il modulo */
+    /* Contenitore principale centrato */
     .module-container {
       width: 90%;
       max-width: 400px;
@@ -26,14 +26,16 @@
       padding: 20px;
       box-sizing: border-box;
     }
+    /* Forza il testo bianco per titoli e paragrafi */
     h2, p {
       color: white !important;
       margin-bottom: 20px;
     }
-    /* Contenitore per l'input e per il pulsante, separati per avere due livelli distinti */
+    /* Contenitori separati per input e pulsante */
     .input-container, .button-container {
       width: 100%;
       margin: 10px 0;
+      text-align: center;
     }
     .input-container input {
       width: 100%;
@@ -44,6 +46,12 @@
       outline: none;
       background-color: transparent !important;
       color: white !important;
+      transition: border-color 0.3s;
+    }
+    /* Classe per evidenziare l'input in caso di errore */
+    .input-error {
+      border-color: red !important;
+      color: red !important;
     }
     .button-container button {
       width: 100%;
@@ -62,15 +70,15 @@
       font-size: 18px;
       color: white !important;
     }
-    /* Effetto shake per l'intero modulo */
+    /* Aumenta l'effetto shake: maggiore durata e ampiezza */
     .shake {
-      animation: shake 0.5s;
+      animation: shake 0.7s;
     }
     @keyframes shake {
       0% { transform: translateX(0); }
-      25% { transform: translateX(10px); }
-      50% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
+      25% { transform: translateX(20px); }
+      50% { transform: translateX(-20px); }
+      75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
   </style>
@@ -80,12 +88,12 @@
     <h2>🔍 Verifica il Tuo Airdrop</h2>
     <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
     
-    <!-- Contenitore per l'input (barra di ricerca) -->
+    <!-- Contenitore per la barra di ricerca -->
     <div class="input-container">
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
     
-    <!-- Contenitore per il pulsante in un livello separato -->
+    <!-- Contenitore per il pulsante di verifica -->
     <div class="button-container">
       <button onclick="checkAirdrop()">Verifica</button>
     </div>
@@ -95,16 +103,24 @@
   
   <script>
     function checkAirdrop() {
-      const wallet = document.getElementById("walletInput").value.trim();
+      const walletInput = document.getElementById("walletInput");
+      const wallet = walletInput.value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
 
+      // Se l'input è vuoto, mostra un messaggio di errore, applica l'effetto shake e evidenzia l'input in rosso
       if (!wallet) {
         resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
+        container.classList.add("shake");
+        walletInput.classList.add("input-error");
+        setTimeout(() => {
+          container.classList.remove("shake");
+          walletInput.classList.remove("input-error");
+        }, 700);
         return;
       }
       
-      // Simulazione di verifica: consideriamo idonei i wallet che iniziano con "0x1"
+      // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
         // Qui potresti attivare l'animazione dei coriandoli
@@ -113,7 +129,7 @@
         container.classList.add("shake");
         setTimeout(() => {
           container.classList.remove("shake");
-        }, 500);
+        }, 700);
       }
     }
   </script>
