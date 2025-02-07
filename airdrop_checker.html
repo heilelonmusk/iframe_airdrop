@@ -2,42 +2,44 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Assicura che html e body occupino tutta l'altezza e abbiano background trasparente */
+    /* Impostazioni di base per fare in modo che html e body occupino il 100% dell'altezza disponibile nell'iframe */
     html, body {
       margin: 0;
       padding: 0;
-      height: 100vh;
+      height: 100%;             /* Usa 100% dell'altezza dell'iframe */
       background: transparent;
-      color: white;
       font-family: 'Poppins', sans-serif;
+      color: white;
     }
-    /* Contenitore principale centrato verticalmente e orizzontalmente */
+    /* Il contenitore principale prende il 100% dell'altezza dell'iframe e centra il contenuto */
     .module-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;  /* Utilizza l'intera altezza della viewport */
+      height: 100%;            /* Occupa il 100% dell'altezza del documento (cioè l'altezza dell'iframe) */
       text-align: center;
       padding: 20px;
+      box-sizing: border-box;
     }
     h2 {
       margin-bottom: 20px;
+      color: white;
     }
     p {
       margin-bottom: 20px;
+      color: white;
     }
-    /* Contenitore per l'input e il pulsante, entrambi centrati */
-    .input-container, .button-container {
+    /* Contenitore per l'input */
+    .input-container {
       width: 90%;
       max-width: 400px;
       margin: 10px auto;
       text-align: center;
     }
-    /* Stile per il campo di input: sfondo trasparente e testo bianco */
     .input-container input {
       width: 100%;
       padding: 12px;
@@ -46,9 +48,15 @@
       border: 1px solid #ccc;
       outline: none;
       background-color: transparent;
-      color: white;
+      color: white; /* Il testo digitato sarà bianco */
     }
-    /* Stile per il pulsante: larghezza uguale a quella dell'input */
+    /* Contenitore per il pulsante */
+    .button-container {
+      width: 90%;
+      max-width: 400px;
+      margin: 10px auto;
+      text-align: center;
+    }
     .button-container button {
       width: 100%;
       padding: 12px;
@@ -65,7 +73,7 @@
       font-weight: bold;
       font-size: 18px;
     }
-    /* Effetto shake sull'intero modulo */
+    /* Effetto shake applicato all'intero modulo */
     .shake {
       animation: shake 0.5s;
     }
@@ -83,12 +91,12 @@
     <h2>🔍 Verifica il Tuo Airdrop</h2>
     <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
     
-    <!-- Contenitore per la barra di ricerca -->
+    <!-- Barra di ricerca in un contenitore separato -->
     <div class="input-container">
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
     
-    <!-- Contenitore per il pulsante in un livello separato -->
+    <!-- Pulsante in un contenitore separato -->
     <div class="button-container">
       <button onclick="checkAirdrop()">Verifica</button>
     </div>
@@ -107,10 +115,10 @@
         return;
       }
       
-      // Simulazione: wallet che inizia con "0x1" sono considerati idonei
+      // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui puoi attivare un'animazione di coriandoli se desideri
+        // Qui potresti attivare l'animazione dei coriandoli se desideri
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         container.classList.add("shake");
