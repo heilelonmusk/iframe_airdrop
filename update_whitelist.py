@@ -25,23 +25,22 @@ def update_whitelist(wallet_address):
     file_path = "data/whitelist.csv"
     
     try:
-        # Legge il contenuto attuale del file whitelist.csv
+        # Leggi il contenuto attuale del file whitelist.csv
         file_content = repo.file_contents(file_path, ref=BRANCH)
         csv_data = file_content.decoded_content.decode("utf-8")
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found.")
         sys.exit(1)
     
-    # Leggi i dati CSV
+    # Leggi i dati CSV in memoria
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
     
     updated = False
     for row in rows:
-        # Confronta in modo case-insensitive
+        # Confronto case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
-            # Imposta il timestamp corrente in formato "YYYY-MM-DD HH:MM:SS"
             now = datetime.now()
             row["DateTime"] = now.strftime("%Y-%m-%d %H:%M:%S")
             updated = True
