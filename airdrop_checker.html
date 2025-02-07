@@ -5,36 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <style>
-    /* Forza il background trasparente e il testo bianco su tutta la pagina */
+    /* Forza l'altezza del documento pari all'altezza dell'iframe (600px) e centrare il contenuto */
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      height: 600px; /* Altezza fissa per far corrispondere l'iframe */
+      width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
-    }
-    /* Forza il colore bianco per titoli e paragrafi */
-    h2, p {
-      color: white !important;
-    }
-    /* Contenitore principale centrato verticalmente e orizzontalmente */
-    .module-container {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%;
+    }
+    /* Contenitore principale per il modulo */
+    .module-container {
+      width: 90%;
+      max-width: 400px;
       text-align: center;
       padding: 20px;
       box-sizing: border-box;
     }
-    /* Contenitore per l'input e il pulsante */
+    h2, p {
+      color: white !important;
+      margin-bottom: 20px;
+    }
+    /* Contenitore per l'input e per il pulsante, separati per avere due livelli distinti */
     .input-container, .button-container {
-      width: 90%;
-      max-width: 400px;
-      margin: 10px auto;
-      text-align: center;
+      width: 100%;
+      margin: 10px 0;
     }
     .input-container input {
       width: 100%;
@@ -81,7 +80,7 @@
     <h2>🔍 Verifica il Tuo Airdrop</h2>
     <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
     
-    <!-- Contenitore per la barra di ricerca -->
+    <!-- Contenitore per l'input (barra di ricerca) -->
     <div class="input-container">
       <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
     </div>
@@ -105,10 +104,10 @@
         return;
       }
       
-      // Simulazione: consideriamo idonei i wallet che iniziano con "0x1"
+      // Simulazione di verifica: consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui puoi attivare l'animazione dei coriandoli se desideri
+        // Qui potresti attivare l'animazione dei coriandoli
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         container.classList.add("shake");
