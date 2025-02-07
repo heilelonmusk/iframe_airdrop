@@ -5,13 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>$HELON Airdrop Checker</title>
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
+    /* Rimuove margini e padding di default e imposta lo sfondo trasparente */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      height: 100%;
+    }
+    /* Contenitore principale centrato verticalmente e orizzontalmente */
+    .module-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
       text-align: center;
-      padding: 40px;
-      line-height: 2.5;
-      color: white;
-      background: transparent; /* Background trasparente */
     }
     h2 {
       margin-bottom: 20px;
@@ -19,12 +28,11 @@
     p {
       margin-bottom: 20px;
     }
+    /* Contenitori separati per l'input e il pulsante */
     .input-container, .button-container {
-      margin-top: 20px;
       width: 90%;
       max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 10px auto;
     }
     .input-container input {
       width: 100%;
@@ -51,53 +59,59 @@
       font-weight: bold;
       font-size: 18px;
     }
+    /* Effetto shake applicato all'intero modulo */
     .shake {
       animation: shake 0.5s;
     }
     @keyframes shake {
       0% { transform: translateX(0); }
-      25% { transform: translateX(5px); }
-      50% { transform: translateX(-5px); }
-      75% { transform: translateX(5px); }
+      25% { transform: translateX(10px); }
+      50% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
       100% { transform: translateX(0); }
     }
   </style>
 </head>
 <body>
-  <h2>🔍 Verifica il Tuo Airdrop</h2>
-  <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
-  
-  <!-- Contenitore per la barra di ricerca (input) -->
-  <div class="input-container">
-    <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
+  <div class="module-container" id="moduleContainer">
+    <h2>🔍 Verifica il Tuo Airdrop</h2>
+    <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
+    
+    <!-- Contenitore per la barra di ricerca -->
+    <div class="input-container">
+      <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
+    </div>
+    
+    <!-- Contenitore per il pulsante di verifica -->
+    <div class="button-container">
+      <button onclick="checkAirdrop()">Verifica</button>
+    </div>
+    
+    <p id="result"></p>
   </div>
-  
-  <!-- Contenitore per il pulsante -->
-  <div class="button-container">
-    <button onclick="checkAirdrop()">Verifica</button>
-  </div>
-  
-  <p id="result"></p>
   
   <script>
     async function checkAirdrop() {
       const wallet = document.getElementById("walletInput").value.trim();
       const resultElem = document.getElementById("result");
-
+      const container = document.getElementById("moduleContainer");
+      
+      // Se l'input è vuoto, mostra un messaggio di errore
       if (!wallet) {
         resultElem.innerText = "⚠️ Per favore, inserisci un indirizzo wallet valido.";
         return;
       }
       
-      // Simulazione di verifica: per esempio, wallet che inizia con "0x1" sono considerati idonei
+      // Simulazione di controllo: per questo esempio, consideriamo idonei i wallet che iniziano con "0x1"
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui potresti attivare un'animazione (es. coriandoli)
+        // Qui potresti attivare un'animazione (ad esempio, dei coriandoli)
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
-        document.getElementById("walletInput").classList.add("shake");
+        // Aggiunge l'effetto shake all'intero modulo
+        container.classList.add("shake");
         setTimeout(() => {
-          document.getElementById("walletInput").classList.remove("shake");
+          container.classList.remove("shake");
         }, 500);
       }
     }
