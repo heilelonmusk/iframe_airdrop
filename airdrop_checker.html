@@ -11,7 +11,7 @@
       padding: 40px;
       line-height: 2.5;
       color: white;
-      background: transparent; /* Background impostato a trasparente */
+      background: transparent; /* Background trasparente */
     }
     h2 {
       margin-bottom: 20px;
@@ -19,17 +19,28 @@
     p {
       margin-bottom: 20px;
     }
-    input, button {
+    .input-container, .button-container {
       margin-top: 20px;
+      width: 90%;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .input-container input {
+      width: 100%;
       padding: 12px;
       font-size: 16px;
       border-radius: 8px;
       border: none;
       outline: none;
-      width: 90%;
-      max-width: 400px;
     }
-    button {
+    .button-container button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
       background-color: #ffcc00;
       color: black;
       font-weight: bold;
@@ -56,8 +67,15 @@
   <h2>🔍 Verifica il Tuo Airdrop</h2>
   <p>Inserisci il tuo indirizzo wallet per controllare se sei nella whitelist:</p>
   
-  <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
-  <button onclick="checkAirdrop()">Verifica</button>
+  <!-- Contenitore per la barra di ricerca (input) -->
+  <div class="input-container">
+    <input type="text" id="walletInput" placeholder="Inserisci il tuo indirizzo wallet" required>
+  </div>
+  
+  <!-- Contenitore per il pulsante -->
+  <div class="button-container">
+    <button onclick="checkAirdrop()">Verifica</button>
+  </div>
   
   <p id="result"></p>
   
@@ -71,10 +89,10 @@
         return;
       }
       
-      // Simulazione del controllo: wallet che inizia con "0x1" è considerato idoneo
+      // Simulazione di verifica: per esempio, wallet che inizia con "0x1" sono considerati idonei
       if (wallet.startsWith("0x1")) {
         resultElem.innerText = "✅ Sei idoneo! L'allocazione finale verrà comunicata prossimamente.";
-        // Qui puoi attivare un'animazione, per esempio, dei coriandoli.
+        // Qui potresti attivare un'animazione (es. coriandoli)
       } else {
         resultElem.innerText = "❌ Non sei nella whitelist, ma resta sintonizzato: potrebbero arrivare sorprese!";
         document.getElementById("walletInput").classList.add("shake");
