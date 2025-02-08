@@ -1,12 +1,11 @@
-// ultronChat.js
 (function() {
-  // Se lo script è eseguito in un iframe, non eseguire il resto del codice.
+  // Esegui lo script solo se siamo nel contesto della finestra principale (non in un iframe)
   if (window.self !== window.top) {
     console.log("Ultron Chat is not injected in an iframe context.");
     return;
   }
 
-  // Crea il contenitore per il chatbot se non esiste già
+  // Crea il container globale per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
@@ -14,25 +13,23 @@
     // Posiziona il container in maniera fissa in basso a destra
     container.style.position = "fixed";
     container.style.bottom = "20px";
-    container.style.right = "20px";  // Posizionamento a destra
+    container.style.right = "20px";  // Posizionato a destra
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
 
-  // Inietta il markup del widget di chat
+  // Inietta il markup del widget di chat nel container
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" style="
       width: 60px;
       height: 60px;
       border-radius: 50%;
       background: linear-gradient(135deg, #ffcc00, #ffdd55);
-      color: #000;
       border: none;
-      font-size: 28px;
       cursor: pointer;
       opacity: 0;
       transition: transform 0.3s, opacity 0.3s;">
-      🤖
+      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" style="width: 100%; height: 100%; border-radius: 50%;">
     </button>
     <div id="ultronChatWidget" style="
       width: 320px;
@@ -49,7 +46,7 @@
         background: linear-gradient(135deg, #ffcc00, #ffdd55);
         padding: 12px;
         font-weight: 600;
-        color: #000;
+        color: white !important;
         text-align: center;">
         Ultron – Heil Elon
       </header>
@@ -59,7 +56,8 @@
         overflow-y: auto;
         background: #2e2e2e;
         font-size: 14px;
-        line-height: 1.5;">
+        line-height: 1.5;
+        color: white !important;">
         <p>Hello, I'm Ultron – your AI companion for the Helon project!</p>
         <p>How can I help you?</p>
         <p>Ask about <strong>who</strong>, <strong>what</strong>, <strong>where</strong>, <strong>when</strong>, or <strong>why</strong>.<br>
@@ -76,7 +74,7 @@
           border-radius: 4px;
           font-size: 14px;
           background: transparent;
-          color: white;
+          color: white !important;
           outline: none;">
         <button onclick="sendChat()" style="
           margin-left: 8px;
@@ -92,6 +90,15 @@
     </div>
   `;
 
+  // Forza il colore bianco per tutti gli elementi all'interno del container (override globale)
+  const styleOverride = document.createElement('style');
+  styleOverride.innerHTML = `
+    #ultronChatContainer, #ultronChatContainer * {
+      color: white !important;
+    }
+  `;
+  document.head.appendChild(styleOverride);
+
   // Mostra il pulsante di chat dopo 3 secondi
   setTimeout(() => {
     const btn = document.getElementById("ultronChatButton");
@@ -104,7 +111,7 @@
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Funzione per processare le chat e rispondere
+  // Funzione per processare le chat e generare risposte
   window.sendChat = async function() {
     const input = document.getElementById("chatInput");
     const question = input.value.trim();
@@ -143,12 +150,12 @@
   };
 
   // Iniezione dello stile per l'animazione slideUp
-  const style = document.createElement('style');
-  style.innerHTML = `
+  const slideStyle = document.createElement('style');
+  slideStyle.innerHTML = `
     @keyframes slideUp {
       from { transform: translateY(100%); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(slideStyle);
 })();
