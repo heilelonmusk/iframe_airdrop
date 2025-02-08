@@ -5,7 +5,7 @@
     return;
   }
 
-  // Crea il container globale per il chatbot se non esiste già
+  // Controlla se il container del chatbot esiste già; se non esiste, crealo.
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
@@ -18,13 +18,13 @@
     document.body.appendChild(container);
   }
 
-  // Inietta il markup del widget di chat nel container
+  // Inietta il markup del widget di chat
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" style="
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #ffcc00, #ffdd55);
+      background: linear-gradient(135deg, #ff9300, #ff9300);
       border: none;
       cursor: pointer;
       opacity: 0;
@@ -43,7 +43,7 @@
       overflow: hidden;
       margin-top: 10px;">
       <header style="
-        background: linear-gradient(135deg, #ffcc00, #ffdd55);
+        background: linear-gradient(135deg, #ff9300, #ff9300);
         padding: 12px;
         font-weight: 600;
         color: white !important;
@@ -80,7 +80,7 @@
           margin-left: 8px;
           padding: 8px 12px;
           border: none;
-          background: #ffcc00;
+          background: #ff9300;
           color: #000;
           font-weight: bold;
           border-radius: 4px;
@@ -90,7 +90,7 @@
     </div>
   `;
 
-  // Forza il colore bianco per tutti gli elementi all'interno del container (override globale)
+  // Forza il colore bianco per tutti gli elementi all'interno del container
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
