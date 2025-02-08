@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 import csv
 import io
@@ -6,12 +7,16 @@ import github3
 import os
 
 def update_non_eligible(wallet_address):
-    # Configurazione
+    # ------------------------------
+    # CONFIGURAZIONE
+    # ------------------------------
     GITHUB_TOKEN = os.getenv("MY_GITHUB_TOKEN")
     GITHUB_REPO = "heilelonmusk/iframe_airdrop"
     BRANCH = "main"
     
-    # Autenticazione con GitHub
+    # ------------------------------
+    # CONNESSIONE A GITHUB
+    # ------------------------------
     gh = github3.login(token=GITHUB_TOKEN)
     if gh is None:
         print("Authentication failed.")
@@ -24,37 +29,42 @@ def update_non_eligible(wallet_address):
     
     file_path = "data/non_eligible.csv"
     
-    # Prova a leggere il contenuto attuale del file non_eligible.csv.
-    # Se il file non esiste, inizializza csv_data con l'intestazione.
+    # ------------------------------
+    # LETTURA DEL FILE CSV DEI NON ELEGIBILE
+    # ------------------------------
     try:
         file_content = repo.file_contents(file_path, ref=BRANCH)
-        csv_data = file_content.decoded.decode("utf-8")
+        try:
+            csv_data = file_content.decoded.decode("utf-8")
+        except AttributeError:
+            csv_data = file_content.decoded_content.decode("utf-8")
     except github3.exceptions.NotFoundError:
         print("non_eligible.csv not found, creating a new file.")
         csv_data = "Wallet Address,DateTime\n"
         file_content = None  # Indica che il file non esiste ancora
-
-    # Leggi i dati CSV in memoria e raccogli gli indirizzi già registrati.
+    
+    # ------------------------------
+    # CONTROLLO DEI DUPLICATI
+    # ------------------------------
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
-    
-    # Se il wallet è già presente, esci senza duplicati.
     for row in rows:
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             print(f"Wallet {wallet_address} is already recorded in non_eligible.csv.")
             sys.exit(0)
     
-    # Aggiungi una nuova riga con il wallet e il timestamp corrente.
+    # ------------------------------
+    # AGGIUNTA DEL NUOVO WALLET
+    # ------------------------------
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_row = {"Wallet Address": wallet_address, "DateTime": timestamp}
     
-    # Se il file non esiste, prepariamo la lista con un'unica riga; altrimenti, aggiungiamo alla lista esistente.
+    # Se il file non esiste, inizializza la lista con il nuovo record
     if file_content is None:
         rows = [new_row]
         fieldnames = ["Wallet Address", "DateTime"]
     else:
         rows.append(new_row)
-        # Se per qualche motivo i fieldnames non sono stati definiti, usiamo quelli standard.
         fieldnames = reader.fieldnames if reader.fieldnames else ["Wallet Address", "DateTime"]
     
     output = io.StringIO()
@@ -63,14 +73,15 @@ def update_non_eligible(wallet_address):
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
-    # Aggiorna il file su GitHub:
-    # Se il file esiste, prova ad aggiornare; se non funziona, usa il fallback di eliminare e ricrearlo.
-    if file_content is not None:
+    # ------------------------------
+    # AGGIORNAMENTO/CREAZIONE DEL FILE SU GITHUB
+    # ------------------------------
+    if file_content:
         try:
             repo.update_file(
                 file_path,
                 f"Update non_eligible.csv: add {wallet_address}",
-                new_csv,  # new_csv è in formato bytes
+                new_csv,
                 file_content.sha,
                 branch=BRANCH
             )
@@ -79,8 +90,7 @@ def update_non_eligible(wallet_address):
             print(f"Error updating non_eligible.csv with update_file: {e}")
             print("Attempting fallback: delete and recreate the file...")
             try:
-                # Utilizza il metodo delete() sull'oggetto file_content.
-                file_content.delete(f"Delete old non_eligible.csv for {wallet_address}", branch=BRANCH)
+                file_content.delete(f"Delete file for update: {wallet_address}", branch=BRANCH)
             except Exception as delete_err:
                 print(f"Error deleting file: {delete_err}")
                 sys.exit(1)
@@ -96,7 +106,6 @@ def update_non_eligible(wallet_address):
                 print(f"Error creating file: {create_err}")
                 sys.exit(1)
     else:
-        # Se il file non esiste, crealo
         try:
             repo.create_file(
                 file_path,
