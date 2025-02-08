@@ -1,6 +1,12 @@
 // ultronChat.js
 (function() {
-  // Controlla se il container del chatbot esiste già; se non esiste, crealo.
+  // Se lo script è eseguito in un iframe, non eseguire il resto del codice.
+  if (window.self !== window.top) {
+    console.log("Ultron Chat is not injected in an iframe context.");
+    return;
+  }
+
+  // Crea il contenitore per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
