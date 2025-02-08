@@ -1,4 +1,5 @@
 // triggerWhitelistUpdate.js
+
 exports.handler = async function(event, context) {
   // Consenti solo richieste POST
   if (event.httpMethod !== "POST") {
@@ -19,7 +20,7 @@ exports.handler = async function(event, context) {
     };
   }
   
-  // Controlla che venga fornito il wallet
+  // Verifica che venga fornito il wallet
   if (!data.wallet) {
     return {
       statusCode: 400,
@@ -27,7 +28,7 @@ exports.handler = async function(event, context) {
     };
   }
   
-  // Usa la variabile d'ambiente MY_GITHUB_TOKEN (configurata in Netlify)
+  // Recupera il token dalle variabili d'ambiente (assicurati che MY_GITHUB_TOKEN sia impostato in Netlify)
   const token = process.env.MY_GITHUB_TOKEN;
   if (!token) {
     return {
@@ -36,17 +37,20 @@ exports.handler = async function(event, context) {
     };
   }
   
+  // Configurazione del repository e dell'evento dispatch
   const repoOwner = "heilelonmusk";
   const repoName = "iframe_airdrop";
   const eventType = "update_whitelist";
   const url = `https://api.github.com/repos/${repoOwner}/${repoName}/dispatches`;
   
+  // Costruzione del payload per il repository_dispatch
   const payload = {
     event_type: eventType,
     client_payload: { wallet: data.wallet }
   };
   
   try {
+    // Invia la richiesta POST alla GitHub API
     const response = await fetch(url, {
       method: "POST",
       headers: {
