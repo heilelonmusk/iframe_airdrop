@@ -5,14 +5,19 @@
     return;
   }
 
+  // Determina se l'utente è su mobile (threshold 600px)
+  const isMobile = window.innerWidth <= 600;
+  const buttonSize = isMobile ? "60px" : "80px";         // Desktop: 80px, Mobile: 60px
+  const bottomOffset = isMobile ? "20px" : "80px";         // Desktop: 80px dal fondo, Mobile: 20px
+
   // Crea il container globale per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
-    // Usa classi per il posizionamento; qui lo posizioniamo in basso a destra
+    // Posiziona il container in maniera fissa in basso a destra
     container.style.position = "fixed";
-    container.style.bottom = "20px";
+    container.style.bottom = bottomOffset;
     container.style.right = "20px";
     container.style.zIndex = "1100";
     document.body.appendChild(container);
@@ -21,14 +26,15 @@
   // Inietta il markup del widget di chat nel container
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
-      width: 60px;
-      height: 60px;
+      width: ${buttonSize};
+      height: ${buttonSize};
       border-radius: 50%;
       background: linear-gradient(135deg, #ff9300, #ff9300);
       border: none;
       cursor: pointer;
       opacity: 0;
-      transition: transform 0.3s, opacity 0.3s;">
+      transition: transform 0.3s, opacity 0.3s;
+      ${!isMobile ? "animation: pulse 2s infinite;" : ""}">
       <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img" style="width: 100%; height: 100%; border-radius: 50%;">
     </button>
     <div id="ultronChatWidget" class="ultron-widget" style="
@@ -91,12 +97,18 @@
     </div>
   `;
 
-  // Forza il colore bianco per tutti gli elementi all'interno del container
+  // Iniezione dello stile per forzare il colore bianco in tutti gli elementi all'interno del container
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
       color: white !important;
       font-family: inherit;
+    }
+    /* Definisce l'animazione pulse per il pulsante di chat (solo desktop) */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
   `;
   document.head.appendChild(styleOverride);
