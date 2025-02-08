@@ -1,13 +1,14 @@
+// ultronChat.js
 (function() {
-  // Crea il contenitore per la chat se non esiste già
+  // Controlla se il container del chatbot esiste già; se non esiste, crealo.
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
-    // Posiziona il container in modo fisso in basso a destra
+    // Posiziona il container in maniera fissa in basso a destra
     container.style.position = "fixed";
     container.style.bottom = "20px";
-    container.style.right = "20px";
+    container.style.right = "20px";  // Posizionamento a destra
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
@@ -85,7 +86,7 @@
     </div>
   `;
 
-  // Mostra il pulsante dopo 3 secondi
+  // Mostra il pulsante di chat dopo 3 secondi
   setTimeout(() => {
     const btn = document.getElementById("ultronChatButton");
     btn.style.opacity = "1";
