@@ -1,5 +1,6 @@
+// ultronChat.js
 (function() {
-  // Crea un contenitore per la chat se non esiste già
+  // Crea il contenitore per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
@@ -100,7 +101,7 @@
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Funzione per processare le chat e rispondere
+  // Funzione per processare le chat e rispondere (semplice logica di fallback)
   window.sendChat = async function() {
     const input = document.getElementById("chatInput");
     const question = input.value.trim();
@@ -110,7 +111,6 @@
     input.value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
-    // Logica di risposta basata su keyword (fallback)
     let answer = "I'm sorry, I didn't understand that. Please ask about our channels or project details.";
     const lowerQuestion = question.toLowerCase();
     if (lowerQuestion.includes("who")) {
@@ -139,7 +139,7 @@
     }, 500);
   };
 
-  // Iniezione dello stile per l'animazione slideUp (in alternativa, potresti spostarlo nel CSS principale)
+  // Iniezione dello stile per l'animazione slideUp
   const style = document.createElement('style');
   style.innerHTML = `
     @keyframes slideUp {
@@ -148,5 +148,4 @@
     }
   `;
   document.head.appendChild(style);
-
 })();
