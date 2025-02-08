@@ -15,7 +15,6 @@
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
-    // Posiziona il container in maniera fissa in basso a destra
     container.style.position = "fixed";
     container.style.bottom = bottomOffset;
     container.style.right = "20px";
@@ -33,8 +32,7 @@
       border: none;
       cursor: pointer;
       opacity: 0;
-      transition: transform 0.3s, opacity 0.3s;
-      ${!isMobile ? "animation: pulse 2s infinite;" : ""}">
+      transition: transform 0.3s, opacity 0.3s;">
       <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img" style="width: 100%; height: 100%; border-radius: 50%;">
     </button>
     <div id="ultronChatWidget" class="ultron-widget" style="
@@ -97,18 +95,35 @@
     </div>
   `;
 
-  // Iniezione dello stile per forzare il colore bianco in tutti gli elementi all'interno del container
+  // Iniezione di regole CSS globali per garantire che i testi siano sempre bianchi e per l'animazione del glow pulse.
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
       color: white !important;
       font-family: inherit;
     }
-    /* Definisce l'animazione pulse per il pulsante di chat (solo desktop) */
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+    /* Pulsing glow halo per il pulsante (solo desktop) */
+    .ultron-button {
+      position: relative;
+      overflow: visible;
+    }
+    .ultron-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,147,0,0.5) 0%, transparent 70%);
+      opacity: 0;
+      animation: pulseGlow 2s infinite;
+      z-index: -1;
+    }
+    @keyframes pulseGlow {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
     }
   `;
   document.head.appendChild(styleOverride);
