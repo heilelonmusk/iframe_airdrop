@@ -1,13 +1,13 @@
 (function() {
-  // Controlla se il container del chatbot esiste già; altrimenti, crealo
+  // Crea il contenitore per la chat se non esiste già
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
-    // Imposta lo stile per fissare il container globalmente
+    // Posiziona il container in modo fisso in basso a destra
     container.style.position = "fixed";
     container.style.bottom = "20px";
-    container.style.left = "20px";
+    container.style.right = "20px";
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
@@ -85,7 +85,7 @@
     </div>
   `;
 
-  // Mostra il pulsante di chat dopo 3 secondi
+  // Mostra il pulsante dopo 3 secondi
   setTimeout(() => {
     const btn = document.getElementById("ultronChatButton");
     btn.style.opacity = "1";
@@ -107,7 +107,6 @@
     input.value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
-    // Logica di risposta basata su keyword (fallback)
     let answer = "I'm sorry, I didn't understand that. Please ask about our channels or project details.";
     const lowerQuestion = question.toLowerCase();
     if (lowerQuestion.includes("who")) {
