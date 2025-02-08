@@ -2,9 +2,9 @@
 import sys
 import csv
 import io
+import os
 from datetime import datetime
 import github3
-import os
 
 def update_non_eligible(wallet_address):
     # ------------------------------
@@ -29,9 +29,7 @@ def update_non_eligible(wallet_address):
     
     file_path = "data/non_eligible.csv"
     
-    # ------------------------------
-    # LETTURA DEL FILE CSV DEI NON ELEGIBILE
-    # ------------------------------
+    # Prova a leggere il file; se non esiste, inizializzalo con l'intestazione
     try:
         file_content = repo.file_contents(file_path, ref=BRANCH)
         try:
@@ -41,25 +39,20 @@ def update_non_eligible(wallet_address):
     except github3.exceptions.NotFoundError:
         print("non_eligible.csv not found, creating a new file.")
         csv_data = "Wallet Address,DateTime\n"
-        file_content = None  # Indica che il file non esiste ancora
+        file_content = None
     
-    # ------------------------------
-    # CONTROLLO DEI DUPLICATI
-    # ------------------------------
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
+    
+    # Verifica se il wallet è già registrato
     for row in rows:
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             print(f"Wallet {wallet_address} is already recorded in non_eligible.csv.")
             sys.exit(0)
     
-    # ------------------------------
-    # AGGIUNTA DEL NUOVO WALLET
-    # ------------------------------
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_row = {"Wallet Address": wallet_address, "DateTime": timestamp}
     
-    # Se il file non esiste, inizializza la lista con il nuovo record
     if file_content is None:
         rows = [new_row]
         fieldnames = ["Wallet Address", "DateTime"]
@@ -73,9 +66,6 @@ def update_non_eligible(wallet_address):
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
-    # ------------------------------
-    # AGGIORNAMENTO/CREAZIONE DEL FILE SU GITHUB
-    # ------------------------------
     if file_content:
         try:
             repo.update_file(
@@ -97,7 +87,7 @@ def update_non_eligible(wallet_address):
             try:
                 repo.create_file(
                     file_path,
-                    f"Create non_eligible.csv with {wallet_address}",
+                    f"Create new non_eligible.csv with {wallet_address}",
                     new_csv,
                     branch=BRANCH
                 )
@@ -114,13 +104,16 @@ def update_non_eligible(wallet_address):
                 branch=BRANCH
             )
             print(f"non_eligible.csv created and wallet {wallet_address} added.")
-        except Exception as create_err:
-            print(f"Error creating file: {create_err}")
+        except Exception as e:
+            print(f"Error creating non_eligible.csv: {e}")
             sys.exit(1)
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2:
         print("Please provide a wallet address as an argument.")
         sys.exit(1)
     wallet_address = sys.argv[1]
     update_non_eligible(wallet_address)
+
+if __name__ == "__main__":
+    main()

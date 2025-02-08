@@ -3,11 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>$HELON Airdrop Checker & Ultron Chat</title>
-  <!-- Optional: Include canvas-confetti for desktop effects -->
+  <title>$HELON Airdrop Checker</title>
+  <!-- Includi il file globale della chat di Ultron -->
+  <script src="https://heilelonmusk.github.io/iframe_airdrop/ultronChat.js" defer></script>
+  <!-- Include canvas-confetti in the parent page -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-  <!-- Google Fonts for a modern look -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Listener per eventuali messaggi da altri iframe/elementi -->
+  <script>
+    window.addEventListener('message', function(event) {
+      // Verifica l'origine per sicurezza
+      if (event.origin !== "https://heilelonmusk.github.io") {
+        console.warn("Untrusted origin:", event.origin);
+        return;
+      }
+      if (event.data && event.data.action === 'triggerConfetti') {
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 }
+        });
+      }
+    });
+  </script>
   <style>
     /* Global Reset */
     *, *::before, *::after {
@@ -16,16 +33,16 @@
     html, body {
       margin: 0;
       padding: 0;
+      height: 400px; /* Altezza fissa del modulo */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
     }
-    /* ---------------------------
-       Airdrop Checker Module
-       --------------------------- */
+    /* Airdrop Checker Module */
     .checker-container {
-      height: 400px; /* Fisso per il modulo */
+      height: 100%;
+      width: 100%;
       max-width: 400px;
       margin: 0 auto;
       padding: 10px;
@@ -35,8 +52,8 @@
       align-items: center;
       text-align: center;
     }
-    .checker-container h2,
-    .checker-container p {
+    h2, p {
+      color: white !important;
       margin-bottom: 10px;
     }
     p.description {
@@ -45,6 +62,7 @@
     .input-container, .button-container {
       width: 100%;
       margin: 5px auto;
+      text-align: center;
     }
     .input-container input {
       width: 100%;
@@ -75,7 +93,7 @@
       margin-top: 10px;
       font-weight: bold;
       font-size: 16px;
-      min-height: 40px; /* Spazio per messaggio su due righe */
+      min-height: 40px;
     }
     /* Shake effect for errors */
     .shake {
@@ -88,7 +106,6 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    /* Mobile: reduce shake amplitude */
     @media (max-width: 600px) {
       @keyframes shake {
         0% { transform: translateX(0); }
@@ -107,129 +124,6 @@
       50% { box-shadow: 0 0 0 10px rgba(0,255,0,0); }
       100% { box-shadow: 0 0 0 0 rgba(0,255,0,0); }
     }
-    /* ---------------------------
-       Ultron Chat Widget Styles
-       --------------------------- */
-    #ultronChatButton {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #ffcc00, #ffdd55);
-      color: #000;
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1100;
-      transition: transform 0.3s, opacity 0.3s;
-      opacity: 0;
-    }
-    .chat-show {
-      opacity: 1;
-    }
-    #ultronChatButton:hover {
-      transform: scale(1.1);
-    }
-    #ultronChatWidget {
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
-      width: 320px;
-      max-width: 90%;
-      height: 400px;
-      background: #1c1c1c;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 1100;
-      animation: slideUp 0.5s ease;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    #ultronChatWidget header {
-      background: linear-gradient(135deg, #ffcc00, #ffdd55);
-      padding: 12px;
-      font-weight: 600;
-      color: #000;
-      text-align: center;
-    }
-    #ultronChatWidget .chat-body {
-      flex: 1;
-      padding: 12px;
-      overflow-y: auto;
-      background: #2e2e2e;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    #ultronChatWidget .chat-body p {
-      margin: 0 0 10px;
-    }
-    #ultronChatWidget .chat-input {
-      display: flex;
-      padding: 12px;
-      background: #2e2e2e;
-    }
-    #ultronChatWidget .chat-input input {
-      flex: 1;
-      padding: 8px;
-      border: 1px solid #444;
-      border-radius: 4px;
-      font-size: 14px;
-      background: transparent;
-      color: white;
-      outline: none;
-    }
-    #ultronChatWidget .chat-input button {
-      margin-left: 8px;
-      padding: 8px 12px;
-      border: none;
-      background: #ffcc00;
-      color: #000;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    #ultronChatWidget .chat-input button:hover {
-      background: #ffdd55;
-    }
-    /* Responsive adjustments for mobile */
-    @media (max-width: 600px) {
-      #ultronChatWidget {
-        width: 90%;
-        left: 5%;
-      }
-      #ultronChatWidget header {
-        padding: 10px;
-        font-size: 16px;
-      }
-      #ultronChatWidget .chat-body {
-        padding: 10px;
-        font-size: 13px;
-      }
-      #ultronChatWidget .chat-input input {
-        padding: 8px;
-        font-size: 14px;
-      }
-      #ultronChatWidget .chat-input button {
-        padding: 8px 10px;
-        font-size: 14px;
-      }
-      #ultronChatButton {
-        width: 50px;
-        height: 50px;
-        font-size: 24px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -246,28 +140,9 @@
     <p id="result"></p>
   </div>
   
-  <!-- Ultron Chat Widget (global for extended interaction) -->
-  <button id="ultronChatButton" title="Chat with Ultron">🤖</button>
-  <div id="ultronChatWidget">
-    <header>Ultron – Heil Elon</header>
-    <div class="chat-body" id="chatBody">
-      <p>Hello, I'm Ultron – your AI companion for the Helon project!</p>
-      <p>How can I help you?</p>
-      <p>Ask about <strong>who</strong>, <strong>what</strong>, <strong>where</strong>, <strong>when</strong>, or <strong>why</strong>.<br>
-         Type "channels" for our community links.</p>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="Type your question here..." />
-      <button onclick="sendChat()">Send</button>
-    </div>
-  </div>
-  
   <script>
-    /* ------------------------------
-       Airdrop Checker Logic
-       ------------------------------ */
+    // Function to trigger workflow via the serverless endpoint
     async function triggerWorkflow(wallet, updateType) {
-      // Endpoint serverless (Netlify Functions)
       const endpoint = "https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/triggerWhitelistUpdate";
       try {
         const response = await fetch(endpoint, {
@@ -318,9 +193,7 @@
   
         if (isWhitelisted) {
           resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
-          // Trigger whitelist workflow update
           triggerWorkflow(wallet, "update_whitelist");
-          // Desktop: trigger confetti effect; Mobile: trigger pulse effect
           if (window.innerWidth > 600) {
             confetti({
               particleCount: 150,
@@ -339,97 +212,12 @@
           setTimeout(() => {
             container.classList.remove("shake");
           }, 700);
-          // Trigger non-eligible workflow update
           triggerWorkflow(wallet, "update_noneligible");
         }
       } catch (error) {
         resultElem.innerText = "⚠️ Error checking whitelist. Please try again later.";
         console.error(error);
       }
-    }
-    
-    /* ------------------------------
-       Ultron Chat Widget Logic
-       ------------------------------ */
-    // Show the chat button after 3 seconds
-    setTimeout(() => {
-      document.getElementById("ultronChatButton").classList.add("chat-show");
-    }, 3000);
-    
-    // Toggle the chat widget on button click
-    document.getElementById("ultronChatButton").addEventListener("click", () => {
-      const widget = document.getElementById("ultronChatWidget");
-      widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
-    });
-    
-    // Process chat messages and respond based on a knowledge base
-    async function sendChat() {
-      const input = document.getElementById("chatInput");
-      const question = input.value.trim();
-      const chatBody = document.getElementById("chatBody");
-      
-      if (!question) return;
-      
-      // Append user's message
-      chatBody.innerHTML += `<p style="color:#ffcc00;"><strong>You:</strong> ${question}</p>`;
-      input.value = "";
-      chatBody.scrollTop = chatBody.scrollHeight;
-      
-      // Try to fetch the knowledge base JSON
-      let knowledge = null;
-      try {
-        const kbResponse = await fetch("https://heilelonmusk.github.io/iframe_airdrop/data/knowledge.json");
-        if (kbResponse.ok) {
-          knowledge = await kbResponse.json();
-        }
-      } catch (e) {
-        console.error("Error fetching knowledge base:", e);
-      }
-      
-      let answer = "";
-      const lowerQuestion = question.toLowerCase();
-      if (knowledge) {
-        if (lowerQuestion.includes("who")) {
-          answer += knowledge.who.description + "<br>";
-        }
-        if (lowerQuestion.includes("what")) {
-          answer += knowledge.what + "<br>";
-        }
-        if (lowerQuestion.includes("where")) {
-          answer += "Visit our website: " + knowledge.where.website + "<br>";
-          answer += "Join our channels: Discord: " + knowledge.where.channels.discord +
-                    ", Twitter: " + knowledge.where.channels.twitter +
-                    ", Telegram: " + knowledge.where.channels.telegram + "<br>";
-        }
-        if (lowerQuestion.includes("when")) {
-          answer += knowledge.when + "<br>";
-        }
-        if (lowerQuestion.includes("why")) {
-          answer += knowledge.why + "<br>";
-        }
-        if (!answer) {
-          answer = "I'm sorry, I couldn't understand your question. Please ask about our project or channels.";
-        }
-      } else {
-        if (lowerQuestion.includes("channels") || lowerQuestion.includes("links")) {
-          answer = "Our main channels are:<br>• Discord: https://discord.gg/helon<br>• Twitter: https://twitter.com/helonproject<br>• Telegram: https://t.me/helon";
-        } else if (lowerQuestion.includes("project") || lowerQuestion.includes("helon")) {
-          answer = "Helon is a revolutionary project focused on decentralized interactions. Stay tuned for more updates!";
-        } else {
-          answer = "I'm sorry, I didn't understand that. Please ask about our channels or project details.";
-        }
-      }
-      
-      chatBody.innerHTML += `<p style="color:lightblue;"><strong>Ultron:</strong> ${answer}</p>`;
-      chatBody.scrollTop = chatBody.scrollHeight;
-      
-      // Optional: pulse animation for visual feedback
-      const widget = document.getElementById("ultronChatWidget");
-      widget.style.transition = "box-shadow 0.5s ease";
-      widget.style.boxShadow = "0 0 0 10px rgba(0,255,0,0.3)";
-      setTimeout(() => {
-        widget.style.boxShadow = "none";
-      }, 500);
     }
   </script>
   

@@ -1,5 +1,4 @@
 // triggerWhitelistUpdate.js
-
 exports.handler = async function(event, context) {
   // Consenti solo richieste POST
   if (event.httpMethod !== "POST") {
@@ -28,7 +27,7 @@ exports.handler = async function(event, context) {
     };
   }
   
-  // Recupera il token dalle variabili d'ambiente (assicurati che MY_GITHUB_TOKEN sia impostato in Netlify)
+  // Recupera il token dalla variabile d'ambiente (configurato in Netlify)
   const token = process.env.MY_GITHUB_TOKEN;
   if (!token) {
     return {
@@ -43,14 +42,12 @@ exports.handler = async function(event, context) {
   const eventType = "update_whitelist";
   const url = `https://api.github.com/repos/${repoOwner}/${repoName}/dispatches`;
   
-  // Costruzione del payload per il repository_dispatch
   const payload = {
     event_type: eventType,
     client_payload: { wallet: data.wallet }
   };
   
   try {
-    // Invia la richiesta POST alla GitHub API
     const response = await fetch(url, {
       method: "POST",
       headers: {
