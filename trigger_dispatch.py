@@ -1,12 +1,21 @@
+#!/usr/bin/env python3
 import requests
 import json
 import os
+import sys
 
 # Recupera il token dalle variabili d'ambiente (assicurati di averlo impostato)
 token = os.getenv("MY_GITHUB_TOKEN")
 if not token:
     print("MY_GITHUB_TOKEN is not set!")
-    exit(1)
+    sys.exit(1)
+
+# Verifica che sia stato passato un wallet come parametro
+if len(sys.argv) < 2:
+    print("Usage: python trigger_dispatch.py <wallet_address>")
+    sys.exit(1)
+
+wallet_address = sys.argv[1]
 
 # Imposta i parametri per il repository e l'evento
 repo_owner = "heilelonmusk"
@@ -19,11 +28,10 @@ headers = {
     "Content-Type": "application/json"
 }
 
-# Sostituisci l'indirizzo wallet con quello che vuoi inviare
 data = {
     "event_type": "update_whitelist",
     "client_payload": {
-        "wallet": "0x123abc..."  # Modifica questo valore con l'indirizzo wallet da aggiornare
+        "wallet": wallet_address
     }
 }
 
