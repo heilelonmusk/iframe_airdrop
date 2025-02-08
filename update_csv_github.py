@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import os
+import sys
 import github3
 
 # ------------------------------
@@ -12,7 +14,7 @@ BRANCH = "main"  # Branch su cui caricare i file
 
 if not GITHUB_TOKEN:
     print("❌ ERRORE: Token GitHub non trovato. Assicurati di averlo impostato come MY_GITHUB_TOKEN.")
-    exit(1)
+    sys.exit(1)
 
 # ------------------------------
 # CONNESSIONE A GITHUB
@@ -24,22 +26,20 @@ try:
         raise ValueError("Autenticazione GitHub fallita.")
 except Exception as e:
     print(f"❌ ERRORE: {e}")
-    exit(1)
+    sys.exit(1)
 
 repo = gh.repository(*GITHUB_REPO.split("/"))
 if repo is None:
     print("❌ ERRORE: Repository non trovato. Controlla il nome del repository.")
-    exit(1)
+    sys.exit(1)
 
 # ------------------------------
-# LINK PER I FILE CSV
+# LINK PER I FILE CSV (documentazione)
 # ------------------------------
-
-# Questi file saranno aggiornati su GitHub
+# Questi file saranno aggiornati su GitHub.
+# Le URL qui indicate rappresentano la fonte dei dati (Google Sheets/Drive) ma non sono usate direttamente in questo script:
 WHITELIST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ6WoIqrzoUdPh922uKFA08fuTTOWH2xreDmx18E2lpGioH9z_eVJ034ul3DJixg/pub?output=csv"
 NON_ELIGIBLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRHfqtGOIR-87zaRJhuqjN70N-tRSe2QOV6lb-vfECg9SqJ6q3aclTVp6vJDaGgIg/pub?output=csv"
-
-# Il file di stile rimane su Google Drive per aggiornamenti diretti dal team design
 IFRAME_SETTINGS_URL = "https://drive.google.com/uc?export=download&id=12qqeSqcli6NNbD7dx8wr7S0mmx_OSZAz"
 
 # ------------------------------
@@ -95,3 +95,7 @@ def upload_to_github(local_file, github_file):
 upload_to_github("whitelist.csv", "data/whitelist.csv")
 upload_to_github("non_eligible.csv", "data/non_eligible.csv")
 upload_to_github("iframe_settings.csv", "data/iframe_settings.csv")
+
+if __name__ == "__main__":
+    # Lo script viene eseguito automaticamente all'avvio.
+    pass
