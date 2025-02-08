@@ -7,10 +7,6 @@ from datetime import datetime
 import github3
 
 def get_decoded_content(file_content):
-    """
-    Prova a utilizzare la proprietà 'decoded' e, in caso di AttributeError,
-    utilizza 'decoded_content' per ottenere il contenuto del file in formato UTF-8.
-    """
     try:
         return file_content.decoded.decode("utf-8")
     except AttributeError:
@@ -40,22 +36,16 @@ def update_whitelist(wallet_address):
     file_path = "data/whitelist.csv"
     
     try:
-        # Leggi il contenuto attuale del file whitelist.csv dal repository
         file_content = repo.file_contents(file_path, ref=BRANCH)
         csv_data = get_decoded_content(file_content)
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found.")
         sys.exit(1)
     
-    # ------------------------------
-    # LETTURA DEI DATI CSV IN MEMORIA
-    # ------------------------------
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
-    
     updated = False
     for row in rows:
-        # Confronta l'indirizzo wallet in modo case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
             row["DateTime"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -66,29 +56,22 @@ def update_whitelist(wallet_address):
         print(f"Wallet address {wallet_address} not found in whitelist.")
         sys.exit(1)
     
-    # ------------------------------
-    # CREAZIONE DEL NUOVO CONTENUTO CSV
-    # ------------------------------
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=reader.fieldnames)
     writer.writeheader()
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
-    # ------------------------------
-    # AGGIORNAMENTO DEL FILE SU GITHUB
-    # ------------------------------
     try:
         repo.update_file(
             file_path,
             f"Update whitelist for wallet {wallet_address}",
-            new_csv,        # new_csv è già in formato bytes
+            new_csv,
             file_content.sha,
             branch=BRANCH
         )
         print(f"Whitelist updated for wallet {wallet_address}.")
-    except AttributeError as ae:
-        # Fallback: se update_file non è disponibile, elimina e ricrea il file
+    except AttributeError:
         print("update_file method not available, attempting to delete and recreate the file...")
         try:
             file_content.delete(f"Delete old whitelist for wallet {wallet_address}", branch=BRANCH)
