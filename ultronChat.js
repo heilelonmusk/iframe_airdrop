@@ -1,5 +1,5 @@
 (function() {
-  // Se lo script viene eseguito in un iframe, non eseguirlo (il widget deve essere iniettato solo nel top window)
+  // Esegui lo script solo se siamo nel contesto della finestra principale (non in un iframe)
   if (window.self !== window.top) {
     console.log("Ultron Chat is not injected in an iframe context.");
     return;
@@ -10,35 +10,88 @@
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
-    // Usa classi per il posizionamento; lascia che il CSS globale le gestisca
-    container.className = "ultron-container";
+    // Usa classi per il posizionamento; qui lo posizioniamo in basso a destra
+    container.style.position = "fixed";
+    container.style.bottom = "20px";
+    container.style.right = "20px";
+    container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
 
   // Inietta il markup del widget di chat nel container
   container.innerHTML = `
-    <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button">
-      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img">
+    <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff9300, #ff9300);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;">
+      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img" style="width: 100%; height: 100%; border-radius: 50%;">
     </button>
-    <div id="ultronChatWidget" class="ultron-widget">
-      <header class="ultron-header">
+    <div id="ultronChatWidget" class="ultron-widget" style="
+      width: 320px;
+      max-width: 90%;
+      height: 400px;
+      background: #1c1c1c;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      margin-top: 10px;">
+      <header class="ultron-header" style="
+        background: linear-gradient(135deg, #ff9300, #ff9300);
+        padding: 12px;
+        font-weight: 600;
+        color: white !important;
+        text-align: center;">
         Ultron – Heil Elon
       </header>
-      <div class="ultron-body" id="chatBody">
+      <div class="ultron-body" id="chatBody" style="
+        flex: 1;
+        padding: 12px;
+        overflow-y: auto;
+        background: #2e2e2e;
+        font-size: 14px;
+        line-height: 1.5;
+        color: white !important;">
         <p class="ultron-intro">Hi, here ULTRON. 🤖</p>
         <p class="ultron-intro">Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
         <p class="ultron-intro">💡 Curious? Ask me anything about Helon, its vision, the ecosystem, or what’s next.<br>
            🔗 Need official links? Type “channels” to connect with the community.</p>
         <p class="ultron-intro">The system runs. The answers are yours to uncover. 🚀</p>
       </div>
-      <div class="ultron-input">
-        <input type="text" id="chatInput" placeholder="Type your question here..." class="ultron-input-field">
-        <button onclick="sendChat()" class="ultron-send-button">Send</button>
+      <div class="ultron-input" style="
+        display: flex;
+        padding: 12px;
+        background: #2e2e2e;">
+        <input type="text" id="chatInput" placeholder="Type your question here..." class="ultron-input-field" style="
+          flex: 1;
+          padding: 8px;
+          border: 1px solid #444;
+          border-radius: 4px;
+          font-size: 14px;
+          background: transparent;
+          color: white !important;
+          outline: none;">
+        <button onclick="sendChat()" class="ultron-send-button" style="
+          margin-left: 8px;
+          padding: 8px 12px;
+          border: none;
+          background: #ff9300;
+          color: #000;
+          font-weight: bold;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background 0.3s;">Send</button>
       </div>
     </div>
   `;
 
-  // Iniezione di una regola CSS per forzare il colore bianco in modo che ereditino lo stile del sito di Hostinger
+  // Forza il colore bianco per tutti gli elementi all'interno del container
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -50,7 +103,8 @@
 
   // Mostra il pulsante di chat dopo 3 secondi
   setTimeout(() => {
-    document.getElementById("ultronChatButton").style.opacity = "1";
+    const btn = document.getElementById("ultronChatButton");
+    btn.style.opacity = "1";
   }, 3000);
 
   // Toggle del widget di chat al clic del pulsante
@@ -65,7 +119,7 @@
     const question = input.value.trim();
     const chatBody = document.getElementById("chatBody");
     if (!question) return;
-    chatBody.innerHTML += `<p class="ultron-user"><strong>You:</strong> ${question}</p>`;
+    chatBody.innerHTML += `<p class="ultron-user" style="color:#ffcc00;"><strong>You:</strong> ${question}</p>`;
     input.value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
@@ -85,7 +139,7 @@
       answer = "Our main channels are:<br>• Discord: https://discord.gg/helon<br>• Twitter: https://twitter.com/helonproject<br>• Telegram: https://t.me/helon";
     }
     
-    chatBody.innerHTML += `<p class="ultron-response"><strong>Ultron:</strong> ${answer}</p>`;
+    chatBody.innerHTML += `<p class="ultron-response" style="color:lightblue;"><strong>Ultron:</strong> ${answer}</p>`;
     chatBody.scrollTop = chatBody.scrollHeight;
     
     // Effetto pulse come feedback visivo
