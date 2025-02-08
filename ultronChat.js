@@ -18,7 +18,7 @@
     document.body.appendChild(container);
   }
 
-  // Inietta il markup del widget di chat
+  // Inietta il markup del widget di chat nel container
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" style="
       width: 60px;
@@ -58,10 +58,11 @@
         font-size: 14px;
         line-height: 1.5;
         color: white !important;">
-        <p>Hello, I'm Ultron – your AI companion for the Helon project!</p>
-        <p>How can I help you?</p>
-        <p>Ask about <strong>who</strong>, <strong>what</strong>, <strong>where</strong>, <strong>when</strong>, or <strong>why</strong>.<br>
-           Type "channels" for our community links.</p>
+        <p>Hi, here ULTRON. 🤖</p>
+        <p>Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
+        <p>💡 Curious? Ask me anything about Helon, its vision, the ecosystem, or what’s next.<br>
+        🔗 Need official links? Type “channels” to connect with the community.</p>
+        <p>The system runs. The answers are yours to uncover. 🚀</p>
       </div>
       <div class="chat-input" style="
         display: flex;
@@ -90,7 +91,7 @@
     </div>
   `;
 
-  // Forza il colore bianco per tutti gli elementi all'interno del container
+  // Forza il colore bianco per tutti gli elementi all'interno del container (override globale)
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
