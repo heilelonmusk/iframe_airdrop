@@ -1,19 +1,20 @@
-// ultronChat.js
 (function() {
-  // Crea il contenitore per il chatbot se non esiste già
+  // Controlla se il container del chatbot esiste già; altrimenti, crealo
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
+    // Imposta lo stile per fissare il container globalmente
+    container.style.position = "fixed";
+    container.style.bottom = "20px";
+    container.style.left = "20px";
+    container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
 
   // Inietta il markup del widget di chat
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" style="
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
       width: 60px;
       height: 60px;
       border-radius: 50%;
@@ -22,15 +23,11 @@
       border: none;
       font-size: 28px;
       cursor: pointer;
-      z-index: 1100;
       opacity: 0;
       transition: transform 0.3s, opacity 0.3s;">
       🤖
     </button>
     <div id="ultronChatWidget" style="
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
       width: 320px;
       max-width: 90%;
       height: 400px;
@@ -40,8 +37,7 @@
       display: none;
       flex-direction: column;
       overflow: hidden;
-      z-index: 1100;
-      animation: slideUp 0.5s ease;">
+      margin-top: 10px;">
       <header style="
         background: linear-gradient(135deg, #ffcc00, #ffdd55);
         padding: 12px;
@@ -89,7 +85,7 @@
     </div>
   `;
 
-  // Mostra il pulsante dopo 3 secondi
+  // Mostra il pulsante di chat dopo 3 secondi
   setTimeout(() => {
     const btn = document.getElementById("ultronChatButton");
     btn.style.opacity = "1";
@@ -101,7 +97,7 @@
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Funzione per processare le chat e rispondere (semplice logica di fallback)
+  // Funzione per processare le chat e rispondere
   window.sendChat = async function() {
     const input = document.getElementById("chatInput");
     const question = input.value.trim();
@@ -111,6 +107,7 @@
     input.value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
+    // Logica di risposta basata su keyword (fallback)
     let answer = "I'm sorry, I didn't understand that. Please ask about our channels or project details.";
     const lowerQuestion = question.toLowerCase();
     if (lowerQuestion.includes("who")) {
