@@ -1,17 +1,32 @@
+#!/usr/bin/env python3
 import sys
 import csv
 import io
+import os
 from datetime import datetime
 import github3
-import os
+
+def get_decoded_content(file_content):
+    """
+    Prova a utilizzare la proprietà 'decoded' e, in caso di AttributeError,
+    utilizza 'decoded_content' per ottenere il contenuto del file in formato UTF-8.
+    """
+    try:
+        return file_content.decoded.decode("utf-8")
+    except AttributeError:
+        return file_content.decoded_content.decode("utf-8")
 
 def update_whitelist(wallet_address):
-    # Configurazione
+    # ------------------------------
+    # CONFIGURAZIONE
+    # ------------------------------
     GITHUB_TOKEN = os.getenv("MY_GITHUB_TOKEN")
     GITHUB_REPO = "heilelonmusk/iframe_airdrop"
     BRANCH = "main"
     
-    # Autenticazione con GitHub
+    # ------------------------------
+    # CONNESSIONE A GITHUB
+    # ------------------------------
     gh = github3.login(token=GITHUB_TOKEN)
     if gh is None:
         print("Authentication failed.")
@@ -25,25 +40,25 @@ def update_whitelist(wallet_address):
     file_path = "data/whitelist.csv"
     
     try:
-        # Leggi il contenuto attuale del file whitelist.csv
+        # Leggi il contenuto attuale del file whitelist.csv dal repository
         file_content = repo.file_contents(file_path, ref=BRANCH)
-        # Usa la proprietà "decoded" per ottenere il contenuto in bytes e poi decodificarlo in stringa UTF-8
-        csv_data = file_content.decoded.decode("utf-8")
+        csv_data = get_decoded_content(file_content)
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found.")
         sys.exit(1)
     
-    # Leggi i dati CSV in memoria
+    # ------------------------------
+    # LETTURA DEI DATI CSV IN MEMORIA
+    # ------------------------------
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
     
     updated = False
     for row in rows:
-        # Confronta in modo case-insensitive
+        # Confronta l'indirizzo wallet in modo case-insensitive
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             row["Checked"] = "true"
-            now = datetime.now()
-            row["DateTime"] = now.strftime("%Y-%m-%d %H:%M:%S")
+            row["DateTime"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             updated = True
             break
 
@@ -51,29 +66,31 @@ def update_whitelist(wallet_address):
         print(f"Wallet address {wallet_address} not found in whitelist.")
         sys.exit(1)
     
-    # Scrivi i dati aggiornati in una stringa CSV e codificala in bytes
+    # ------------------------------
+    # CREAZIONE DEL NUOVO CONTENUTO CSV
+    # ------------------------------
     output = io.StringIO()
-    fieldnames = reader.fieldnames
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer = csv.DictWriter(output, fieldnames=reader.fieldnames)
     writer.writeheader()
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
-    # Aggiorna il file su GitHub utilizzando il metodo update_file()
+    # ------------------------------
+    # AGGIORNAMENTO DEL FILE SU GITHUB
+    # ------------------------------
     try:
         repo.update_file(
             file_path,
             f"Update whitelist for wallet {wallet_address}",
-            new_csv,  # new_csv è già in formato bytes
+            new_csv,        # new_csv è già in formato bytes
             file_content.sha,
             branch=BRANCH
         )
         print(f"Whitelist updated for wallet {wallet_address}.")
     except AttributeError as ae:
-        # Se update_file non è disponibile, usa il fallback: elimina il file e ricrealo
+        # Fallback: se update_file non è disponibile, elimina e ricrea il file
         print("update_file method not available, attempting to delete and recreate the file...")
         try:
-            # Usa il metodo delete() sull'oggetto file_content
             file_content.delete(f"Delete old whitelist for wallet {wallet_address}", branch=BRANCH)
         except Exception as delete_err:
             print(f"Error deleting file: {delete_err}")
@@ -93,9 +110,12 @@ def update_whitelist(wallet_address):
         print(f"Error updating whitelist: {e}")
         sys.exit(1)
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2:
         print("Please provide a wallet address as an argument.")
         sys.exit(1)
     wallet_address = sys.argv[1]
     update_whitelist(wallet_address)
+
+if __name__ == "__main__":
+    main()
