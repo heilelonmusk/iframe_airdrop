@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>$HELON Airdrop Checker</title>
-  <!-- Optional: Library for confetti effect on desktop -->
+  <title>$HELON Airdrop Checker & Ultron Chat</title>
+  <!-- Optional: Include canvas-confetti for desktop effects -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <!-- Google Fonts for a modern look -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -16,37 +16,35 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 400px; /* Module Airdrop Checker height */
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
       color: white !important;
     }
-    /* Airdrop Checker Module */
-    .module-container {
-      height: 100%;
-      width: 100%;
+    /* ---------------------------
+       Airdrop Checker Module
+       --------------------------- */
+    .checker-container {
+      height: 400px; /* Fisso per il modulo */
       max-width: 400px;
       margin: 0 auto;
       padding: 10px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       text-align: center;
     }
-    h2, p {
-      color: white !important;
+    .checker-container h2,
+    .checker-container p {
       margin-bottom: 10px;
     }
-    /* For a positive message on two lines */
     p.description {
       white-space: pre-line;
     }
     .input-container, .button-container {
       width: 100%;
       margin: 5px auto;
-      text-align: center;
     }
     .input-container input {
       width: 100%;
@@ -55,12 +53,12 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
-      background: transparent !important;
-      color: white !important;
+      background: transparent;
+      color: white;
       transition: border-color 0.3s;
     }
     .input-error {
-      border-color: red !important;
+      border-color: red;
     }
     .button-container button {
       width: 100%;
@@ -68,8 +66,8 @@
       font-size: 14px;
       border-radius: 8px;
       border: none;
-      background: #ffcc00 !important;
-      color: black !important;
+      background: #ffcc00;
+      color: black;
       font-weight: bold;
       cursor: pointer;
     }
@@ -77,8 +75,7 @@
       margin-top: 10px;
       font-weight: bold;
       font-size: 16px;
-      color: white !important;
-      min-height: 40px; /* Enough space for a two-line message */
+      min-height: 40px; /* Spazio per messaggio su due righe */
     }
     /* Shake effect for errors */
     .shake {
@@ -110,8 +107,9 @@
       50% { box-shadow: 0 0 0 10px rgba(0,255,0,0); }
       100% { box-shadow: 0 0 0 0 rgba(0,255,0,0); }
     }
-
-    /* Ultron Chat Widget Styles */
+    /* ---------------------------
+       Ultron Chat Widget Styles
+       --------------------------- */
     #ultronChatButton {
       position: fixed;
       bottom: 20px;
@@ -204,6 +202,7 @@
     #ultronChatWidget .chat-input button:hover {
       background: #ffdd55;
     }
+    /* Responsive adjustments for mobile */
     @media (max-width: 600px) {
       #ultronChatWidget {
         width: 90%;
@@ -235,7 +234,7 @@
 </head>
 <body>
   <!-- Airdrop Checker Module -->
-  <div class="module-container" id="moduleContainer">
+  <div class="checker-container" id="moduleContainer">
     <h2>🔍 Check Your Airdrop</h2>
     <p class="description">Enter your DYM wallet address (dym...)<br>to verify if you're whitelisted:</p>
     <div class="input-container">
@@ -247,14 +246,14 @@
     <p id="result"></p>
   </div>
   
-  <!-- Ultron Chat Widget (global, per l'interazione con il progetto) -->
+  <!-- Ultron Chat Widget (global for extended interaction) -->
   <button id="ultronChatButton" title="Chat with Ultron">🤖</button>
   <div id="ultronChatWidget">
     <header>Ultron – Heil Elon</header>
     <div class="chat-body" id="chatBody">
       <p>Hello, I'm Ultron – your AI companion for the Helon project!</p>
-      <p>How can I assist you today?</p>
-      <p>Ask about <strong>who</strong>, <strong>what</strong>, <strong>where</strong>, <strong>when</strong> or <strong>why</strong>.<br>
+      <p>How can I help you?</p>
+      <p>Ask about <strong>who</strong>, <strong>what</strong>, <strong>where</strong>, <strong>when</strong>, or <strong>why</strong>.<br>
          Type "channels" for our community links.</p>
     </div>
     <div class="chat-input">
@@ -267,7 +266,6 @@
     /* ------------------------------
        Airdrop Checker Logic
        ------------------------------ */
-    // Function to trigger workflow via endpoint serverless
     async function triggerWorkflow(wallet, updateType) {
       // Endpoint serverless (Netlify Functions)
       const endpoint = "https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/triggerWhitelistUpdate";
@@ -283,13 +281,13 @@
         console.error("Error triggering workflow:", error);
       }
     }
-
+    
     async function checkAirdrop() {
       const walletInput = document.getElementById("walletInput");
       const wallet = walletInput.value.trim();
       const resultElem = document.getElementById("result");
       const container = document.getElementById("moduleContainer");
-
+  
       if (!wallet) {
         resultElem.innerText = "⚠️ Please enter a valid wallet address.";
         container.classList.add("shake");
@@ -317,7 +315,7 @@
             break;
           }
         }
-        
+  
         if (isWhitelisted) {
           resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
           // Trigger whitelist workflow update
@@ -349,7 +347,7 @@
         console.error(error);
       }
     }
-
+    
     /* ------------------------------
        Ultron Chat Widget Logic
        ------------------------------ */
@@ -364,7 +362,7 @@
       widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
     });
     
-    // Function to process chat messages and reply using a local knowledge base or fallback logic
+    // Process chat messages and respond based on a knowledge base
     async function sendChat() {
       const input = document.getElementById("chatInput");
       const question = input.value.trim();
@@ -377,7 +375,7 @@
       input.value = "";
       chatBody.scrollTop = chatBody.scrollHeight;
       
-      // Try to fetch knowledge base JSON (if available)
+      // Try to fetch the knowledge base JSON
       let knowledge = null;
       try {
         const kbResponse = await fetch("https://heilelonmusk.github.io/iframe_airdrop/data/knowledge.json");
@@ -391,7 +389,6 @@
       let answer = "";
       const lowerQuestion = question.toLowerCase();
       if (knowledge) {
-        // Process based on 5W keywords if knowledge base is available
         if (lowerQuestion.includes("who")) {
           answer += knowledge.who.description + "<br>";
         }
@@ -414,22 +411,19 @@
           answer = "I'm sorry, I couldn't understand your question. Please ask about our project or channels.";
         }
       } else {
-        // Fallback logic if no knowledge base is available
         if (lowerQuestion.includes("channels") || lowerQuestion.includes("links")) {
-          answer = "Our main channels are:\n• Discord: https://discord.gg/helon\n• Twitter: https://twitter.com/helonproject\n• Telegram: https://t.me/helon";
+          answer = "Our main channels are:<br>• Discord: https://discord.gg/helon<br>• Twitter: https://twitter.com/helonproject<br>• Telegram: https://t.me/helon";
         } else if (lowerQuestion.includes("project") || lowerQuestion.includes("helon")) {
           answer = "Helon is a revolutionary project focused on decentralized interactions. Stay tuned for more updates!";
         } else {
           answer = "I'm sorry, I didn't understand that. Please ask about our channels or project details.";
         }
-        answer = answer.replace(/\n/g, '<br>');
       }
       
-      // Append Ultron's reply
       chatBody.innerHTML += `<p style="color:lightblue;"><strong>Ultron:</strong> ${answer}</p>`;
       chatBody.scrollTop = chatBody.scrollHeight;
       
-      // Trigger a subtle pulse animation on the widget as visual feedback
+      // Optional: pulse animation for visual feedback
       const widget = document.getElementById("ultronChatWidget");
       widget.style.transition = "box-shadow 0.5s ease";
       widget.style.boxShadow = "0 0 0 10px rgba(0,255,0,0.3)";
