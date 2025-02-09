@@ -2,7 +2,7 @@ name: Update CSV Files from Google Sheets
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Run every hour
+    - cron: "0 * * * *"  # Esegui ogni ora
 
 jobs:
   update-csv:

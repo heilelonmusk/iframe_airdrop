@@ -4,7 +4,6 @@ async function checkAirdrop() {
   const resultElem = document.getElementById("result");
   const container = document.querySelector(".checker-container");
 
-  // Se il wallet non è stato inserito, mostra un messaggio d'errore e l'effetto shake
   if (!wallet) {
     resultElem.innerText = "⚠️ Please enter a valid wallet address.";
     container.classList.add("shake");
@@ -17,7 +16,6 @@ async function checkAirdrop() {
   }
   
   try {
-    // Fetch della whitelist CSV tramite jsDelivr
     const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
     if (!response.ok) throw new Error("Network response was not ok");
     const csvText = await response.text();
@@ -25,6 +23,7 @@ async function checkAirdrop() {
     const header = rows[0].split(",").map(h => h.trim().toLowerCase());
     const walletIndex = header.indexOf("wallet address");
     let isWhitelisted = false;
+
     for (let i = 1; i < rows.length; i++) {
       const cols = rows[i].split(",").map(col => col.trim());
       if (cols[walletIndex] && cols[walletIndex].toLowerCase() === wallet.toLowerCase()) {
@@ -32,12 +31,11 @@ async function checkAirdrop() {
         break;
       }
     }
-  
+
     if (isWhitelisted) {
       resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
-      // Trigger del workflow per whitelist
       triggerWorkflow(wallet, "update_whitelist");
-      // Attiva l'effetto confetti
+      // Effetto confetti
       confetti({
         particleCount: 150,
         spread: 100,
@@ -45,12 +43,10 @@ async function checkAirdrop() {
       });
     } else {
       resultElem.innerText = "❌ Not whitelisted, but stay tuned for future opportunities! Join our community channels for updates.";
-      // Trigger dell'effetto shake per l'errore
       container.classList.add("shake");
       setTimeout(() => {
         container.classList.remove("shake");
       }, 700);
-      // Trigger del workflow per non eligible
       triggerWorkflow(wallet, "update_noneligible");
     }
   } catch (error) {
