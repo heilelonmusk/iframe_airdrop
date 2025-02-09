@@ -4,18 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
+  <!-- Include canvas-confetti per l'effetto confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <!-- Include il font Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* Reset e impostazioni globali */
     html, body {
       margin: 0;
       padding: 0;
-      height: 400px;
+      height: 400px; /* Altezza fissa del modulo */
       width: 100%;
-      background: linear-gradient(135deg, #1f1f1f, #3f3f3f);
+      background: transparent !important;
       font-family: 'Poppins', sans-serif;
       color: white;
     }
+    /* Contenitore del modulo */
     .checker-container {
       height: 100%;
       width: 100%;
@@ -23,9 +27,11 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
+      justify-content: center;
       align-items: center;
       text-align: center;
       padding: 20px;
+      background: transparent;
     }
     h2 {
       font-size: 24px;
@@ -37,6 +43,7 @@
       margin-bottom: 15px;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     }
+    /* Stili per l’input */
     input[type="text"] {
       width: 100%;
       padding: 12px;
@@ -52,6 +59,10 @@
     input[type="text"]:focus {
       border-color: #ff9300;
     }
+    .input-error {
+      border-color: red !important;
+    }
+    /* Stili per il pulsante */
     button {
       width: 100%;
       padding: 12px;
@@ -68,12 +79,14 @@
     button:hover {
       transform: scale(1.05);
     }
+    /* Area del risultato (messaggio) */
     #result {
       margin-top: 15px;
       font-size: 16px;
       min-height: 40px;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
     }
+    /* Effetto shake per errori */
     .shake {
       animation: shake 0.7s;
     }
@@ -103,6 +116,7 @@
     <button onclick="checkAirdrop()">Verify</button>
     <p id="result"></p>
   </div>
+  <!-- Includi lo script per la logica del modulo -->
   <script src="https://heilelonmusk.github.io/iframe_airdrop/iframe/airdrop_checker.js"></script>
 </body>
 </html>
