@@ -10,15 +10,15 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
-
+      
       - name: Install Dependencies
         run: pip install github3.py
-
+      
       - name: Run Update Script
         env:
           MY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
