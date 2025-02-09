@@ -17,7 +17,7 @@
     container.id = "ultronChatContainer";
     container.style.position = "fixed";
     container.style.bottom = bottomOffset;
-    container.style.right = "40px"; // Spostato ancora più a sinistra
+    container.style.right = "40px"; // Posizione leggermente spostata più a sinistra
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
@@ -99,14 +99,14 @@
     </div>
   `;
 
-  // Iniezione di regole CSS per l'effetto pulse più delicato
+  // Iniezione di regole CSS per l'effetto pulse più evidente
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
       color: white !important;
       font-family: inherit;
     }
-    /* Pulsing glow halo più sottile */
+    /* Pulsing glow halo con effetto intermedio */
     .ultron-button {
       position: relative;
       overflow: visible;
@@ -116,16 +116,16 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,147,0,0.5) 0%, transparent 70%);
-      animation: pulseGlow 2s infinite;
+      background: radial-gradient(circle, rgba(255,147,0,0.7) 0%, transparent 75%);
+      animation: pulseGlow 1.7s infinite;
       top: 0;
       left: 0;
       z-index: -1;
     }
     @keyframes pulseGlow {
-      0% { transform: scale(1); opacity: 0.5; }
-      50% { transform: scale(1.5); opacity: 0.3; }
-      100% { transform: scale(1); opacity: 0.5; }
+      0% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.6); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 0.7; }
     }
   `;
   document.head.appendChild(styleOverride);
