@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>$HELON Airdrop Checker</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 400px;
+      width: 100%;
+      background: transparent;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+    }
+    .checker-container {
+      height: 100%;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="checker-container">
+    <h2>🔍 Check Your Airdrop</h2>
+    <p class="description">Enter your DYM wallet address:</p>
+    <input type="text" id="walletInput" placeholder="Enter your wallet" required>
+    <button onclick="checkAirdrop()">Verify</button>
+    <p id="result"></p>
+  </div>
+  <script src="https://heilelonmusk.github.io/iframe_airdrop/iframe/airdrop_checker.js"></script>
+</body>
+</html>
