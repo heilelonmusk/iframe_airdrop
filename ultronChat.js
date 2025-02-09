@@ -6,9 +6,12 @@
 
   // Determina le dimensioni in base al dispositivo
   const isMobile = window.innerWidth <= 600;
-  const buttonSize = isMobile ? "70px" : "90px";  // Mobile: 70px, Desktop: 90px
-  const imgSize = isMobile ? "65%" : "80%"; // Riduzione del padding per una maggiore visibilità
+  const buttonSize = isMobile ? "75px" : "95px";  // Mobile: 75px, Desktop: 95px
+  const imgSize = isMobile ? "70%" : "85%"; // Più visibile
   const bottomOffset = isMobile ? "20px" : "80px";
+
+  // Sposta il bottone leggermente a sinistra (prima era right: 20px, ora 40px)
+  const rightOffset = isMobile ? "40px" : "40px";
 
   // Crea il container per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
@@ -17,7 +20,7 @@
     container.id = "ultronChatContainer";
     container.style.position = "fixed";
     container.style.bottom = bottomOffset;
-    container.style.right = "20px";
+    container.style.right = rightOffset;
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
@@ -99,7 +102,7 @@
     </div>
   `;
 
-  // Iniezione di regole CSS per l'effetto pulse potenziato
+  // Iniezione di regole CSS per l'effetto pulse migliorato
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -124,7 +127,7 @@
     }
     @keyframes pulseGlow {
       0% { transform: scale(1); opacity: 0.9; }
-      50% { transform: scale(1.8); opacity: 0.6; }
+      50% { transform: scale(2.2); opacity: 0.5; }
       100% { transform: scale(1); opacity: 0.9; }
     }
   `;
