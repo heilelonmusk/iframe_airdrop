@@ -40,7 +40,7 @@ def update_whitelist(wallet_address):
 
     if not found:
         print(f"Wallet address {wallet_address} not found in whitelist.")
-        sys.exit(1)
+        return False  # Indica che il wallet non è presente in whitelist
     
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=reader.fieldnames)
@@ -51,6 +51,7 @@ def update_whitelist(wallet_address):
     try:
         repo.update_file(file_path, f"Update whitelist for {wallet_address}", new_csv, file_content.sha, branch=BRANCH)
         print(f"Whitelist updated for wallet {wallet_address}.")
+        return True
     except AttributeError:
         print("update_file method not available, attempting to delete and recreate the file...")
         try:
@@ -61,6 +62,7 @@ def update_whitelist(wallet_address):
         try:
             repo.create_file(file_path, f"Recreate whitelist after update {wallet_address}", new_csv, branch=BRANCH)
             print(f"Whitelist updated for wallet {wallet_address} (deleted and recreated).")
+            return True
         except Exception as create_err:
             print(f"Error creating file: {create_err}")
             sys.exit(1)

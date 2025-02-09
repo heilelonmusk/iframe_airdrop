@@ -24,6 +24,7 @@ if repo is None:
     print("❌ Repository non trovato.")
     exit(1)
 
+# Se desideri ancora prendere i CSV da Google Sheets, personalizza qui:
 WHITELIST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ6WoIqrzoUdPh922uKFA08fuTTOWH2xreDmx18E2lpGioH9z_eVJ034ul3DJixg/pub?output=csv"
 NON_ELIGIBLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRHfqtGOIR-87zaRJhuqjN70N-tRSe2QOV6lb-vfECg9SqJ6q3aclTVp6vJDaGgIg/pub?output=csv"
 IFRAME_SETTINGS_URL = "https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/iframe_settings.csv"
