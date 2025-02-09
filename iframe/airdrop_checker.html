@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 400px;
       width: 100%;
-      background: transparent;
+      background: linear-gradient(135deg, #1f1f1f, #3f3f3f);
       font-family: 'Poppins', sans-serif;
       color: white;
     }
@@ -24,7 +25,73 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 10px;
+      padding: 20px;
+    }
+    h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    p.description {
+      font-size: 16px;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      transition: border-color 0.3s;
+      margin-bottom: 10px;
+    }
+    input[type="text"]:focus {
+      border-color: #ff9300;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #ff9300;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: background 0.3s, transform 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 16px;
+      min-height: 40px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .shake {
+      animation: shake 0.7s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(20px); }
+      50% { transform: translateX(-20px); }
+      75% { transform: translateX(20px); }
+      100% { transform: translateX(0); }
+    }
+    @media (max-width: 600px) {
+      @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(10px); }
+        50% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+        100% { transform: translateX(0); }
+      }
     }
   </style>
 </head>
@@ -32,7 +99,7 @@
   <div class="checker-container">
     <h2>🔍 Check Your Airdrop</h2>
     <p class="description">Enter your DYM wallet address:</p>
-    <input type="text" id="walletInput" placeholder="Enter your wallet" required>
+    <input type="text" id="walletInput" placeholder="Enter your wallet address" required>
     <button onclick="checkAirdrop()">Verify</button>
     <p id="result"></p>
   </div>
