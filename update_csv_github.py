@@ -34,9 +34,9 @@ if repo is None:
 # LINK PER I FILE CSV (documentazione)
 # ------------------------------
 # Questi link indicano la fonte dei dati, ma non vengono usati direttamente nello script:
-WHITELIST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ6WoIqrzoUdPh922uKFA08fuTTOWH2xreDmx18E2lpGioH9z_eVJ034ul3DJixg/pub?output=csv"
-NON_ELIGIBLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRHfqtGOIR-87zaRJhuqjN70N-tRSe2QOV6lb-vfECg9SqJ6q3aclTVp6vJDaGgIg/pub?output=csv"
-IFRAME_SETTINGS_URL = "https://drive.google.com/uc?export=download&id=12qqeSqcli6NNbD7dx8wr7S0mmx_OSZAz"
+WHITELIST_URL = "https://github.com/heilelonmusk/iframe_airdrop/blob/main/data/whitelist.csv"
+NON_ELIGIBLE_URL = "https://github.com/heilelonmusk/iframe_airdrop/blob/main/data/non_eligible.csv"
+IFRAME_URL = "https://github.com/heilelonmusk/iframe_airdrop/blob/main/airdrop_checker.html"
 
 # ------------------------------
 # FUNZIONE DI UPLOAD SU GITHUB
