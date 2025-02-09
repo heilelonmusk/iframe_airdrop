@@ -10,15 +10,15 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Setup Python
+      
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
-
+      
       - name: Install Dependencies
         run: pip install requests github3.py pandas
-
+      
       - name: Run Update Script
         env:
           MY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
