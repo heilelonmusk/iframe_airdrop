@@ -2,7 +2,7 @@ name: Update CSV Files from Google Sheets
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Esegui ogni ora
+    - cron: "0 * * * *"  # Run every hour
 
 jobs:
   update-csv:
@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
