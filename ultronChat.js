@@ -6,12 +6,9 @@
 
   // Determina le dimensioni in base al dispositivo
   const isMobile = window.innerWidth <= 600;
-  const buttonSize = isMobile ? "75px" : "95px";  // Mobile: 75px, Desktop: 95px
-  const imgSize = isMobile ? "70%" : "85%"; // Più visibile
+  const buttonSize = isMobile ? "70px" : "90px";  // Mobile: 70px, Desktop: 90px
+  const imgSize = isMobile ? "65%" : "80%"; // Riduzione del padding per una maggiore visibilità
   const bottomOffset = isMobile ? "20px" : "80px";
-
-  // Sposta il bottone leggermente a sinistra (prima era right: 20px, ora 40px)
-  const rightOffset = isMobile ? "40px" : "40px";
 
   // Crea il container per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
@@ -20,7 +17,7 @@
     container.id = "ultronChatContainer";
     container.style.position = "fixed";
     container.style.bottom = bottomOffset;
-    container.style.right = rightOffset;
+    container.style.right = "40px"; // Spostato ancora più a sinistra
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
@@ -102,14 +99,14 @@
     </div>
   `;
 
-  // Iniezione di regole CSS per l'effetto pulse migliorato
+  // Iniezione di regole CSS per l'effetto pulse più delicato
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
       color: white !important;
       font-family: inherit;
     }
-    /* Pulsing glow halo migliorato */
+    /* Pulsing glow halo più sottile */
     .ultron-button {
       position: relative;
       overflow: visible;
@@ -119,16 +116,16 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,147,0,0.9) 0%, transparent 80%);
-      animation: pulseGlow 1.5s infinite;
+      background: radial-gradient(circle, rgba(255,147,0,0.5) 0%, transparent 70%);
+      animation: pulseGlow 2s infinite;
       top: 0;
       left: 0;
       z-index: -1;
     }
     @keyframes pulseGlow {
-      0% { transform: scale(1); opacity: 0.9; }
-      50% { transform: scale(2.2); opacity: 0.5; }
-      100% { transform: scale(1); opacity: 0.9; }
+      0% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.5); opacity: 0.3; }
+      100% { transform: scale(1); opacity: 0.5; }
     }
   `;
   document.head.appendChild(styleOverride);
