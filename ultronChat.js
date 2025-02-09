@@ -1,21 +1,20 @@
 (function() {
-  // Esegui lo script solo se siamo nel contesto della finestra principale (non in un iframe)
   if (window.self !== window.top) {
     console.log("Ultron Chat is not injected in an iframe context.");
     return;
   }
 
-  // Determina se l'utente è su mobile (threshold 600px)
+  // Determina le dimensioni in base al dispositivo
   const isMobile = window.innerWidth <= 600;
-  const buttonSize = isMobile ? "60px" : "80px";         // Desktop: 80px, Mobile: 60px
-  const bottomOffset = isMobile ? "20px" : "80px";         // Desktop: 80px dal fondo, Mobile: 20px
+  const buttonSize = isMobile ? "70px" : "90px";  // Mobile: 70px, Desktop: 90px
+  const imgSize = isMobile ? "65%" : "80%"; // Riduzione del padding per una maggiore visibilità
+  const bottomOffset = isMobile ? "20px" : "80px";
 
-  // Crea il container globale per il chatbot se non esiste già
+  // Crea il container per il chatbot se non esiste già
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
     container = document.createElement("div");
     container.id = "ultronChatContainer";
-    // Posiziona il container in maniera fissa in basso a destra
     container.style.position = "fixed";
     container.style.bottom = bottomOffset;
     container.style.right = "20px";
@@ -23,7 +22,7 @@
     document.body.appendChild(container);
   }
 
-  // Inietta il markup del widget di chat nel container
+  // Inietta il markup del widget di chat
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: ${buttonSize};
@@ -35,7 +34,10 @@
       opacity: 0;
       transition: transform 0.3s, opacity 0.3s;
       position: relative;">
-      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img" style="width: 100%; height: 100%; border-radius: 50%;">
+      <div class="ultron-pulse"></div>
+      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" 
+        alt="Ultron" class="ultron-button-img" 
+        style="width: ${imgSize}; height: ${imgSize}; border-radius: 50%; position: absolute; top: 10%; left: 10%;">
     </button>
     <div id="ultronChatWidget" class="ultron-widget" style="
       width: 320px;
@@ -97,35 +99,33 @@
     </div>
   `;
 
-  // Iniezione di regole CSS globali per garantire che i testi siano sempre bianchi e per definire l'effetto pulse più evidente.
+  // Iniezione di regole CSS per l'effetto pulse potenziato
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
       color: white !important;
       font-family: inherit;
     }
-    /* Pulsing glow halo per il pulsante di chat (solo desktop) */
+    /* Pulsing glow halo migliorato */
     .ultron-button {
       position: relative;
       overflow: visible;
     }
-    .ultron-button::after {
-      content: '';
+    .ultron-pulse {
       position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,147,0,0.7) 0%, transparent 70%);
-      opacity: 0;
-      animation: pulseGlow 2s infinite;
+      background: radial-gradient(circle, rgba(255,147,0,0.9) 0%, transparent 80%);
+      animation: pulseGlow 1.5s infinite;
+      top: 0;
+      left: 0;
       z-index: -1;
     }
     @keyframes pulseGlow {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 1; }
+      0% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.8); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 0.9; }
     }
   `;
   document.head.appendChild(styleOverride);
@@ -142,51 +142,4 @@
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Funzione per processare le chat e generare risposte
-  window.sendChat = async function() {
-    const input = document.getElementById("chatInput");
-    const question = input.value.trim();
-    const chatBody = document.getElementById("chatBody");
-    if (!question) return;
-    chatBody.innerHTML += `<p class="ultron-user" style="color:#ffcc00;"><strong>You:</strong> ${question}</p>`;
-    input.value = "";
-    chatBody.scrollTop = chatBody.scrollHeight;
-    
-    let answer = "I'm sorry, I didn't understand that. Please ask about our channels or project details.";
-    const lowerQuestion = question.toLowerCase();
-    if (lowerQuestion.includes("who")) {
-      answer = "We are a dedicated team committed to decentralized interactions.";
-    } else if (lowerQuestion.includes("what")) {
-      answer = "Helon is a revolutionary project offering innovative airdrop opportunities.";
-    } else if (lowerQuestion.includes("where")) {
-      answer = "Visit our website at https://helon.space and join our Discord, Twitter, and Telegram channels.";
-    } else if (lowerQuestion.includes("when")) {
-      answer = "Final airdrop details will be announced by 23:59 CET on Feb. 28.";
-    } else if (lowerQuestion.includes("why")) {
-      answer = "We believe in empowering our community through decentralized solutions.";
-    } else if (lowerQuestion.includes("channels")) {
-      answer = "Our main channels are:<br>• Discord: https://discord.gg/helon<br>• Twitter: https://twitter.com/helonproject<br>• Telegram: https://t.me/helon";
-    }
-    
-    chatBody.innerHTML += `<p class="ultron-response" style="color:lightblue;"><strong>Ultron:</strong> ${answer}</p>`;
-    chatBody.scrollTop = chatBody.scrollHeight;
-    
-    // Effetto pulse come feedback visivo
-    const widget = document.getElementById("ultronChatWidget");
-    widget.style.transition = "box-shadow 0.5s ease";
-    widget.style.boxShadow = "0 0 0 10px rgba(0,255,0,0.3)";
-    setTimeout(() => {
-      widget.style.boxShadow = "none";
-    }, 500);
-  };
-
-  // Iniezione dello stile per l'animazione slideUp (se necessario)
-  const slideStyle = document.createElement('style');
-  slideStyle.innerHTML = `
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-  `;
-  document.head.appendChild(slideStyle);
 })();
