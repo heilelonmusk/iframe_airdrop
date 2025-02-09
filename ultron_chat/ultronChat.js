@@ -65,9 +65,15 @@
     }
     .ultron-button { position: relative; overflow: visible; }
     .ultron-pulse {
-      position: absolute; width: 100%; height: 100%; border-radius: 50%;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
       background: radial-gradient(circle, rgba(255,147,0,0.7) 0%, transparent 75%);
-      animation: pulseGlow 1.7s infinite; top: 0; left: 0; z-index: -1;
+      animation: pulseGlow 1.7s infinite;
+      top: 0;
+      left: 0;
+      z-index: -1;
     }
     @keyframes pulseGlow {
       0% { transform: scale(1); opacity: 0.7; }
@@ -93,6 +99,5 @@
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
-    // Qui puoi implementare ulteriore logica per la risposta di Ultron
   };
 })();
