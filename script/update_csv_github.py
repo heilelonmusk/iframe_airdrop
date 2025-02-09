@@ -24,10 +24,11 @@ if repo is None:
     print("❌ Repository non trovato.")
     exit(1)
 
-# Link per i file CSV
+# Link per i file CSV (tutti su GitHub)
 WHITELIST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZ6WoIqrzoUdPh922uKFA08fuTTOWH2xreDmx18E2lpGioH9z_eVJ034ul3DJixg/pub?output=csv"
 NON_ELIGIBLE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRHfqtGOIR-87zaRJhuqjN70N-tRSe2QOV6lb-vfECg9SqJ6q3aclTVp6vJDaGgIg/pub?output=csv"
-IFRAME_SETTINGS_URL = "https://drive.google.com/uc?export=download&id=12qqeSqcli6NNbD7dx8wr7S0mmx_OSZAz"
+# Ora il file di configurazione è gestito su GitHub; utilizziamo jsDelivr o GitHub Pages:
+IFRAME_SETTINGS_URL = "https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/iframe_settings.csv"
 
 def update_csv(file_url, output_filename):
     try:
