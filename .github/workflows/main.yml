@@ -38,13 +38,12 @@ jobs:
           # Se la cartella di output è ./build
           # Se invece è ./dist o ./public, adegua sotto
 
-      # 4) Carica i file generati come artifact
-      - name: Upload artifact for Pages
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: ./build  # cartella generata
-          # Se vuoi nominare l'artifact, decommenta e usa lo stesso nome nel passaggio di deploy
-          # artifact_name: mySiteArtifact
+  # RIMOSSO / COMMENTATO:
+# - name: Upload artifact for Pages
+#   uses: actions/upload-pages-artifact@v2
+#   with:
+#     path: ./build
+#     artifact_name: mySiteArtifact
 
       # 5) Pubblica su GitHub Pages
       - name: Deploy to GitHub Pages
