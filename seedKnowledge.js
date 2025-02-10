@@ -33,8 +33,8 @@ async function seedKnowledge() {
   let client;
 
   try {
-    // Connect to MongoDB
-    client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    // Connect to MongoDB without deprecated options
+    client = new MongoClient(uri);
     await client.connect();
     console.log("Connected to MongoDB successfully.");
 
