@@ -7,8 +7,7 @@
   const isMobile = window.innerWidth <= 600;
   const buttonSize = isMobile ? "70px" : "90px";
   const imgSize = isMobile ? "65%" : "80%";
-  // Per spostare l'icona più a sinistra, regola leftOffset
-  const leftOffset = isMobile ? "5px" : "5px";
+  const rightOffset = isMobile ? "5px" : "20px";
   const bottomOffset = isMobile ? "20px" : "80px";
 
   let container = document.getElementById("ultronChatContainer");
@@ -17,7 +16,7 @@
     container.id = "ultronChatContainer";
     container.style.position = "fixed";
     container.style.bottom = bottomOffset;
-    container.style.left = leftOffset;
+    container.style.right = rightOffset;
     container.style.zIndex = "1100";
     document.body.appendChild(container);
   }
@@ -139,11 +138,4 @@
   window.sendChat = function() {
     const input = document.getElementById("chatInput");
     const message = input.value.trim();
-    if (!message) return;
-    const chatBody = document.getElementById("chatBody");
-    chatBody.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
-    input.value = "";
-    chatBody.scrollTop = chatBody.scrollHeight;
-    // Inserisci qui la logica di risposta di Ultron, collegando eventualmente una knowledge base.
-  };
-})();
+    if 
