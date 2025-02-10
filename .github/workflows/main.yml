@@ -1,4 +1,4 @@
-name: Build and Deploy GitHub Pages (Publishing on main)
+name: Deploy GitHub Pages (Static)
 
 on:
   push:
@@ -8,48 +8,26 @@ permissions:
   contents: write
   id-token: write
 
-# Impedisce che un nuovo push annulli i run in corso
 concurrency:
   group: pages_build_deployment
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Setup Node (se il tuo progetto utilizza Node.js)
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16  # Sostituisci con la versione richiesta
-
-      # 3) Installa le dipendenze ed esegui la build
-      - name: Install dependencies & Build
-        run: |
-          echo "Installing dependencies..."
-          npm install
-          echo "Running build..."
-          npm run build
-          # Assicurati che questo comando generi la cartella ./build
-          # (se il tuo output è in ./dist o ./public, modifica di conseguenza)
-
-      # 4) Carica l'artifact (usa actions/upload-artifact@v4, non deprecata)
-      - name: Upload artifact for Pages
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mySiteArtifact        # Nome dell'artifact; questo nome deve essere usato anche nello step successivo
-          path: ./build              # La cartella generata dalla build
+          name: mySiteArtifact
+          path: ./public
 
-      # 5) Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}  # Usa il PAT personalizzato se lo hai configurato; altrimenti, puoi usare ${{
-                                                    # secrets.GITHUB_TOKEN }} se i permessi sono corretti
-          artifact_name: mySiteArtifact          # Deve corrispondere al nome definito nello step 4
-          branch: main                          # Pubblica su main (assicurati di aver configurato in Settings → Pages "Deploy from a branch" su main)
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+          artifact_name: mySiteArtifact
+          branch: main
