@@ -10,7 +10,7 @@
   container.style.zIndex = "1100";
   document.body.appendChild(container);
 
-  // HTML structure for the chat widget
+  // Set up the HTML structure for the chat widget
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: 90px;
@@ -85,13 +85,13 @@
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
-  // Toggle widget visibility when clicking the chat button
+  // Toggle widget visibility on button click
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Send chat function: sends question to the serverless function and handles the response
+  // Send chat function: sends a question to the serverless function and handles the response
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
