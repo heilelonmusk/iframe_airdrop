@@ -2,13 +2,12 @@ name: Build and Deploy GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]  # O il branch di cui vuoi fare il deploy
+    branches: [ "main" ]
 
 permissions:
   contents: write
   id-token: write
 
-# Evita che un nuovo push annulli i run in corso
 concurrency:
   group: pages_build_deployment
   cancel-in-progress: false
@@ -18,44 +17,28 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Setup Node (se il tuo progetto usa Node.js)
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16  # o la versione che usi
+          node-version: 16
 
-      # 3) Installa dipendenze & build (esempio con npm)
       - name: Install dependencies & Build
         run: |
-          echo "Installing dependencies..."
           npm install
-          echo "Running build..."
           npm run build
-          # Se la cartella di output è ./build
-          # Se invece è ./dist o ./public, adegua sotto
+          # produce i file in ./build
 
-  # RIMOSSO / COMMENTATO:
-# - name: Upload artifact for Pages
-#   uses: actions/upload-pages-artifact@v2
-#   with:
-#     path: ./build
-#     artifact_name: mySiteArtifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mySiteArtifact         # Nome artefatto
+          path: ./build               # Cartella generata
 
-      # 5) Pubblica su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          # Se vuoi un token personalizzato:
-          # token: ${{ secrets.MY_GITHUB_TOKEN }}
-          # Altrimenti usa GITHUB_TOKEN integrato:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
-
-          # Se hai nominato l'artifact sopra:
-          # artifact_name: mySiteArtifact
-
-          # Se preferisci un altro branch, es. 'gh-pages':
-          # branch: gh-pages
+          token: ${{ secrets.MY_GITHUB_TOKEN }}  # O secrets.GITHUB_TOKEN
+          artifact_name: mySiteArtifact          # Lo stesso nome definito sopra
