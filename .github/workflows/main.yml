@@ -8,6 +8,7 @@ permissions:
   contents: write
   id-token: write
 
+# Evita che un nuovo push annulli i run in corso:
 concurrency:
   group: pages_build_deployment
   cancel-in-progress: false
@@ -17,35 +18,37 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Step 1: Checkout del repository
+      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Setup Node (se il progetto usa Node.js; altrimenti rimuovi questo step)
+      # 2) Setup Node (se il tuo progetto usa Node.js; altrimenti rimuovi questo step)
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16  # Sostituisci con la versione necessaria
+          node-version: 16
 
-      # Step 3: Installa le dipendenze e Build
+      # 3) Installa le dipendenze ed esegui la build
       - name: Install dependencies & Build
         run: |
           echo "Installing dependencies..."
           npm install
           echo "Running build..."
           npm run build
-          # Assicurati che questo comando crei la cartella ./build (oppure sostituisci con il percorso corretto)
+          # Assicurati che il comando generi i file nella cartella ./build
+          # Se il tuo output è in una cartella diversa (es. ./dist o ./public), sostituisci di conseguenza.
 
-      # Step 4: Carica l'artifact manualmente con upload-artifact@v2
+      # 4) Carica l'artifact (utilizza actions/upload-artifact@v3, non deprecato)
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: mySiteArtifact           # Nome dell'artifact
-          path: ./build                  # Percorso della cartella generata dalla build
+          name: mySiteArtifact      # Nome dell'artifact (deve essere usato anche nello step successivo)
+          path: ./build            # Cartella contenente i file generati dalla build
 
-      # Step 5: Deploy su GitHub Pages
+      # 5) Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}  # Usa il tuo PAT personalizzato oppure sostituisci con ${{ secrets.GITHUB_TOKEN }} se preferisci
-          artifact_name: mySiteArtifact            # Deve essere identico al nome usato nello step di upload
+          token: ${{ secrets.MY_GITHUB_TOKEN }}  # Assicurati che questo secret sia impostato nel repository
+          artifact_name: mySiteArtifact          # Deve corrispondere al nome usato nello step di upload
+          branch: main                          # Pubblica su main (se le Settings di Pages sono configurate su questo branch)
