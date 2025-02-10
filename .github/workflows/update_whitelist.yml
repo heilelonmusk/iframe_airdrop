@@ -7,16 +7,14 @@ on:
 jobs:
   update-whitelist:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # (Opzionale) Step di debug per listare i file e confermare la struttura
       - name: Debug List Files
         run: ls -R
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
@@ -27,6 +25,4 @@ jobs:
       - name: Run Update Script
         env:
           MY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Se la cartella si chiama script/ (senza la s finale),
-        # allora il path deve essere script/update_whitelist.py
         run: python script/update_whitelist.py "${{ github.event.client_payload.wallet }}"
