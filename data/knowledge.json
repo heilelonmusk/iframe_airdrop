@@ -15,7 +15,7 @@
     "name": "Heil Elon",
     "symbol": "HELON",
     "description": "Heil Elon is a RollApp project on the Dymension platform. The $HELON token is used within the ecosystem for governance, transaction fees, and incentives.",
-    "address": "0xae2d11954812a870aec79f73a948d7f3c31607ae",
+    "address": "0xYourTokenContractAddressHere",
     "decimals": 18,
     "official_source": "https://helon.space"
   }
