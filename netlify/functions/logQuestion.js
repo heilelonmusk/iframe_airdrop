@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 
-// Get connection string from environment variable
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
@@ -15,7 +14,8 @@ async function connectToDatabase() {
 
 exports.handler = async (event) => {
   try {
-    // Only allow POST requests
+    console.log("Received event:", event);
+
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
@@ -23,19 +23,14 @@ exports.handler = async (event) => {
       };
     }
 
-    // Log the raw event body for debugging
+    // Log raw body to see what is received
     console.log("Raw event body:", event.body);
-    
-    // Ensure event.body exists and parse JSON
-    if (!event.body) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Empty request body" })
-      };
-    }
+
+    // Parse the request body
     let data;
     try {
       data = JSON.parse(event.body);
+      console.log("Parsed data:", data);
     } catch (parseError) {
       console.error("Error parsing JSON:", parseError);
       return {
@@ -44,34 +39,30 @@ exports.handler = async (event) => {
       };
     }
 
-    // Extract and trim the question
     const question = data.question ? data.question.trim() : "";
     if (!question) {
+      console.error("Missing question field");
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Missing question" })
       };
     }
 
-    // Connect to MongoDB
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB"); // Change the database name if needed
+    const db = client.db("heilelonDB");
     const collection = db.collection("questions");
 
-    // Look for a similar question (case-insensitive)
     const existing = await collection.findOne({
       question: { $regex: new RegExp(question, 'i') }
     });
 
     let responseContent = {};
-
     if (existing && existing.answer) {
       responseContent = {
         answer: existing.answer,
         source: existing.source
       };
     } else {
-      // If no matching answer found, record the new question for future updates
       const newDoc = {
         question: question,
         answer: null,
