@@ -1,4 +1,4 @@
-name: Build and Deploy GitHub Pages (Static)
+name: Build and Deploy GitHub Pages (Publishing on main)
 
 on:
   push:
@@ -21,22 +21,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Debug: List dei file nella root e nella cartella "public"
-      - name: List repository files (debug)
-        run: ls -la
-      - name: List "public" folder (debug)
-        run: ls -la public || echo "Folder 'public' not found!"
+      # 2) Setup Node (se il progetto usa Node.js per la build; altrimenti, rimuovi questo step)
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
-      # 3) Carica l'artifact (usa upload-artifact@v4)
-      - name: Upload artifact
+      # 3) Installa le dipendenze ed esegui la build
+      - name: Install dependencies & Build
+        run: |
+          echo "Installing dependencies..."
+          npm install
+          echo "Running build..."
+          npm run build
+          # Assicurati che questo comando generi la cartella "build".
+          
+      # 4) Debug: List dei file nella cartella di output
+      - name: List build folder
+        run: ls -la build || echo "Build folder not found."
+
+      # 5) Carica l’artifact (usiamo actions/upload-artifact@v4)
+      - name: Upload artifact for Pages
         uses: actions/upload-artifact@v4
         with:
-          name: mySiteArtifact      # Nome dell'artifact (assicurati di usarlo anche nello step di deploy)
-          path: ./public            # Percorso della cartella con i file statici da pubblicare
+          name: iframeAirdropArtifact
+          path: build   # Modifica questo percorso se la cartella di output è diversa
 
-      # 4) Deploy su GitHub Pages
+      # 6) Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
-          artifact_name: mySiteArtifact
+          artifact_name: iframeAirdropArtifact
