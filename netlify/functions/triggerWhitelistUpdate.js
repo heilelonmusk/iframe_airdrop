@@ -1,24 +1,65 @@
 exports.handler = async function(event, context) {
+  // Gestione Preflight (OPTIONS)
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+      },
+      body: "OK"
+    };
+  }
+
+  // Consenti solo richieste POST
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+      },
+      body: "Method Not Allowed"
+    };
   }
   
+  // Parsing del body
   let data;
   try {
     data = JSON.parse(event.body);
   } catch (error) {
-    return { statusCode: 400, body: "Invalid JSON" };
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+      },
+      body: "Invalid JSON"
+    };
   }
   
   if (!data.wallet || !data.updateType) {
-    return { statusCode: 400, body: "Missing wallet address or update type" };
+    return {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+      },
+      body: "Missing wallet address or updateType"
+    };
   }
   
+  // Recupera il token GitHub
   const token = process.env.MY_GITHUB_TOKEN;
   if (!token) {
-    return { statusCode: 500, body: "Server misconfiguration: missing token" };
+    return {
+      statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+      },
+      body: "Server misconfiguration: missing token"
+    };
   }
   
+  // Dispatch su GitHub
   const repoOwner = "heilelonmusk";
   const repoName = "iframe_airdrop";
   const eventType = data.updateType;
@@ -42,11 +83,29 @@ exports.handler = async function(event, context) {
     
     if (!response.ok) {
       const responseText = await response.text();
-      return { statusCode: response.status, body: `Error dispatching event: ${responseText}` };
+      return {
+        statusCode: response.status,
+        headers: {
+          "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+        },
+        body: `Error dispatching event: ${responseText}`
+      };
     }
     
-    return { statusCode: 200, body: JSON.stringify({ message: "Event dispatched successfully." }) };
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+      },
+      body: JSON.stringify({ message: "Event dispatched successfully." })
+    };
   } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+    return {
+      statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "https://heilelonmusk.github.io"
+      },
+      body: JSON.stringify({ error: error.message })
+    };
   }
 };
