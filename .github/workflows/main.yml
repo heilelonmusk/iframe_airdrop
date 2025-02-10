@@ -1,8 +1,8 @@
-name: Build and Deploy GitHub Pages
+name: Build and Deploy GitHub Pages (Publishing on main)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]   # Build e deploy quando fai push su main
 
 permissions:
   contents: write
@@ -17,28 +17,35 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2) Setup Node (se il tuo progetto usa Node.js per la build)
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16  # Sostituisci con la versione che preferisci
 
+      # 3) Installa dipendenze & build
       - name: Install dependencies & Build
         run: |
           npm install
           npm run build
-          # produce i file in ./build
+          # Supponendo che i file finali siano in ./build
+          # Se la cartella è ./dist, sostituisci ovunque con ./dist
 
+      # 4) Carica manualmente i file come artifact (usa upload-artifact@v2, NON v3)
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: mySiteArtifact         # Nome artefatto
-          path: ./build               # Cartella generata
+          name: mySiteArtifact           # Nome dell'artifact
+          path: ./build                 # Cartella con i file HTML/CSS/JS generati
 
+      # 5) Deploy su GitHub Pages (restando su main)
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}  # O secrets.GITHUB_TOKEN
-          artifact_name: mySiteArtifact          # Lo stesso nome definito sopra
+          token: ${{ secrets.MY_GITHUB_TOKEN }}  # O secrets.GITHUB_TOKEN, se preferisci
+          artifact_name: mySiteArtifact
+          branch: main  # Pubblica su main (che dev'essere la stessa branch impostata in Settings → Pages)
