@@ -1,5 +1,14 @@
 exports.handler = async function(event, context) {
-  // Gestione Preflight (OPTIONS)
+// netlify/functions/triggerWhitelistUpdate.js
+
+exports.handler = async () => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: "Whitelist update triggered successfully." })
+  };
+}; 
+
+ // Gestione Preflight (OPTIONS)
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
