@@ -10,7 +10,7 @@
   container.style.zIndex = "1100";
   document.body.appendChild(container);
 
-  // Define the chat widget HTML structure
+  // Set up the HTML structure for the chat widget
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: 90px;
@@ -42,7 +42,7 @@
         background: #2e2e2e; font-size: 14px; line-height: 1.5; color: white;">
         <p>Hi, I'm ULTRON. 🤖</p>
         <p>Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
-        <p>💡 Ask me anything about Helon, its vision, the ecosystem, or token details.<br>
+        <p>💡 Ask me anything about Helon, its vision, the ecosystem or token details.<br>
            🔗 For official links, type “channels”.</p>
         <p>The system runs. The answers are yours to uncover. 🚀</p>
       </div>
@@ -59,7 +59,7 @@
     </div>
   `;
 
-  // Additional style injection
+  // Inject additional styles
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -80,23 +80,24 @@
   `;
   document.head.appendChild(styleOverride);
 
-  // Reveal the chat button after a short delay
+  // Show the chat button after a short delay
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
-  // Toggle widget visibility on button click
+  // Toggle widget visibility when clicking the chat button
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Function to send user input to the backend
+  // Function to send a chat message to the backend
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
     
+    // Append user message to chat
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
