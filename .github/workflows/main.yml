@@ -2,13 +2,13 @@ name: Build and Deploy GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]  # Cambia se vuoi un altro branch per il deploy
+    branches: [ "main" ]  # O il branch di cui vuoi fare il deploy
 
 permissions:
   contents: write
   id-token: write
 
-# Se vuoi che un nuovo push NON annulli i run precedenti, setta concurrency:
+# Evita che un nuovo push annulli i run in corso
 concurrency:
   group: pages_build_deployment
   cancel-in-progress: false
@@ -16,40 +16,47 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      # 1) Effettua il checkout del repository
+      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Build del tuo sito (esempio con npm)
+      # 2) Setup Node (se il tuo progetto usa Node.js)
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16  # o la versione che usi
+
+      # 3) Installa dipendenze & build (esempio con npm)
       - name: Install dependencies & Build
         run: |
           echo "Installing dependencies..."
           npm install
           echo "Running build..."
           npm run build
-          # Supponendo che la cartella di output sia ./build;
-          # se invece si chiama ./dist o ./public, cambiala sotto.
+          # Se la cartella di output è ./build
+          # Se invece è ./dist o ./public, adegua sotto
 
-      # 3) Carica l'artifact per Pages (v2 per evitare la deprecazione di v3)
+      # 4) Carica i file generati come artifact
       - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v2
         with:
-          path: ./build  # la cartella generata dalla build
-          # artifact_name: mySiteArtifact  # (opzionale) se vuoi nominare l'artifact
+          path: ./build  # cartella generata
+          # Se vuoi nominare l'artifact, decommenta e usa lo stesso nome nel passaggio di deploy
+          # artifact_name: mySiteArtifact
 
-      # 4) Pubblica su GitHub Pages
+      # 5) Pubblica su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          # Se vuoi usare un token personalizzato: 
+          # Se vuoi un token personalizzato:
           # token: ${{ secrets.MY_GITHUB_TOKEN }}
           # Altrimenti usa GITHUB_TOKEN integrato:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          #
-          # Se sopra hai nominato l'artifact:
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+
+          # Se hai nominato l'artifact sopra:
           # artifact_name: mySiteArtifact
-          #
-          # Se vuoi un branch diverso da 'gh-pages':
+
+          # Se preferisci un altro branch, es. 'gh-pages':
           # branch: gh-pages
