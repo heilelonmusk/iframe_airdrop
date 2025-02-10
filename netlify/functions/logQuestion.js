@@ -13,11 +13,11 @@ exports.handler = async function(event, context) {
 
   let data;
   try {
-    data = JSON.parse(event.body);
+    data = JS.parse(event.body);
   } catch (error) {
     return {
       statusCode: 400,
-      body: "Invalid JSON"
+      body: "Invalid JS"
     };
   }
 
@@ -29,18 +29,18 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // Percorso del file knowledge.json (assumendo che la cartella data si trovi nella root del repository)
-  const filePath = path.join(__dirname, '../../data/knowledge.json');
+  // Percorso del file knowledge.js (assumendo che la cartella data si trovi nella root del repository)
+  const filePath = path.join(__dirname, '../../data/knowledge.js');
   let knowledge = [];
 
   try {
     // Se il file esiste, lo leggo e lo converto in oggetto JSON
     if (fs.existsSync(filePath)) {
       const fileContent = fs.readFileSync(filePath, 'utf-8');
-      knowledge = JSON.parse(fileContent);
+      knowledge = JS.parse(fileContent);
     }
   } catch (error) {
-    console.error("Errore nella lettura di knowledge.json:", error);
+    console.error("Errore nella lettura di knowledge.js:", error);
     // In caso di errore, riparte con un array vuoto
     knowledge = [];
   }
@@ -55,9 +55,9 @@ exports.handler = async function(event, context) {
 
   try {
     // Scrive il file aggiornato
-    fs.writeFileSync(filePath, JSON.stringify(knowledge, null, 2));
+    fs.writeFileSync(filePath, JS.stringify(knowledge, null, 2));
   } catch (error) {
-    console.error("Errore nella scrittura di knowledge.json:", error);
+    console.error("Errore nella scrittura di knowledge.js:", error);
     return {
       statusCode: 500,
       body: "Errore nella scrittura dei dati"
@@ -66,6 +66,6 @@ exports.handler = async function(event, context) {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: "Domanda registrata", entry: newEntry })
+    body: JS.stringify({ message: "Domanda registrata", entry: newEntry })
   };
 };
