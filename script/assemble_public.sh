@@ -29,7 +29,7 @@ else
   echo "Warning: data/img folder not found."
 fi
 
-# Copia (opzionale) lo script della chat Ultron
+# Copia lo script della chat Ultron
 if [ -f "ultron_chat/ultronChat.js" ]; then
   mkdir -p public/ultron_chat
   cp ultron_chat/ultronChat.js public/ultron_chat/
