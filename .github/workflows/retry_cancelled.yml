@@ -1,0 +1,37 @@
+name: Retry Cancelled Workflows
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Esegui ogni ora
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  retry-cancelled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List cancelled workflow runs
+        id: list_cancelled
+        run: |
+          echo "Listing cancelled workflow runs..."
+          # Ottieni tutte le run completate
+          curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs?status=completed" > workflow_runs.json
+          
+          # Filtra quelle con conclusion "cancelled"
+          CANCELLED_COUNT=$(jq '[.workflow_runs[] | select(.conclusion=="cancelled")] | length' workflow_runs.json)
+          echo "::set-output name=count::$CANCELLED_COUNT"
+          echo "Found $CANCELLED_COUNT cancelled workflow runs."
+          cat workflow_runs.json
+
+      - name: Retry cancelled workflow runs
+        if: steps.list_cancelled.outputs.count != '0'
+        run: |
+          CANCELLED_IDS=$(jq -r '.workflow_runs[] | select(.conclusion=="cancelled") | .id' workflow_runs.json)
+          for id in $CANCELLED_IDS; do
+            echo "Retrying cancelled workflow run $id..."
+            curl -X POST -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs/$id/rerun"
+          done
