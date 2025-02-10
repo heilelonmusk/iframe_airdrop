@@ -7,8 +7,9 @@
   const isMobile = window.innerWidth <= 600;
   const buttonSize = isMobile ? "70px" : "90px";
   const imgSize = isMobile ? "65%" : "80%";
+  // Per spostare l'icona più a sinistra, regola leftOffset
+  const leftOffset = isMobile ? "5px" : "5px";
   const bottomOffset = isMobile ? "20px" : "80px";
-  const leftOffset = isMobile ? "10px" : "10px";
 
   let container = document.getElementById("ultronChatContainer");
   if (!container) {
@@ -66,9 +67,11 @@
         color: white;">
         <p class="ultron-intro">Hi, here ULTRON. 🤖</p>
         <p class="ultron-intro">Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
-        <p class="ultron-intro">💡 Curious? Ask me anything about Helon, its vision, the ecosystem, or what’s next.<br>
-           🔗 Need official links? Type “channels” to connect with the community.</p>
-        <p class="ultron-intro">The system runs. The answers are yours to uncover. 🚀</p>
+        <p class="ultron-intro">
+          💡 Curious? Ask me anything about Helon, its vision, the ecosystem, or what’s next.<br>
+          🔗 Need official links? Type “channels” to connect with the community.
+        </p>
+        <p class="ultron-intro">The system runs.<br>The answers are yours to uncover. 🚀</p>
       </div>
       <div class="ultron-input" style="
         display: flex;
@@ -117,7 +120,7 @@
     }
     @keyframes pulseGlow {
       0% { transform: scale(1); opacity: 0.9; }
-      50% { transform: scale(1.3); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.8; }
       100% { transform: scale(1); opacity: 0.9; }
     }
   `;
@@ -141,6 +144,6 @@
     chatBody.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
     input.value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
-    // Aggiungi qui la logica di risposta di Ultron (se disponibile)
+    // Inserisci qui la logica di risposta di Ultron, collegando eventualmente una knowledge base.
   };
 })();
