@@ -1,115 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>$HELON Airdrop Checker</title>
-  
-  <!-- Include la libreria confetti per l'effetto coriandoli -->
+  <!-- Include canvas-confetti for desktop effect -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-  
-  <!-- Include il font Poppins -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-    rel="stylesheet"
-  />
-  
+  <!-- Google Fonts for a modern look -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* Assicura che padding e bordi non facciano sforare la larghezza */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
-    /* Reset e impostazioni generali */
+    *, *::before, *::after { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
-      height: 400px; /* Altezza fissa del modulo */
+      height: 400px;
       width: 100%;
       background: transparent !important;
-      font-family: 'Poppins', sans-serif;
-      color: white;
-      overflow: hidden; /* Evita scroll indesiderati, se vuoi */
+      font-family: 'Poppins', sans-serif !important;
+      color: white !important;
     }
-
-    /* Contenitore principale centrato */
     .checker-container {
       height: 100%;
       width: 100%;
       max-width: 400px;
       margin: 0 auto;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       text-align: center;
-      padding: 20px;
-      background: transparent;
     }
-    
-    h2 {
-      font-size: 24px;
-      margin-bottom: 15px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    }
-    
-    p.description {
-      font-size: 16px;
-      margin-bottom: 15px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-    }
-    
-    /* Input stile */
-    input[type="text"] {
+    h2, p { margin-bottom: 10px; }
+    p.description { white-space: pre-line; }
+    .input-container, .button-container { width: 100%; margin: 5px auto; text-align: center; }
+    .input-container input {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 2px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 8px;
+      border: 1px solid #ccc;
       outline: none;
-      background: rgba(255, 255, 255, 0.1);
+      background: transparent;
       color: white;
       transition: border-color 0.3s;
-      margin-bottom: 10px;
     }
-    input[type="text"]:focus {
-      border-color: #ff9300;
-    }
-    
-    /* Pulsante stile */
-    button {
+    .input-error { border-color: red; }
+    .button-container button {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 8px;
       border: none;
-      background: #ff9300;
+      background: #ffcc00;
       color: black;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transition: background 0.3s, transform 0.3s;
     }
-    button:hover {
-      transform: scale(1.05);
-    }
-    
-    /* Area risultato */
     #result {
-      margin-top: 15px;
+      margin-top: 10px;
+      font-weight: bold;
       font-size: 16px;
       min-height: 40px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-      width: 100%;
-      box-sizing: border-box;
-      /* se vuoi un minimo di riserva per stringhe più lunghe */
-      word-wrap: break-word;
     }
-    
-    /* Effetto shake per errori */
-    .shake {
-      animation: shake 0.7s;
-    }
+    .shake { animation: shake 0.7s; }
     @keyframes shake {
       0% { transform: translateX(0); }
       25% { transform: translateX(20px); }
@@ -117,24 +71,7 @@
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
     }
-    
-    /* Adattamenti per schermi <= 600px */
     @media (max-width: 600px) {
-      .checker-container {
-        padding: 10px; /* Riduciamo un po’ il padding */
-      }
-      h2 {
-        font-size: 20px;
-      }
-      p.description {
-        font-size: 14px;
-      }
-      input[type="text"] {
-        font-size: 14px;
-      }
-      button {
-        font-size: 14px;
-      }
       @keyframes shake {
         0% { transform: translateX(0); }
         25% { transform: translateX(10px); }
@@ -143,22 +80,28 @@
         100% { transform: translateX(0); }
       }
     }
+    .eligible-mobile { animation: eligiblePulse 1s ease-out; }
+    @keyframes eligiblePulse {
+      0% { box-shadow: 0 0 0 0 rgba(0,255,0,0.8); }
+      50% { box-shadow: 0 0 0 10px rgba(0,255,0,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,255,0,0); }
+    }
   </style>
 </head>
 <body>
-  <div class="checker-container">
+  <div class="checker-container" id="moduleContainer">
     <h2>🔍 Check Your Airdrop</h2>
-    <p class="description">Enter your DYM wallet address:</p>
-    
-    <input type="text" id="walletInput" placeholder="Enter your wallet address" required />
-    
-    <!-- Botton che chiama la funzione JavaScript checkAirdrop() -->
-    <button onclick="checkAirdrop()">Verify</button>
-    
+    <p class="description">Enter your DYM wallet address (dym...)<br>to verify if you're whitelisted:</p>
+    <div class="input-container">
+      <input type="text" id="walletInput" placeholder="Enter your wallet address" required>
+    </div>
+    <div class="button-container">
+      <button onclick="checkAirdrop()">Verify</button>
+    </div>
     <p id="result"></p>
   </div>
   
-  <!-- Carichiamo lo script di logica con defer -->
-  <script src="airdrop_checker.js" defer></script>
+  <script src="airdrop_checker.js"></script>
+  <!-- Author: Ultron AI -->
 </body>
 </html>
