@@ -35,12 +35,12 @@ jobs:
           # Supponendo che i file finali siano in ./build
           # Se la cartella è ./dist, sostituisci ovunque con ./dist
 
-      # 4) Carica manualmente i file come artifact (usa upload-artifact@v2, NON v3)
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: mySiteArtifact           # Nome dell'artifact
-          path: ./build                 # Cartella con i file HTML/CSS/JS generati
+     # 4) Carica manualmente i file come artifact (usa upload-artifact@v3)
+- name: Upload artifact
+  uses: actions/upload-artifact@v3
+  with:
+    name: mySiteArtifact           # Nome dell'artifact
+    path: ./build                 # Cartella con i file HTML/CSS/JS generati
 
       # 5) Deploy su GitHub Pages (restando su main)
       - name: Deploy to GitHub Pages
