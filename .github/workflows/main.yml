@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages (Root Deployment)
+name: Deploy GitHub Pages (Static)
 
 on:
   push:
@@ -20,15 +20,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: List repository files (debug)
-        run: ls -la
+      # Esegui lo script per assemblare la cartella "public"
+      - name: Assemble public folder
+        run: bash assemble_public.sh
 
-      # Se i file statici sono nella root, usa il percorso "."
+      # Debug: List dei file nella cartella "public"
+      - name: List "public" folder contents
+        run: ls -la public || echo "Folder 'public' not found"
+
       - name: Upload artifact for Pages
         uses: actions/upload-artifact@v4
         with:
-          name: heilelonmusk
-          path: .  # Usa la root; assicurati che contenga solo i file da pubblicare
+          name: mySiteArtifact
+          path: public
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
