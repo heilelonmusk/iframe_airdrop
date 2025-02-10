@@ -1,13 +1,13 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config(); // Load environment variables
 
-// Retrieve connection string from environment variable
+// Retrieve the MongoDB connection string from the environment
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
 async function connectToDatabase() {
   if (cachedClient) return cachedClient;
-  // With MongoDB driver 4.x, the new parser and unified topology are enabled by default.
+  // The MongoDB Node.js Driver 4.x uses the new parser and unified topology by default.
   const client = new MongoClient(uri);
   await client.connect();
   cachedClient = client;
@@ -27,7 +27,7 @@ exports.handler = async (event) => {
     console.log("Received event:", event);
     console.log("Raw event body:", event.body);
 
-    // Parse request body
+    // Parse the request body
     let data;
     try {
       data = JSON.parse(event.body);
@@ -52,10 +52,10 @@ exports.handler = async (event) => {
 
     // Connect to MongoDB
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB"); // Adjust database name if necessary
+    const db = client.db("heilelonDB"); // Adjust the database name if necessary
     const collection = db.collection("questions");
 
-    // Check for a similar question (case-insensitive)
+    // Search for a similar question (case-insensitive)
     const existing = await collection.findOne({
       question: { $regex: new RegExp(question, 'i') }
     });
