@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages (Static)
+name: Build and Deploy GitHub Pages (Publishing on main)
 
 on:
   push:
@@ -13,23 +13,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
+      # Step 1: Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Se i file statici sono già presenti nella root o in una cartella (es. "public"),
-      # sostituisci ./public con il percorso corretto:
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      # Step 2: Setup Node (se il progetto usa Node.js; altrimenti rimuovi questo step)
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          name: mySiteArtifact
-          path: ./public
+          node-version: 16  # Sostituisci con la versione necessaria
 
+      # Step 3: Installa le dipendenze e Build
+      - name: Install dependencies & Build
+        run: |
+          echo "Installing dependencies..."
+          npm install
+          echo "Running build..."
+          npm run build
+          # Assicurati che questo comando crei la cartella ./build (oppure sostituisci con il percorso corretto)
+
+      # Step 4: Carica l'artifact manualmente con upload-artifact@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mySiteArtifact           # Nome dell'artifact
+          path: ./build                  # Percorso della cartella generata dalla build
+
+      # Step 5: Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}
-          artifact_name: mySiteArtifact
-          branch: main
+          token: ${{ secrets.MY_GITHUB_TOKEN }}  # Usa il tuo PAT personalizzato oppure sostituisci con ${{ secrets.GITHUB_TOKEN }} se preferisci
+          artifact_name: mySiteArtifact            # Deve essere identico al nome usato nello step di upload
