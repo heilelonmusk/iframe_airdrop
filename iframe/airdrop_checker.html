@@ -1,17 +1,4 @@
-/*******************************************************
- * airdrop_checker.js
- * Definitive script for Helon Airdrop Checker
- *******************************************************/
-
-/**
- * Funzione principale che viene chiamata dal pulsante "Verify".
- * 1. Controlla se l’input wallet è vuoto (effetto shake).
- * 2. Scarica la whitelist.csv da GitHub (via jsDelivr).
- * 3. Verifica se il wallet è presente in whitelist:
- *    - Se sì, effetto confetti + dispatch "update_whitelist".
- *    - Se no, effetto shake + dispatch "update_noneligible".
- */
- async function checkAirdrop() {
+async function checkAirdrop() {
   const walletInput = document.getElementById("walletInput");
   const wallet = walletInput.value.trim();
   const resultElem = document.getElementById("result");
@@ -99,4 +86,3 @@ async function triggerWorkflow(wallet, updateType) {
   } catch (error) {
     console.error("Error triggering workflow:", error);
   }
-}
