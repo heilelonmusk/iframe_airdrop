@@ -10,7 +10,7 @@
   container.style.zIndex = "1100";
   document.body.appendChild(container);
 
-  // Set up the HTML structure for the chat widget
+  // HTML structure for the chat widget
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: 90px;
@@ -80,7 +80,7 @@
   `;
   document.head.appendChild(styleOverride);
 
-  // Show the chat button after a short delay
+  // Show the chat button after a delay
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
@@ -91,7 +91,7 @@
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Function to send a chat message to the backend
+  // Send chat function: sends question to the serverless function and handles the response
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
@@ -116,7 +116,7 @@
           chatBody.innerHTML += `<p><strong>Ultron:</strong> This is an interesting question! 🚀 I'm gathering information, please try again later.</p>`;
         }
       } else {
-        console.error("Error logging question");
+        console.error("Error logging question:", response.status);
       }
     } catch (err) {
       console.error("Network error:", err);
