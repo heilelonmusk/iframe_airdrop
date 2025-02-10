@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Setup Node (se il tuo progetto usa Node.js per la build)
+      # 2) Setup Node (se il tuo progetto usa Node.js)
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
@@ -32,20 +32,22 @@ jobs:
         run: |
           npm install
           npm run build
-          # Supponendo che i file finali siano in ./build
-          # Se la cartella è ./dist, sostituisci ovunque con ./dist
+          # Se la cartella di output è ./build,
+          # altrimenti modifica i riferimenti qui sotto.
 
-     # 4) Carica manualmente i file come artifact (usa upload-artifact@v3)
-- name: Upload artifact
-  uses: actions/upload-artifact@v3
-  with:
-    name: mySiteArtifact           # Nome dell'artifact
-    path: ./build                 # Cartella con i file HTML/CSS/JS generati
+      # 4) Carica manualmente i file come artifact (usa upload-artifact@v2)
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: mySiteArtifact            # Nome dell'artifact
+          path: ./build                  # Cartella con i file HTML/CSS/JS generati
 
       # 5) Deploy su GitHub Pages (restando su main)
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          token: ${{ secrets.MY_GITHUB_TOKEN }}  # O secrets.GITHUB_TOKEN, se preferisci
-          artifact_name: mySiteArtifact
-          branch: main  # Pubblica su main (che dev'essere la stessa branch impostata in Settings → Pages)
+          # Se vuoi un token personalizzato, sostituisci con MY_GITHUB_TOKEN
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+
+          artifact_name: mySiteArtifact   # Deve corrispondere al "name:" sopra
+          branch: main                   # Pubblica su main (impostato in Settings → Pages)
