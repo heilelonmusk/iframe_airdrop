@@ -41,7 +41,7 @@ def update_whitelist(wallet_address):
 
     if not found:
         print(f"Wallet address {wallet_address} not found in whitelist.")
-        return False  # Indica che non era in whitelist
+        return False
 
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=reader.fieldnames)
@@ -49,6 +49,7 @@ def update_whitelist(wallet_address):
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
     
+    # Tenta update_file, fallback in caso di errore
     try:
         if file_content:
             repo.update_file(
@@ -60,7 +61,6 @@ def update_whitelist(wallet_address):
             )
             print(f"Whitelist updated for wallet {wallet_address}.")
         else:
-            # Se il file non esisteva, creiamolo
             repo.create_file(
                 file_path,
                 f"Create whitelist for {wallet_address}",
@@ -70,8 +70,31 @@ def update_whitelist(wallet_address):
             print(f"Whitelist created and updated for {wallet_address}.")
         return True
     except Exception as e:
-        print(f"Error updating whitelist: {e}")
-        sys.exit(1)
+        print(f"update_file failed: {e}")
+        print("Attempting fallback: delete + create...")
+
+        if file_content:
+            try:
+                file_content.delete("Delete old whitelist for fallback", branch=BRANCH)
+                print("Old whitelist file deleted.")
+            except Exception as delete_err:
+                print(f"Error deleting file: {delete_err}")
+                sys.exit(1)
+
+        # Ricrea il file
+        try:
+            repo.create_file(
+                file_path,
+                f"Recreate whitelist for {wallet_address}",
+                new_csv,
+                branch=BRANCH
+            )
+            print(f"Whitelist recreated and updated for {wallet_address}.")
+        except Exception as create_err:
+            print(f"Error creating file: {create_err}")
+            sys.exit(1)
+
+        return True
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
