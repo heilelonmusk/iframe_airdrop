@@ -31,6 +31,8 @@ def update_noneligible(wallet_address):
 
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
+    
+    # Verifica se il wallet esiste già in non_eligible
     for row in rows:
         if row["Wallet Address"].strip().lower() == wallet_address.strip().lower():
             print(f"Wallet {wallet_address} is already recorded in non_eligible.csv.")
@@ -39,26 +41,54 @@ def update_noneligible(wallet_address):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_row = {"Wallet Address": wallet_address, "DateTime": timestamp}
     rows.append(new_row)
+
     fieldnames = reader.fieldnames if reader.fieldnames else ["Wallet Address", "DateTime"]
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(rows)
     new_csv = output.getvalue().encode("utf-8")
-    
-    if file_content:
-        try:
-            repo.update_file(file_path, f"Update non_eligible for {wallet_address}", new_csv, file_content.sha, branch=BRANCH)
+
+    try:
+        if file_content:
+            repo.update_file(
+                file_path,
+                f"Update non_eligible for {wallet_address}",
+                new_csv,
+                file_content.sha,
+                branch=BRANCH
+            )
             print(f"Wallet {wallet_address} added to non_eligible.csv.")
-        except Exception as e:
-            print(f"Error updating non_eligible.csv: {e}")
-            sys.exit(1)
-    else:
-        try:
-            repo.create_file(file_path, f"Create non_eligible.csv with {wallet_address}", new_csv, branch=BRANCH)
+        else:
+            repo.create_file(
+                file_path,
+                f"Create non_eligible.csv with {wallet_address}",
+                new_csv,
+                branch=BRANCH
+            )
             print(f"non_eligible.csv created and wallet {wallet_address} added.")
-        except Exception as e:
-            print(f"Error creating non_eligible.csv: {e}")
+    except Exception as e:
+        print(f"update_file failed: {e}")
+        print("Attempting fallback: delete + create...")
+
+        if file_content:
+            try:
+                file_content.delete("Delete old non_eligible for fallback", branch=BRANCH)
+                print("Old non_eligible file deleted.")
+            except Exception as delete_err:
+                print(f"Error deleting file: {delete_err}")
+                sys.exit(1)
+
+        try:
+            repo.create_file(
+                file_path,
+                f"Recreate non_eligible for {wallet_address}",
+                new_csv,
+                branch=BRANCH
+            )
+            print(f"non_eligible.csv recreated and updated for {wallet_address}.")
+        except Exception as create_err:
+            print(f"Error creating file: {create_err}")
             sys.exit(1)
 
 if __name__ == "__main__":
