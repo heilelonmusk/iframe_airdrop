@@ -1,55 +1,35 @@
-name: Build and Deploy GitHub Pages (Using main branch)
+name: Deploy GitHub Pages (Static)
 
 on:
   push:
-    branches: [ "main" ]   # Usa "main" come branch di publishing
+    branches: [ "main" ]
 
 permissions:
   contents: write
   id-token: write
 
-# Evita che un nuovo push annulli i run in corso
 concurrency:
   group: pages_build_deployment
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    
     steps:
-      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Setup Node (se il tuo progetto usa Node.js)
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16  # Sostituisci con la versione che preferisci
-
-      # 3) Installa dipendenze & build (esempio con npm)
-      - name: Install dependencies & Build
-        run: |
-          npm install
-          npm run build
-          # Supponendo che i file finali siano in ./build
-
-      # 4) Carica manualmente i file come artifact (versione v4 NON deprecata)
+      # Se i file statici sono già presenti nella root o in una cartella (es. "public"),
+      # sostituisci ./public con il percorso corretto:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mySiteArtifact     # Nome dell'artifact
-          path: ./build           # Cartella con i file HTML/CSS/JS generati
+          name: mySiteArtifact
+          path: ./public
 
-      # 5) Deploy su GitHub Pages (restando su main)
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          # Se vuoi usare un token personalizzato:
-          # token: ${{ secrets.MY_GITHUB_TOKEN }}
-          # Altrimenti il token integrato:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
           artifact_name: mySiteArtifact
-          branch: main  # Pubblica su main (in Settings > Pages seleziona main)
+          branch: main
