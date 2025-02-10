@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages (Static)
+name: Deploy GitHub Pages (Root Deployment)
 
 on:
   push:
@@ -17,26 +17,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Debug: Elenca i file nella root
-      - name: List repository files
+      - name: List repository files (debug)
         run: ls -la
 
-      # 3) Debug: Elenca i file nella cartella "public"
-      - name: List "public" folder contents
-        run: ls -la public || echo "Folder 'public' not found"
-
-      # 4) Upload dell'artifact
+      # Se i file statici sono nella root, usa il percorso "."
       - name: Upload artifact for Pages
         uses: actions/upload-artifact@v4
         with:
           name: mySiteArtifact
-          path: public  # Assicurati che questa cartella contenga i file statici da pubblicare
+          path: .  # Usa la root; assicurati che contenga solo i file da pubblicare
 
-      # 5) Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
