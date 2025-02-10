@@ -9,7 +9,7 @@ permissions:
   actions: write
 
 jobs:
-  retry-cancelled:
+  retry_cancelled:
     runs-on: ubuntu-latest
     steps:
       - name: List cancelled workflow runs
@@ -22,7 +22,7 @@ jobs:
           
           # Filtra quelle con conclusion "cancelled"
           CANCELLED_COUNT=$(jq '[.workflow_runs[] | select(.conclusion=="cancelled")] | length' workflow_runs.json)
-          echo "::set-output name=count::$CANCELLED_COUNT"
+          echo "count=$CANCELLED_COUNT" >> $GITHUB_OUTPUT
           echo "Found $CANCELLED_COUNT cancelled workflow runs."
           cat workflow_runs.json
 
