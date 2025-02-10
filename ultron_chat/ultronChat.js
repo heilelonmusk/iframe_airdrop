@@ -77,22 +77,44 @@
   `;
   document.head.appendChild(styleOverride);
 
+  // Rende visibile il pulsante dopo 3 secondi
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
+  // Toggle visibilità del widget al click sul pulsante
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
+  // Funzione per inviare la chat e loggare la domanda
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
+    
+    // Aggiunge il messaggio inviato dall'utente nella chat
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
+
+    // Invia la domanda alla funzione Netlify (logQuestion.js)
+    try {
+      const response = await fetch('/.netlify/functions/logQuestion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ question: input })
+      });
+      if (!response.ok) {
+        console.error("Errore durante il logging della domanda");
+      }
+    } catch (err) {
+      console.error("Errore di rete durante il logging:", err);
+    }
+
     // Qui puoi implementare ulteriore logica per la risposta di Ultron
   };
 })();
