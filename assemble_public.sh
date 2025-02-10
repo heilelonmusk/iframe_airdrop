@@ -1,9 +1,9 @@
 #!/bin/bash
-# assemble_public.sh
+# Rimuove eventuali versioni precedenti della cartella "public" e ne crea una nuova
 rm -rf public
 mkdir public
 
-# Copia il file HTML principale dall'iframe (modifica i percorsi in base alla struttura attuale)
+# Copia il file HTML principale dall'interno della cartella "iframe"
 if [ -f "iframe/airdrop_checker.html" ]; then
   cp iframe/airdrop_checker.html public/
   echo "Copied iframe/airdrop_checker.html to public/"
@@ -19,14 +19,14 @@ else
   echo "Error: iframe/airdrop_checker.js not found."
 fi
 
-# Copia le immagini (se ci sono)
+# Copia le immagini necessarie (se presenti)
 if [ -d "data/img" ]; then
   mkdir -p public/img
   cp -r data/img/* public/img/
   echo "Copied images from data/img to public/img/"
 fi
 
-# Copia la chat di Ultron (se desiderato)
+# (Opzionale) Copia il file della chat Ultron se desiderato
 if [ -f "ultron_chat/ultronChat.js" ]; then
   mkdir -p public/ultron_chat
   cp ultron_chat/ultronChat.js public/ultron_chat/
