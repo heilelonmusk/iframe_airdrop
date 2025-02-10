@@ -21,8 +21,9 @@
       transition: transform 0.3s, opacity 0.3s;
       position: relative;">
       <div class="ultron-pulse"></div>
-      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img" style="
-        width: 85%; height: 85%; border-radius: 50%; position: absolute; top: 10%; left: 10%;">
+      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" 
+           alt="Ultron" class="ultron-button-img" style="
+           width: 85%; height: 85%; border-radius: 50%; position: absolute; top: 10%; left: 10%;">
     </button>
     <div id="ultronChatWidget" class="ultron-widget" style="
       width: 320px; max-width: 90%; height: 400px;
@@ -92,6 +93,6 @@
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
-    // Here you can implement further AI processing if needed
+    // Qui puoi implementare ulteriore logica per la risposta di Ultron
   };
 })();
