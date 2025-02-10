@@ -7,6 +7,7 @@
   const isMobile = window.innerWidth <= 600;
   const buttonSize = isMobile ? "70px" : "90px";
   const imgSize = isMobile ? "65%" : "80%";
+  // Posiziona il pulsante nell'angolo in basso a destra
   const rightOffset = isMobile ? "5px" : "20px";
   const bottomOffset = isMobile ? "20px" : "80px";
 
@@ -19,6 +20,7 @@
     container.style.right = rightOffset;
     container.style.zIndex = "1100";
     document.body.appendChild(container);
+    console.log("Ultron Chat container created:", container);
   }
 
   container.innerHTML = `
@@ -99,6 +101,7 @@
     </div>
   `;
 
+  // Iniezione delle regole CSS per l'effetto pulse
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -128,6 +131,7 @@
   setTimeout(() => {
     const btn = document.getElementById("ultronChatButton");
     btn.style.opacity = "1";
+    console.log("Ultron Chat button visible.");
   }, 3000);
 
   document.getElementById("ultronChatButton").addEventListener("click", () => {
@@ -138,4 +142,11 @@
   window.sendChat = function() {
     const input = document.getElementById("chatInput");
     const message = input.value.trim();
-    if 
+    if (!message) return;
+    const chatBody = document.getElementById("chatBody");
+    chatBody.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+    input.value = "";
+    chatBody.scrollTop = chatBody.scrollHeight;
+    // Qui inserisci la logica per la risposta di Ultron
+  };
+})();
