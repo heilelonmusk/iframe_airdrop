@@ -12,6 +12,9 @@ jobs:
   retry_cancelled:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: List cancelled workflow runs
         id: list_cancelled
         run: |
@@ -20,18 +23,22 @@ jobs:
           curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
             "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs?status=completed" > workflow_runs.json
           
-          # Filtra quelle con conclusion "cancelled"
-          CANCELLED_COUNT=$(jq '[.workflow_runs[] | select(.conclusion=="cancelled")] | length' workflow_runs.json)
-          echo "count=$CANCELLED_COUNT" >> $GITHUB_OUTPUT
-          echo "Found $CANCELLED_COUNT cancelled workflow runs."
+          echo "Raw JSON output:"
           cat workflow_runs.json
+          
+          # Filtra le workflow run con conclusione "cancelled"
+          CANCELLED_COUNT=$(jq '[.workflow_runs[] | select(.conclusion=="cancelled")] | length' workflow_runs.json)
+          echo "Cancelled workflow runs: $CANCELLED_COUNT"
+          # Imposta l'output per il job
+          echo "count=$CANCELLED_COUNT" >> $GITHUB_OUTPUT
 
       - name: Retry cancelled workflow runs
         if: steps.list_cancelled.outputs.count != '0'
         run: |
+          echo "Retrying cancelled workflow runs..."
           CANCELLED_IDS=$(jq -r '.workflow_runs[] | select(.conclusion=="cancelled") | .id' workflow_runs.json)
           for id in $CANCELLED_IDS; do
-            echo "Retrying cancelled workflow run $id..."
+            echo "Retrying workflow run $id..."
             curl -X POST -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
               "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs/$id/rerun"
           done
