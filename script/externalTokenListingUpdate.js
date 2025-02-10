@@ -11,7 +11,7 @@ const KNOWLEDGE_JSON_PATH = path.resolve(__dirname, '../data/knowledge.json');
 async function fetchDymensionTokens() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
-    // Assuming the API returns an object with a 'tokens' array
+    // Assume the API returns an object with a 'tokens' array
     return response.data.tokens;
   } catch (error) {
     console.error('Error fetching tokens from Dymension:', error);
@@ -27,14 +27,14 @@ async function updateKnowledgeJson(tokens) {
       knowledge = JSON.parse(rawData);
     }
 
-    // Update the token section with the new data (here, updating only if HELON token is found)
+    // Update the token section if a HELON token is found
     const helonToken = tokens.find(token => token.symbol && token.symbol.toLowerCase() === 'helon');
     if (helonToken) {
       knowledge.token = {
         name: helonToken.name || "Heil Elon",
         symbol: helonToken.symbol || "HELON",
         description: helonToken.description || "Token used in the Helon ecosystem for governance, fees, and incentives.",
-        address: helonToken.address || "0xae2d11954812a870aec79f73a948d7f3c31607ae",
+        address: helonToken.address || "0xYourTokenContractAddressHere",
         decimals: helonToken.decimals || 18,
         official_source: "https://helon.space"
       };
