@@ -13,7 +13,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
+      height: 400px;
       width: 100%;
       background: transparent !important;
       font-family: 'Poppins', sans-serif !important;
@@ -30,9 +30,6 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      background: rgba(0, 0, 0, 0.5); /* Sfumatura dietro la barra */
-      border-radius: 10px; /* Arrotondamento angoli */
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Ombra esterna */
     }
     h2, p { margin-bottom: 10px; }
     p.description { white-space: pre-line; }
@@ -44,12 +41,9 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
-      background: #ffffff10; /* Sfumatura sotto la barra di input */
+      background: transparent;
       color: white;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .input-container input:hover, .input-container input:focus {
-      box-shadow: 0 0 8px rgba(255,255,255,0.5); /* Glow effect on focus */
+      transition: border-color 0.3s;
     }
     .input-error { border-color: red; }
     .button-container button {
@@ -62,11 +56,6 @@
       color: black;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s; /* Smooth transform */
-    }
-    .button-container button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     #result {
       margin-top: 10px;
@@ -81,6 +70,15 @@
       50% { transform: translateX(-20px); }
       75% { transform: translateX(20px); }
       100% { transform: translateX(0); }
+    }
+    @media (max-width: 600px) {
+      @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(10px); }
+        50% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+        100% { transform: translateX(0); }
+      }
     }
     .eligible-mobile { animation: eligiblePulse 1s ease-out; }
     @keyframes eligiblePulse {
