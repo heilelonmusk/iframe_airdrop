@@ -50,7 +50,7 @@ async function updateKnowledgeJson(tokens) {
         name: helonToken.name || "Heil Elon",
         symbol: helonToken.symbol || "HELON",
         description: helonToken.description || "Token used in the Helon ecosystem for governance, fees, and incentives.",
-        address: helonToken.address || "0xYourTokenContractAddressHere",
+        address: helonToken.address || "0xae2d11954812a870aec79f73a948d7f3c31607ae",
         decimals: helonToken.decimals || 18,
         official_source: "https://helon.space"
       };
