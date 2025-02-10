@@ -10,7 +10,7 @@
   container.style.zIndex = "1100";
   document.body.appendChild(container);
 
-  // Set up the HTML structure for the chat widget
+  // HTML structure for the chat widget
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: 90px;
@@ -91,7 +91,7 @@
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Send chat function: sends a question to the serverless function and handles the response
+  // Function to send a chat message to the backend
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
