@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages (Static)
+name: Build and Deploy GitHub Pages (Static)
 
 on:
   push:
@@ -15,19 +15,28 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
+      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2) Debug: List dei file nella root e nella cartella "public"
+      - name: List repository files (debug)
+        run: ls -la
+      - name: List "public" folder (debug)
+        run: ls -la public || echo "Folder 'public' not found!"
+
+      # 3) Carica l'artifact (usa upload-artifact@v4)
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mySiteArtifact
-          path: ./public
+          name: mySiteArtifact      # Nome dell'artifact (assicurati di usarlo anche nello step di deploy)
+          path: ./public            # Percorso della cartella con i file statici da pubblicare
 
+      # 4) Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
           token: ${{ secrets.MY_GITHUB_TOKEN }}
           artifact_name: mySiteArtifact
-          branch: main
