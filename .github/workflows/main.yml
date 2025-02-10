@@ -1,0 +1,44 @@
+name: Deploy GitHub Pages (Static)
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+  id-token: write
+
+# Configura la concurrency per evitare che run multipli si annullino
+concurrency:
+  group: pages_build_deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Esegui lo script di assemblaggio per creare la cartella "public"
+      - name: Assemble public folder
+        run: bash assemble_public.sh
+
+      # Lista il contenuto della cartella "public" per debug
+      - name: List "public" folder contents
+        run: ls -la public || echo "Folder 'public' not found"
+
+      # Carica l’artifact creato dalla cartella "public"
+      - name: Upload artifact for Pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: mySiteArtifact
+          path: public
+
+      # Esegui il deploy su GitHub Pages utilizzando l’artifact
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v2
+        with:
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+          artifact_name: mySiteArtifact
