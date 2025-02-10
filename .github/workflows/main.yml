@@ -27,7 +27,7 @@ jobs:
       - name: Upload artifact for Pages
         uses: actions/upload-artifact@v4
         with:
-          name: mySiteArtifact
+          name: heilelonmusk
           path: .  # Usa la root; assicurati che contenga solo i file da pubblicare
 
       - name: Deploy to GitHub Pages
