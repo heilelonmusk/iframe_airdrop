@@ -41,7 +41,7 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       outline: none;
-      background: transparent;
+      background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
       color: white;
       transition: border-color 0.3s;
     }
@@ -56,6 +56,13 @@
       color: black;
       font-weight: bold;
       cursor: pointer;
+      transition: all 0.3s ease; /* Smooth transition for hover and active states */
+    }
+    .button-container button:hover {
+      background: #ffdd55; /* Lighter background on hover */
+    }
+    .button-container button:active {
+      transform: scale(0.98); /* Slight scale down on click */
     }
     #result {
       margin-top: 10px;
