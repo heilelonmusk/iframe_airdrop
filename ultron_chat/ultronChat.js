@@ -1,6 +1,7 @@
 (function() {
   if (window.self !== window.top) return;
 
+  // Create the chat container
   const container = document.createElement("div");
   container.id = "ultronChatContainer";
   container.style.position = "fixed";
@@ -9,6 +10,7 @@
   container.style.zIndex = "1100";
   document.body.appendChild(container);
 
+  // Define the chat widget HTML structure
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: 90px;
@@ -38,10 +40,10 @@
       <div class="ultron-body" id="chatBody" style="
         flex: 1; padding: 12px; overflow-y: auto;
         background: #2e2e2e; font-size: 14px; line-height: 1.5; color: white;">
-        <p>Hi, here ULTRON. 🤖</p>
+        <p>Hi, I'm ULTRON. 🤖</p>
         <p>Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
-        <p>💡 Curious? Ask me anything about Helon, its vision, the ecosystem, or what’s next.<br>
-           🔗 Need official links? Type “channels” to connect with the community.</p>
+        <p>💡 Ask me anything about Helon, its vision, the ecosystem, or token details.<br>
+           🔗 For official links, type “channels”.</p>
         <p>The system runs. The answers are yours to uncover. 🚀</p>
       </div>
       <div class="ultron-input" style="
@@ -57,6 +59,7 @@
     </div>
   `;
 
+  // Additional style injection
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -77,44 +80,45 @@
   `;
   document.head.appendChild(styleOverride);
 
-  // Rende visibile il pulsante dopo 3 secondi
+  // Reveal the chat button after a short delay
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
-  // Toggle visibilità del widget al click sul pulsante
+  // Toggle widget visibility on button click
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Funzione per inviare la chat e loggare la domanda
+  // Function to send user input to the backend
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
     
-    // Aggiunge il messaggio inviato dall'utente nella chat
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    // Invia la domanda alla funzione Netlify per il logging e il salvataggio
     try {
       const response = await fetch('/.netlify/functions/logQuestion', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: input })
       });
-      if (!response.ok) {
-        console.error("Errore durante il logging della domanda");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.answer) {
+          chatBody.innerHTML += `<p><strong>Ultron:</strong> ${data.answer} <small>(Source: ${data.source})</small></p>`;
+        } else {
+          chatBody.innerHTML += `<p><strong>Ultron:</strong> This is an interesting question! 🚀 I'm gathering information, please try again later.</p>`;
+        }
+      } else {
+        console.error("Error logging question");
       }
     } catch (err) {
-      console.error("Errore di rete durante il logging:", err);
+      console.error("Network error:", err);
     }
-
-    // Qui puoi implementare ulteriore logica per la risposta di Ultron
   };
 })();
