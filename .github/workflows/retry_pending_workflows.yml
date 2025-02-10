@@ -1,0 +1,56 @@
+name: Retry Pending Workflows
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Esegui ogni ora
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  retry-pending:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (optional, for debugging)
+        uses: actions/checkout@v3
+
+      - name: List queued workflow runs
+        id: list_queued
+        run: |
+          echo "Checking for queued workflow runs..."
+          curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs?status=queued" > queued.json
+          echo "::set-output name=queued::$(jq -r '.workflow_runs | length' queued.json)"
+          echo "Queued runs count: $(jq -r '.workflow_runs | length' queued.json)"
+          cat queued.json
+
+      - name: List in-progress workflow runs
+        id: list_in_progress
+        run: |
+          echo "Checking for in-progress workflow runs..."
+          curl -s -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs?status=in_progress" > in_progress.json
+          echo "::set-output name=in_progress::$(jq -r '.workflow_runs | length' in_progress.json)"
+          echo "In-progress runs count: $(jq -r '.workflow_runs | length' in_progress.json)"
+          cat in_progress.json
+
+      - name: Retry queued workflow runs
+        if: steps.list_queued.outputs.queued != '0'
+        run: |
+          QUEUED_IDS=$(jq '.workflow_runs[].id' queued.json)
+          for id in $QUEUED_IDS; do
+            echo "Retrying queued run $id..."
+            curl -X POST -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs/$id/rerun"
+          done
+
+      - name: Retry in-progress workflow runs
+        if: steps.list_in_progress.outputs.in_progress != '0'
+        run: |
+          IN_PROGRESS_IDS=$(jq '.workflow_runs[].id' in_progress.json)
+          for id in $IN_PROGRESS_IDS; do
+            echo "Retrying in-progress run $id..."
+            curl -X POST -H "Authorization: token ${{ secrets.MY_GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/heilelonmusk/iframe_airdrop/actions/runs/$id/rerun"
+          done
