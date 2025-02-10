@@ -2,7 +2,7 @@ name: Retry Cancelled Workflows
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Esegui ogni ora
+    - cron: '*/5 * * * *'  # Esegui ogni 5 minuti
 
 permissions:
   contents: read
