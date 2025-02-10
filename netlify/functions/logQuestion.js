@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config(); // Load environment variables
 
-// Connection URI from environment variable
+// Get connection string from environment variable
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
@@ -23,10 +23,30 @@ exports.handler = async (event) => {
       };
     }
 
-    // Parse incoming request
-    const { question } = JSON.parse(event.body);
-    const trimmedQuestion = question ? question.trim() : "";
-    if (!trimmedQuestion) {
+    // Log the raw event body for debugging
+    console.log("Raw event body:", event.body);
+    
+    // Ensure event.body exists and parse JSON
+    if (!event.body) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Empty request body" })
+      };
+    }
+    let data;
+    try {
+      data = JSON.parse(event.body);
+    } catch (parseError) {
+      console.error("Error parsing JSON:", parseError);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid JSON" })
+      };
+    }
+
+    // Extract and trim the question
+    const question = data.question ? data.question.trim() : "";
+    if (!question) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Missing question" })
@@ -35,26 +55,25 @@ exports.handler = async (event) => {
 
     // Connect to MongoDB
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB"); // Use your desired database name
+    const db = client.db("heilelonDB"); // Change the database name if needed
     const collection = db.collection("questions");
 
-    // Search for a similar question (case-insensitive)
+    // Look for a similar question (case-insensitive)
     const existing = await collection.findOne({
-      question: { $regex: new RegExp(trimmedQuestion, 'i') }
+      question: { $regex: new RegExp(question, 'i') }
     });
 
     let responseContent = {};
 
     if (existing && existing.answer) {
-      // Return existing answer if found
       responseContent = {
         answer: existing.answer,
         source: existing.source
       };
     } else {
-      // Save the new question for future updates
+      // If no matching answer found, record the new question for future updates
       const newDoc = {
-        question: trimmedQuestion,
+        question: question,
         answer: null,
         source: "user_input",
         timestamp: new Date()
