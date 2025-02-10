@@ -1,88 +1,139 @@
-async function checkAirdrop() {
-  const walletInput = document.getElementById("walletInput");
-  const wallet = walletInput.value.trim();
-  const resultElem = document.getElementById("result");
-  const container = document.querySelector(".checker-container");
-
-  // 1. Se non inserisce il wallet, effetto shake e messaggio di errore
-  if (!wallet) {
-    resultElem.innerText = "⚠️ Please enter a valid wallet address.";
-    container.classList.add("shake");
-    walletInput.classList.add("input-error");
-    setTimeout(() => {
-      container.classList.remove("shake");
-      walletInput.classList.remove("input-error");
-    }, 700);
-    return;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>$HELON Airdrop Checker</title>
   
-  try {
-    // 2. Scarica la whitelist.csv
-    const response = await fetch("https://cdn.jsdelivr.net/gh/heilelonmusk/iframe_airdrop@main/data/whitelist.csv");
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
+  <!-- Include la libreria confetti per l'effetto coriandoli -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  
+  <!-- Include il font Poppins -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  
+  <style>
+    /* Reset e impostazioni generali */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 400px; /* Altezza fissa del modulo */
+      width: 100%;
+      background: transparent !important;
+      font-family: 'Poppins', sans-serif;
+      color: white;
     }
 
-    // 3. Analizza il CSV e cerca il wallet
-    const csvText = await response.text();
-    const rows = csvText.split("\n").filter(line => line.trim() !== "");
-    // Preleva l'indice della colonna "wallet address"
-    const header = rows[0].split(",").map(h => h.trim().toLowerCase());
-    const walletIndex = header.indexOf("wallet address");
-    let isWhitelisted = false;
-
-    for (let i = 1; i < rows.length; i++) {
-      const cols = rows[i].split(",").map(col => col.trim());
-      if (cols[walletIndex] && cols[walletIndex].toLowerCase() === wallet.toLowerCase()) {
-        isWhitelisted = true;
-        break;
+    /* Contenitore principale centrato */
+    .checker-container {
+      height: 100%;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      background: transparent;
+    }
+    
+    h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+    
+    p.description {
+      font-size: 16px;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    
+    /* Input stile */
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      transition: border-color 0.3s;
+      margin-bottom: 10px;
+    }
+    input[type="text"]:focus {
+      border-color: #ff9300;
+    }
+    
+    /* Pulsante stile */
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #ff9300;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: background 0.3s, transform 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Area risultato */
+    #result {
+      margin-top: 15px;
+      font-size: 16px;
+      min-height: 40px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    
+    /* Effetto shake per errori */
+    .shake {
+      animation: shake 0.7s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(20px); }
+      50% { transform: translateX(-20px); }
+      75% { transform: translateX(20px); }
+      100% { transform: translateX(0); }
+    }
+    
+    /* Shake ridotto su schermi piccoli */
+    @media (max-width: 600px) {
+      @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(10px); }
+        50% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+        100% { transform: translateX(0); }
       }
     }
-
-    // 4. Se wallet whitelisted
-    if (isWhitelisted) {
-      resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
-      triggerWorkflow(wallet, "update_whitelist");
-
-      // Effetto confetti
-      if (typeof confetti === "function") {
-        confetti({
-          particleCount: 150,
-          spread: 100,
-          origin: { y: 0.6 }
-        });
-      }
-    } 
-    // 5. Se wallet non whitelisted
-    else {
-      resultElem.innerText = "❌ Not whitelisted, but stay tuned for future opportunities! Join our community channels for updates.";
-      container.classList.add("shake");
-      setTimeout(() => {
-        container.classList.remove("shake");
-      }, 700);
-
-      triggerWorkflow(wallet, "update_noneligible");
-    }
-  } catch (error) {
-    resultElem.innerText = "⚠️ Error checking whitelist. Please try again later.";
-    console.error(error);
-  }
-}
-
-/**
- * Invoca la funzione serverless su Netlify per fare il dispatch su GitHub
- * @param {string} wallet - Indirizzo wallet dell'utente
- * @param {string} updateType - "update_whitelist" oppure "update_noneligible"
- */
-async function triggerWorkflow(wallet, updateType) {
-  const endpoint = "https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/triggerWhitelistUpdate";
-  try {
-    await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ wallet, updateType })
-    });
-    // Non serve gestire la risposta qui, ma potresti aggiungere log
-  } catch (error) {
-    console.error("Error triggering workflow:", error);
-  }
+  </style>
+</head>
+<body>
+  <div class="checker-container">
+    <h2>🔍 Check Your Airdrop</h2>
+    <p class="description">Enter your DYM wallet address:</p>
+    
+    <input type="text" id="walletInput" placeholder="Enter your wallet address" required />
+    
+    <!-- Botton che chiama la funzione JavaScript checkAirdrop() -->
+    <button onclick="checkAirdrop()">Verify</button>
+    
+    <p id="result"></p>
+  </div>
+  
+  <!-- Carichiamo lo script di logica con defer -->
+  <script src="airdrop_checker.js" defer></script>
+</body>
+</html>
