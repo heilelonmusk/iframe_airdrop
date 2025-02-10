@@ -1,67 +1,81 @@
-const fs = require('fs');
-const path = require('path');
+const { MongoClient } = require('mongodb');
+require('dotenv').config(); // Load environment variables
 
-exports.handler = async function(event, context) {
-  // Permette solo il metodo POST
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: "Method Not Allowed"
-    };
-  }
-  
-  let data;
+// Connection URI from environment variable
+const uri = process.env.MONGO_URI;
+let cachedClient = null;
+
+async function connectToDatabase() {
+  if (cachedClient) return cachedClient;
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  await client.connect();
+  cachedClient = client;
+  return client;
+}
+
+exports.handler = async (event) => {
   try {
-    data = JSON.parse(event.body);
-  } catch (err) {
-    return {
-      statusCode: 400,
-      body: "Invalid JSON"
-    };
-  }
-  
-  const question = data.question;
-  if (!question) {
-    return {
-      statusCode: 400,
-      body: "Missing question"
-    };
-  }
-  
-  // Percorso del file knowledge.json (assumendo che la cartella data sia nella root del repository)
-  const filePath = path.join(__dirname, '../../data/knowledge.json');
-  let knowledge = [];
-  
-  try {
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, 'utf-8');
-      knowledge = JSON.parse(fileContent);
+    // Only allow POST requests
+    if (event.httpMethod !== 'POST') {
+      return {
+        statusCode: 405,
+        body: JSON.stringify({ error: "Method Not Allowed" })
+      };
     }
+
+    // Parse incoming request
+    const { question } = JSON.parse(event.body);
+    const trimmedQuestion = question ? question.trim() : "";
+    if (!trimmedQuestion) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing question" })
+      };
+    }
+
+    // Connect to MongoDB
+    const client = await connectToDatabase();
+    const db = client.db("heilelonDB"); // Use your desired database name
+    const collection = db.collection("questions");
+
+    // Search for a similar question (case-insensitive)
+    const existing = await collection.findOne({
+      question: { $regex: new RegExp(trimmedQuestion, 'i') }
+    });
+
+    let responseContent = {};
+
+    if (existing && existing.answer) {
+      // Return existing answer if found
+      responseContent = {
+        answer: existing.answer,
+        source: existing.source
+      };
+    } else {
+      // Save the new question for future updates
+      const newDoc = {
+        question: trimmedQuestion,
+        answer: null,
+        source: "user_input",
+        timestamp: new Date()
+      };
+      await collection.insertOne(newDoc);
+      responseContent = {
+        answer: "I'm still learning! Your question has been recorded for future updates.",
+        source: "user_input"
+      };
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(responseContent)
+    };
+
   } catch (error) {
-    console.error("Errore nella lettura di knowledge.json:", error);
-    knowledge = [];
-  }
-  
-  // Crea un nuovo record per la domanda con timestamp
-  const newEntry = {
-    question: question,
-    timestamp: new Date().toISOString()
-  };
-  
-  knowledge.push(newEntry);
-  
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(knowledge, null, 2));
-  } catch (error) {
-    console.error("Errore nella scrittura di knowledge.json:", error);
+    console.error("Error processing question:", error);
     return {
       statusCode: 500,
-      body: "Errore nella scrittura dei dati"
+      body: JSON.stringify({ error: "Internal Server Error" })
     };
   }
-  
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: "Domanda registrata", entry: newEntry })
-  };
 };
