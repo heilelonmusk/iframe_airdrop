@@ -1,14 +1,14 @@
 const { MongoClient } = require('mongodb');
-require('dotenv').config(); // Carica le variabili d'ambiente dal file .env
+require('dotenv').config(); // Load environment variables
 
-// Ottieni la connection string dalla variabile d'ambiente
+// Retrieve connection string from environment variable
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
-// Funzione per connettersi a MongoDB con caching per ambienti serverless
 async function connectToDatabase() {
   if (cachedClient) return cachedClient;
-  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  // With MongoDB driver 4.x, the new parser and unified topology are enabled by default.
+  const client = new MongoClient(uri);
   await client.connect();
   cachedClient = client;
   return client;
@@ -16,7 +16,7 @@ async function connectToDatabase() {
 
 exports.handler = async (event) => {
   try {
-    // Consenti solo richieste POST
+    // Allow only POST requests
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
@@ -24,11 +24,10 @@ exports.handler = async (event) => {
       };
     }
 
-    // Log della richiesta per il debug
     console.log("Received event:", event);
     console.log("Raw event body:", event.body);
 
-    // Parsing del corpo della richiesta
+    // Parse request body
     let data;
     try {
       data = JSON.parse(event.body);
@@ -41,7 +40,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Estrai e valida il campo 'question'
+    // Validate and trim the question
     const question = data.question ? data.question.trim() : "";
     if (!question) {
       console.error("Missing question field");
@@ -51,12 +50,12 @@ exports.handler = async (event) => {
       };
     }
 
-    // Connetti a MongoDB
+    // Connect to MongoDB
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB"); // Modifica il nome del database se necessario
+    const db = client.db("heilelonDB"); // Adjust database name if necessary
     const collection = db.collection("questions");
 
-    // Cerca una domanda esistente (ricerca case-insensitive)
+    // Check for a similar question (case-insensitive)
     const existing = await collection.findOne({
       question: { $regex: new RegExp(question, 'i') }
     });
@@ -64,13 +63,12 @@ exports.handler = async (event) => {
     let responseContent = {};
 
     if (existing && existing.answer) {
-      // Se esiste una risposta, restituiscila
       responseContent = {
         answer: existing.answer,
         source: existing.source
       };
     } else {
-      // Se non viene trovata una risposta, registra la domanda per aggiornamenti futuri
+      // Record the new question for future updates
       const newDoc = {
         question: question,
         answer: null,
