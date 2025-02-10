@@ -10,16 +10,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      
-      - name: Set up Python
+
+      - name: Debug List Files
+        run: ls -R
+
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
-      
+
       - name: Install Dependencies
         run: pip install github3.py
-      
+
       - name: Run Non-Eligible Update Script
         env:
           MY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python scripts/update_noneligible.py "${{ github.event.client_payload.wallet }}"
+        run: python script/update_noneligible.py "${{ github.event.client_payload.wallet }}"
