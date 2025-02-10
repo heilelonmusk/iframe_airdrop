@@ -1,0 +1,7 @@
+[build]
+  publish = "iframe_airdrop"
+  functions = "netlify/functions"
+
+[dev]
+  command = "echo 'No app server specified'; sleep 9999"
+  port = 8888
