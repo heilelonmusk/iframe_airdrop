@@ -99,7 +99,7 @@
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
 
-    // Invia la domanda alla funzione Netlify (logQuestion.js)
+    // Invia la domanda alla funzione Netlify per il logging e il salvataggio
     try {
       const response = await fetch('/.netlify/functions/logQuestion', {
         method: 'POST',
