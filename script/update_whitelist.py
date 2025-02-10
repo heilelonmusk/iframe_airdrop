@@ -27,7 +27,8 @@ def update_whitelist(wallet_address):
     except github3.exceptions.NotFoundError:
         print("Whitelist file not found, creating a new file.")
         csv_data = "Wallet Address,Checked,DateTime\n"
-    
+        file_content = None
+
     reader = csv.DictReader(io.StringIO(csv_data))
     rows = list(reader)
     found = False
@@ -40,8 +41,8 @@ def update_whitelist(wallet_address):
 
     if not found:
         print(f"Wallet address {wallet_address} not found in whitelist.")
-        return False  # Indica che il wallet non è presente in whitelist
-    
+        return False  # Indica che non era in whitelist
+
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=reader.fieldnames)
     writer.writeheader()
@@ -49,23 +50,25 @@ def update_whitelist(wallet_address):
     new_csv = output.getvalue().encode("utf-8")
     
     try:
-        repo.update_file(file_path, f"Update whitelist for {wallet_address}", new_csv, file_content.sha, branch=BRANCH)
-        print(f"Whitelist updated for wallet {wallet_address}.")
+        if file_content:
+            repo.update_file(
+                file_path,
+                f"Update whitelist for {wallet_address}",
+                new_csv,
+                file_content.sha,
+                branch=BRANCH
+            )
+            print(f"Whitelist updated for wallet {wallet_address}.")
+        else:
+            # Se il file non esisteva, creiamolo
+            repo.create_file(
+                file_path,
+                f"Create whitelist for {wallet_address}",
+                new_csv,
+                branch=BRANCH
+            )
+            print(f"Whitelist created and updated for {wallet_address}.")
         return True
-    except AttributeError:
-        print("update_file method not available, attempting to delete and recreate the file...")
-        try:
-            file_content.delete(f"Delete file for update {wallet_address}", branch=BRANCH)
-        except Exception as delete_err:
-            print(f"Error deleting file: {delete_err}")
-            sys.exit(1)
-        try:
-            repo.create_file(file_path, f"Recreate whitelist after update {wallet_address}", new_csv, branch=BRANCH)
-            print(f"Whitelist updated for wallet {wallet_address} (deleted and recreated).")
-            return True
-        except Exception as create_err:
-            print(f"Error creating file: {create_err}")
-            sys.exit(1)
     except Exception as e:
         print(f"Error updating whitelist: {e}")
         sys.exit(1)
