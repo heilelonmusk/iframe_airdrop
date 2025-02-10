@@ -1,30 +1,28 @@
-// scripts/externalTokenListingUpdate.js
+// script/externalTokenListingUpdate.js
 
-// Load environment variables (if needed)
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables
 
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-// Use the BlastAPI endpoint for Dymension
+// Use the BlastAPI endpoint for Dymension token listing
+// Documentation: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
 const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension';
 
-// Path to the knowledge.json file (adjust if necessary)
+// Path to the knowledge.json file
 const KNOWLEDGE_JSON_PATH = path.resolve(__dirname, '../data/knowledge.json');
 
 // Function to fetch token data from BlastAPI for Dymension
 async function fetchDymensionData() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
-    // Log the full data for debugging purposes
     console.log("Fetched data:", response.data);
-    // Assume the API returns an object with a tokens array or similar structure.
-    // You may need to adjust this based on the actual API response.
-    // For example, if the response is { tokens: [ ... ] }:
-    return response.data.tokens || [];
+    // Adjust this line based on the actual response structure.
+    // For example, if the token data is located under response.data.data.tokens:
+    return (response.data.data && response.data.data.tokens) || [];
   } catch (error) {
-    console.error('Error fetching data from BlastAPI:', error.message);
+    console.error('Error fetching tokens from BlastAPI:', error.message);
     return [];
   }
 }
@@ -39,10 +37,7 @@ async function updateKnowledgeJson(tokens) {
     }
 
     // Look for the HELON token in the fetched tokens data
-    // Adjust this logic based on the actual API response structure.
-    const helonToken = tokens.find(token => 
-      token.symbol && token.symbol.toLowerCase() === 'helon'
-    );
+    const helonToken = tokens.find(token => token.symbol && token.symbol.toLowerCase() === 'helon');
     console.log("helonToken:", helonToken);
     
     if (helonToken) {
@@ -52,7 +47,11 @@ async function updateKnowledgeJson(tokens) {
         description: helonToken.description || "Token used in the Helon ecosystem for governance, fees, and incentives.",
         address: helonToken.address || "0xae2d11954812a870aec79f73a948d7f3c31607ae",
         decimals: helonToken.decimals || 18,
-        official_source: "https://helon.space"
+        official_source: "https://helon.space",
+        // If the fetched token data includes RPC or WSS endpoints, you can update these.
+        // Otherwise, we fall back to our pre‐defined endpoints:
+        rpc_endpoint: helonToken.rpc_endpoint || "https://dymension-mainnet.public.blastapi.io",
+        wss_endpoint: helonToken.wss_endpoint || "wss://dymension-mainnet.public.blastapi.io"
       };
       fs.writeFileSync(KNOWLEDGE_JSON_PATH, JSON.stringify(knowledge, null, 2));
       console.log('Knowledge JSON updated successfully with token data.');
