@@ -4,30 +4,50 @@ on:
   push:
     branches: [ "main" ]   # o il branch che preferisci
 
-# Permessi: abilitano id-token e scrittura su contenuti
 permissions:
   contents: write
   id-token: write
 
-# (Opzionale) se non vuoi concurrency che cancella i run
-# concurrency:
-#   group: pages_build_deployment
-#   cancel-in-progress: false
+# Sezione concurrency per impedire la cancellazione automatica dei run precedenti
+concurrency:
+  group: pages_build_deployment
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
     steps:
+      # 1) Checkout del repository
       - name: Checkout repository
         uses: actions/checkout@v3
-      
-      # Esempio di build
-      - name: Build site
-        run: |
-          echo "Here you'd do npm install && npm run build or similar"
 
+      # 2) Build del tuo sito (esempio con npm)
+      - name: Install dependencies & Build
+        run: |
+          npm install
+          npm run build
+          # Supponiamo che la cartella di output sia ./build
+          # Se hai un'altra cartella (es. ./dist), cambia sotto
+
+      # 3) Carica l’artifact per GitHub Pages
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./build  # cartella in cui si trovano i file HTML/CSS/JS generati
+          # artifact_name: mySiteArtifact # (opzionale) se vuoi nominare l'artifact
+
+      # 4) Deploy su GitHub Pages
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # Se servono parametri, puoi aggiungerli (branch: gh-pages, etc.)
+          # Se usi un personal token MY_GITHUB_TOKEN:
+          # token: ${{ secrets.MY_GITHUB_TOKEN }}
+          # Altrimenti, se vuoi usare GITHUB_TOKEN integrato:
+          token: ${{ secrets.MY_GITHUB_TOKEN }}
+
+          # Se hai nominato l'artifact come "mySiteArtifact" sopra, metti:
+          # artifact_name: mySiteArtifact
+
+          # Se vuoi pubblicare su un altro branch (es. gh-pages), aggiungi:
+          # branch: gh-pages
