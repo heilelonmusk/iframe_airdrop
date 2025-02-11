@@ -10,7 +10,7 @@
   container.style.zIndex = "1100";
   document.body.appendChild(container);
 
-  // HTML structure for the chat widget
+  // Define the chat widget HTML
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
       width: 90px;
@@ -59,7 +59,7 @@
     </div>
   `;
 
-  // Inject additional styles
+  // Inject additional styles for the chat widget
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -80,24 +80,24 @@
   `;
   document.head.appendChild(styleOverride);
 
-  // Show the chat button after a delay
+  // Show the chat button after a 3-second delay
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
-  // Toggle widget visibility when the chat button is clicked
+  // Toggle chat widget visibility when the chat button is clicked
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Function to send a chat message to the backend
+  // Send chat function: sends the user's question to the backend and appends the reply to the chat body
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
     
-    // Append the user's message to the chat
+    // Append user's message
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
