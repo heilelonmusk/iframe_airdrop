@@ -1,60 +1,62 @@
 #ultronChatContainer {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
-  }
-  
-  #ultronChatButton {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, #ff9300, #ff9300);
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  #ultronChatWidget {
-    display: none;
-    width: 320px;
-    background: #1c1c1c;
-    border-radius: 10px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-  }
-  
-  .ultron-header {
-    background: linear-gradient(135deg, #ff9300, #ff9300);
-    padding: 12px;
-    color: white;
-    text-align: center;
-  }
-  
-  .ultron-body {
-    padding: 12px;
-    background: #2e2e2e;
-    color: white;
-  }
-  
-  .ultron-input {
-    display: flex;
-    padding: 10px;
-    background: #2e2e2e;
-  }
-  
-  .ultron-input input {
-    flex: 1;
-    padding: 8px;
-    background: #1c1c1c;
-    color: white;
-  }
-  
-  .ultron-input button {
-    background: #ff9300;
-    color: #000;
-    font-weight: bold;
-    padding: 8px 12px;
-    border-radius: 4px;
-  }
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+#ultronChatButton {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #ff9300, #ff9300);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+#ultronChatWidget {
+  display: none;
+  width: 320px;
+  background: #1c1c1c;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+}
+
+.ultron-header {
+  background: linear-gradient(135deg, #ff9300, #ff9300);
+  padding: 12px;
+  color: white;
+  text-align: center;
+}
+
+.ultron-body {
+  padding: 12px;
+  background: #2e2e2e;
+  color: white;
+}
+
+.ultron-input {
+  display: flex;
+  padding: 10px;
+  background: #2e2e2e;
+}
+
+.ultron-input input {
+  flex: 1;
+  padding: 8px;
+  background: #1c1c1c;
+  color: white;
+}
+
+.ultron-input button {
+  background: #ff9300;
+  color: #000;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
