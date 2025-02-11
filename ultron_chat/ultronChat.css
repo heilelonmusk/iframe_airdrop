@@ -1,147 +1,60 @@
-/* Ultron Chat Container */
 #ultronChatContainer {
     position: fixed;
-    bottom: 80px;
-    right: 40px;
-    z-index: 1100;
-}
-
-/* Ultron Chat Button */
-#ultronChatButton {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  #ultronChatButton {
+    width: 70px;
+    height: 70px;
     background: linear-gradient(135deg, #ff9300, #ff9300);
-    border: none;
+    border-radius: 50%;
     cursor: pointer;
-    opacity: 0;
-    transition: transform 0.3s, opacity 0.3s;
-    position: relative;
-}
-
-#ultronChatButton:hover {
-    transform: scale(1.1);
-}
-
-/* Ultron Chat Icon */
-#ultronChatButton img {
-    width: 85%;
-    height: 85%;
-    border-radius: 50%;
-    position: absolute;
-    top: 10%;
-    left: 10%;
-}
-
-/* Pulsing Effect */
-.ultron-pulse {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,147,0,0.7) 0%, transparent 75%);
-    animation: pulseGlow 1.7s infinite;
-    top: 0;
-    left: 0;
-    z-index: -1;
-}
-
-@keyframes pulseGlow {
-    0% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(1.6); opacity: 0.4; }
-    100% { transform: scale(1); opacity: 0.7; }
-}
-
-/* Ultron Chat Widget */
-#ultronChatWidget {
-    width: 320px;
-    max-width: 90%;
-    height: 400px;
-    background: #1c1c1c;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  #ultronChatWidget {
     display: none;
-    flex-direction: column;
-    overflow: hidden;
-    margin-top: 10px;
-}
-
-/* Chat Header */
-.ultron-header {
+    width: 320px;
+    background: #1c1c1c;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+  }
+  
+  .ultron-header {
     background: linear-gradient(135deg, #ff9300, #ff9300);
     padding: 12px;
-    font-weight: 600;
     color: white;
     text-align: center;
-}
-
-/* Chat Body */
-.ultron-body {
-    flex: 1;
+  }
+  
+  .ultron-body {
     padding: 12px;
-    overflow-y: auto;
     background: #2e2e2e;
-    font-size: 14px;
-    line-height: 1.5;
     color: white;
-}
-
-/* Chat Input */
-.ultron-input {
+  }
+  
+  .ultron-input {
     display: flex;
-    padding: 12px;
+    padding: 10px;
     background: #2e2e2e;
-}
-
-/* Input Field */
-#chatInput {
+  }
+  
+  .ultron-input input {
     flex: 1;
     padding: 8px;
-    border: 1px solid #444;
-    border-radius: 4px;
-    font-size: 14px;
-    background: transparent;
+    background: #1c1c1c;
     color: white;
-    outline: none;
-}
-
-/* Send Button */
-#ultronSendButton {
-    margin-left: 8px;
-    padding: 8px 12px;
-    border: none;
+  }
+  
+  .ultron-input button {
     background: #ff9300;
     color: #000;
     font-weight: bold;
+    padding: 8px 12px;
     border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-#ultronSendButton:hover {
-    background: #ffa733;
-}
-
-/* User Message */
-.ultron-user-message {
-    background: #ff9300;
-    color: black;
-    padding: 8px;
-    border-radius: 10px;
-    margin: 5px 0;
-    text-align: right;
-    max-width: 80%;
-    align-self: flex-end;
-}
-
-/* Ultron AI Message */
-.ultron-bot-message {
-    background: #444;
-    color: white;
-    padding: 8px;
-    border-radius: 10px;
-    margin: 5px 0;
-    text-align: left;
-    max-width: 80%;
-    align-self: flex-start;
-}
+  }
