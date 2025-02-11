@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config(); // Load environment variables
 
-// Retrieve the MongoDB URI from environment variables
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
@@ -27,7 +26,7 @@ exports.handler = async (event) => {
     console.log("Received event:", event);
     console.log("Raw event body:", event.body);
 
-    // Parse the request body
+    // Parse the JSON request body
     let data;
     try {
       data = JSON.parse(event.body);
@@ -51,10 +50,10 @@ exports.handler = async (event) => {
 
     // Connect to MongoDB and select the appropriate database and collection
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB");  // Adjust the database name if needed
+    const db = client.db("heilelonDB");
     const collection = db.collection("questions");
 
-    // Check if a similar question already exists (case-insensitive)
+    // Check for an existing similar question (case-insensitive)
     const existing = await collection.findOne({
       question: { $regex: new RegExp(question, 'i') }
     });
@@ -67,6 +66,7 @@ exports.handler = async (event) => {
         source: existing.source
       };
     } else {
+      // Insert the new question for later review/processing
       const newDoc = {
         question: question,
         answer: null,
