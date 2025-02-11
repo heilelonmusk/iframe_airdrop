@@ -1,36 +1,15 @@
 {
   "about": {
-    "who": "We are the Helon team, dedicated to decentralized innovation.",
-    "what": "Helon is a revolutionary project in decentralized finance, empowering communities with advanced blockchain solutions.",
-    "where": {
-      "website": "https://helon.space",
-      "discord": "https://discord.gg/helon",
-      "twitter": "https://twitter.com/helonproject",
-      "telegram": "https://t.me/helon"
-    },
-    "when": "Final airdrop details will be announced by 23:59 CET on Feb. 28.",
-    "why": "To empower our community with decentralized solutions and drive innovation."
+    "description": "Ultron AI is an advanced knowledge base system designed to provide insights on Helon.",
+    "website": "https://helon.space",
+    "twitter": "https://twitter.com/helonproject",
+    "telegram": "https://t.me/helon"
   },
   "token": {
     "name": "Heil Elon",
     "symbol": "HELON",
-    "description": "Heil Elon is a RollApp project on the Dymension platform. The $HELON token is used within the ecosystem for governance, transaction fees, and incentives.",
-    "address": "0xae2d11954812a870aec79f73a948d7f3c31607ae",
+    "contract": "0xae2d11954812a870aec79f73a948d7f3c31607ae",
     "decimals": 18,
-    "official_source": "https://helon.space",
-    "rpc_endpoint": "https://dymension-mainnet.public.blastapi.io",
-    "tendermint_endpoint": "https://dymension-mainnet-tendermint.public.blastapi.io",
-    "wss_endpoint": "wss://dymension-mainnet.public.blastapi.io"
-  },
-  "rollapp": {
-    "rollapp_id": "heilelonmusk_653667-1",
-    "vm_type": "WASM",
-    "domain_handle": "@heilelonmusk",
-    "issued_tokens": "IRO/HELON",
-    "bech32_prefix": "helon",
-    "status": "Registered",
-    "founder": "0xf5be7fbf739b13637661248683f40d9d4a88aac5",
-    "endorsement": "51.05 DYM",
-    "notes": "This RollApp is part of the Dymension ecosystem and uses a WASM execution environment. It is integrated via IBC and registered on the network."
+    "network": "dymension_1100-1"
   }
 }
