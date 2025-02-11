@@ -1,13 +1,11 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config(); // Load environment variables
 
-// Retrieve the MongoDB connection string from the environment
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
 async function connectToDatabase() {
   if (cachedClient) return cachedClient;
-  // The MongoDB Node.js Driver 4.x uses the new parser and unified topology by default.
   const client = new MongoClient(uri);
   await client.connect();
   cachedClient = client;
@@ -16,7 +14,6 @@ async function connectToDatabase() {
 
 exports.handler = async (event) => {
   try {
-    // Allow only POST requests
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
@@ -27,7 +24,6 @@ exports.handler = async (event) => {
     console.log("Received event:", event);
     console.log("Raw event body:", event.body);
 
-    // Parse the request body
     let data;
     try {
       data = JSON.parse(event.body);
@@ -40,7 +36,6 @@ exports.handler = async (event) => {
       };
     }
 
-    // Validate and trim the question
     const question = data.question ? data.question.trim() : "";
     if (!question) {
       console.error("Missing question field");
@@ -50,12 +45,10 @@ exports.handler = async (event) => {
       };
     }
 
-    // Connect to MongoDB
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB"); // Adjust the database name if necessary
+    const db = client.db("heilelonDB");
     const collection = db.collection("questions");
 
-    // Search for a similar question (case-insensitive)
     const existing = await collection.findOne({
       question: { $regex: new RegExp(question, 'i') }
     });
@@ -68,7 +61,6 @@ exports.handler = async (event) => {
         source: existing.source
       };
     } else {
-      // Record the new question for future updates
       const newDoc = {
         question: question,
         answer: null,
