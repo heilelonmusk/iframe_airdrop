@@ -59,7 +59,7 @@
     </div>
   `;
 
-  // Inject additional styles for the chat widget
+  // Inject additional CSS styles for the widget
   const styleOverride = document.createElement('style');
   styleOverride.innerHTML = `
     #ultronChatContainer, #ultronChatContainer * {
@@ -80,24 +80,24 @@
   `;
   document.head.appendChild(styleOverride);
 
-  // Show the chat button after a 3-second delay
+  // Reveal the chat button after 3 seconds
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
-  // Toggle chat widget visibility when the chat button is clicked
+  // Toggle widget visibility when the chat button is clicked
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
 
-  // Send chat function: sends the user's question to the backend and appends the reply to the chat body
+  // Function to send a chat message to the backend and display the response
   window.sendChat = async function() {
     const input = document.getElementById("chatInput").value.trim();
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
     
-    // Append user's message
+    // Append user's question
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
