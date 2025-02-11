@@ -7,29 +7,29 @@ const path = require('path');
 const axios = require('axios');
 
 // Use the BlastAPI endpoint for Dymension token listing.
-// Documentation:
+// Refer to the documentation:
 // - Core API: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
-// - Tendermint: https://docs.blastapi.io/blast-documentation/tendermint/
+// - Tendermint API: https://docs.blastapi.io/blast-documentation/tendermint/
 const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension';
 
 // Path to the knowledge.json file
 const KNOWLEDGE_JSON_PATH = path.resolve(__dirname, '../data/knowledge.json');
 
-// Function to fetch token data from BlastAPI for Dymension
 async function fetchDymensionData() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
     console.log("Fetched data:", response.data);
-    // Adjust extraction based on API response structure.
+    // Adjust the extraction below if the structure differs.
     // For example, if tokens are under response.data.data.tokens:
-    return (response.data.data && response.data.data.tokens) || [];
+    const tokens = (response.data.data && response.data.data.tokens) || [];
+    console.log("Extracted tokens array:", tokens);
+    return tokens;
   } catch (error) {
     console.error('Error fetching tokens from BlastAPI:', error.message);
     return [];
   }
 }
 
-// Function to update knowledge.json with token data
 async function updateKnowledgeJson(tokens) {
   try {
     let knowledge = {};
@@ -40,14 +40,18 @@ async function updateKnowledgeJson(tokens) {
       console.log("knowledge.json not found; creating a new file.");
     }
 
-    // Look for the HELON token in the fetched tokens data
+    // Look for the HELON token (case-insensitive match)
     const helonToken = tokens.find(token => token && token.symbol && token.symbol.toLowerCase() === 'helon');
     console.log("helonToken:", helonToken);
     
     if (helonToken) {
-      // Safely extract token properties, checking for undefined values
+      // Safely extract token properties; warn if 'name' is missing
+      const tokenName = helonToken.name;
+      if (typeof tokenName === 'undefined') {
+        console.warn("Warning: HELON token found but no 'name' property exists. Full token object:", helonToken);
+      }
       knowledge.token = {
-        name: helonToken.name || "Heil Elon",
+        name: tokenName || "Heil Elon",
         symbol: helonToken.symbol || "HELON",
         description: helonToken.description || "Token used in the Helon ecosystem for governance, fees, and incentives.",
         address: helonToken.address || "0xae2d11954812a870aec79f73a948d7f3c31607ae",
@@ -66,7 +70,6 @@ async function updateKnowledgeJson(tokens) {
   }
 }
 
-// Main function to perform the update
 async function main() {
   const tokens = await fetchDymensionData();
   if (tokens.length > 0) {
