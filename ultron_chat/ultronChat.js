@@ -85,7 +85,7 @@
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
 
-  // Toggle widget visibility on button click
+  // Toggle widget visibility when the chat button is clicked
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
@@ -97,7 +97,7 @@
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
     
-    // Append user message to chat
+    // Append the user's message to the chat
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
