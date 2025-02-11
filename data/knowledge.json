@@ -19,6 +19,7 @@
     "decimals": 18,
     "official_source": "https://helon.space",
     "rpc_endpoint": "https://dymension-mainnet.public.blastapi.io",
+    "tendermint_endpoint": "https://dymension-mainnet-tendermint.public.blastapi.io",
     "wss_endpoint": "wss://dymension-mainnet.public.blastapi.io"
   }
 }
