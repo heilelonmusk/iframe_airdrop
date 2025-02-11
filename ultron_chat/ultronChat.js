@@ -1,11 +1,18 @@
 (function () {
-  if (window.self !== window.top) return;
+  if (window.self !== window.top) return;  // Previene caricamento multiplo in iframe
 
   console.log("✅ Ultron Chat is initializing...");
+
+  // Controlla se la chat esiste già
+  if (document.getElementById("ultronChatContainer")) return;
 
   // Creazione del container principale
   const container = document.createElement("div");
   container.id = "ultronChatContainer";
+  container.style.position = "fixed";
+  container.style.bottom = "20px";
+  container.style.right = "20px";
+  container.style.zIndex = "1100";
   document.body.appendChild(container);
 
   container.innerHTML = `
@@ -20,21 +27,21 @@
         <p>Your AI guide through the Helon universe.</p>
       </div>
       <div class="ultron-input">
-        <input type="text" id="chatInput" placeholder="Type here..." />
+        <input type="text" id="chatInput" placeholder="Type your question here..." />
         <button id="ultronSendButton">Send</button>
       </div>
     </div>
   `;
 
-  // **IMPORTANTE**: Aggiunta manuale del CSS se non viene caricato
+  console.log("✅ Ultron Chat elements added to the page.");
+
+  // **Aggiunta manuale del CSS se non viene caricato**
   if (!document.querySelector('link[href="ultron_chat/ultronChat.css"]')) {
     const styleSheet = document.createElement("link");
     styleSheet.rel = "stylesheet";
     styleSheet.href = "ultron_chat/ultronChat.css";
     document.head.appendChild(styleSheet);
   }
-
-  console.log("✅ Ultron Chat elements added to the page.");
 
   // Delay di 3 secondi per l'apparizione dell'icona
   setTimeout(() => {
