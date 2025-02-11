@@ -6,7 +6,7 @@ exports.handler = async () => {
     statusCode: 200,
     body: JSON.stringify({ message: "Whitelist update triggered successfully." })
   };
-}; 
+};
 
  // Gestione Preflight (OPTIONS)
   if (event.httpMethod === "OPTIONS") {
