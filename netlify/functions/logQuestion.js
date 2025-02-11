@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config(); // Load environment variables
 
-// Retrieve MongoDB URI from the environment
+// Retrieve the MongoDB URI from environment variables
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
@@ -16,7 +16,7 @@ async function connectToDatabase() {
 
 exports.handler = async (event) => {
   try {
-    // Only accept POST requests
+    // Accept only POST requests
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
@@ -27,6 +27,7 @@ exports.handler = async (event) => {
     console.log("Received event:", event);
     console.log("Raw event body:", event.body);
 
+    // Parse the request body
     let data;
     try {
       data = JSON.parse(event.body);
@@ -48,10 +49,12 @@ exports.handler = async (event) => {
       };
     }
 
+    // Connect to MongoDB and select the appropriate database and collection
     const client = await connectToDatabase();
-    const db = client.db("heilelonDB");
+    const db = client.db("heilelonDB");  // Adjust the database name if needed
     const collection = db.collection("questions");
 
+    // Check if a similar question already exists (case-insensitive)
     const existing = await collection.findOne({
       question: { $regex: new RegExp(question, 'i') }
     });
