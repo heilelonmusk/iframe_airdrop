@@ -7,7 +7,7 @@ const path = require('path');
 const axios = require('axios');
 
 // Use the BlastAPI endpoint for Dymension token listing.
-// Refer to the documentation:
+// Documentation:
 // - Core API: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
 // - Tendermint API: https://docs.blastapi.io/blast-documentation/tendermint/
 const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension';
@@ -19,9 +19,16 @@ async function fetchDymensionData() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
     console.log("Fetched data:", response.data);
-    // Adjust the extraction below if the structure differs.
+
+    // Adjust extraction based on the API response structure.
     // For example, if tokens are under response.data.data.tokens:
-    const tokens = (response.data.data && response.data.data.tokens) || [];
+    let tokens = (response.data.data && response.data.data.tokens) || [];
+
+    // Verify that tokens is an array
+    if (!Array.isArray(tokens)) {
+      console.warn("Expected tokens array, but got:", tokens);
+      tokens = [];
+    }
     console.log("Extracted tokens array:", tokens);
     return tokens;
   } catch (error) {
@@ -40,12 +47,17 @@ async function updateKnowledgeJson(tokens) {
       console.log("knowledge.json not found; creating a new file.");
     }
 
-    // Look for the HELON token (case-insensitive match)
-    const helonToken = tokens.find(token => token && token.symbol && token.symbol.toLowerCase() === 'helon');
-    console.log("helonToken:", helonToken);
-    
+    // Log tokens array before finding HELON token
+    console.log("Looking for HELON token in tokens array...");
+    const helonToken = tokens.find(token => {
+      if (!token) return false;
+      if (!token.symbol) return false;
+      return token.symbol.toLowerCase() === 'helon';
+    });
+    console.log("helonToken found:", helonToken);
+
     if (helonToken) {
-      // Safely extract token properties; warn if 'name' is missing
+      // Use a safe check for the token name
       const tokenName = helonToken.name;
       if (typeof tokenName === 'undefined') {
         console.warn("Warning: HELON token found but no 'name' property exists. Full token object:", helonToken);
