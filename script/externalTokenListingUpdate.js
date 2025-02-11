@@ -7,7 +7,7 @@ const path = require('path');
 const axios = require('axios');
 
 // Updated BlastAPI endpoint for Dymension token data.
-// (Verify the correct endpoint per the documentation: https://docs.blastapi.io/)
+// Refer to: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
 const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension/tokens';
 
 // Path to the knowledge.json file
@@ -17,7 +17,8 @@ async function fetchDymensionData() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
     console.log("Full API response:", JSON.stringify(response.data, null, 2));
-    // Attempt to extract tokens from the response:
+    
+    // Attempt to extract tokens from expected keys
     let tokens = [];
     if (response.data) {
       if (response.data.data && Array.isArray(response.data.data.tokens)) {
@@ -28,6 +29,8 @@ async function fetchDymensionData() {
         console.warn("Tokens not found under expected keys in the API response.");
       }
     }
+    // Filter out any null or undefined entries
+    tokens = Array.isArray(tokens) ? tokens.filter(token => token != null) : [];
     console.log("Extracted tokens array:", tokens);
     return tokens;
   } catch (error) {
@@ -46,14 +49,14 @@ async function updateKnowledgeJson(tokens) {
       console.log("knowledge.json not found; creating a new file.");
     }
 
-    // Find the HELON token (using a case-insensitive search)
+    // Find the HELON token (case-insensitive search)
     const helonToken = tokens.find(token => token && token.symbol && token.symbol.toLowerCase() === 'helon');
     console.log("helonToken found:", helonToken);
     
     if (helonToken) {
       const tokenName = helonToken.name;
       if (typeof tokenName === 'undefined') {
-        console.warn("Warning: HELON token found but the 'name' property is undefined. Full token object:", helonToken);
+        console.warn("Warning: HELON token found but 'name' property is undefined. Full token object:", helonToken);
       }
       knowledge.token = {
         name: tokenName || "Heil Elon",
