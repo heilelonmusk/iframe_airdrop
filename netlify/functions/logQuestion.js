@@ -1,11 +1,13 @@
 const { MongoClient } = require('mongodb');
 require('dotenv').config(); // Load environment variables
 
+// Retrieve MongoDB URI from the environment
 const uri = process.env.MONGO_URI;
 let cachedClient = null;
 
 async function connectToDatabase() {
   if (cachedClient) return cachedClient;
+  // MongoDB Driver 4.x uses the new parser and unified topology by default.
   const client = new MongoClient(uri);
   await client.connect();
   cachedClient = client;
@@ -14,6 +16,7 @@ async function connectToDatabase() {
 
 exports.handler = async (event) => {
   try {
+    // Only accept POST requests
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405,
