@@ -6,11 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-// Use the BlastAPI endpoint for Dymension token listing.
-// Documentation:
-// - Core API: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
-// - Tendermint API: https://docs.blastapi.io/blast-documentation/tendermint/
-const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension';
+// Updated BlastAPI endpoint for Dymension token data.
+// (Verify the correct endpoint per the documentation: https://docs.blastapi.io/)
+const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension/tokens';
 
 // Path to the knowledge.json file
 const KNOWLEDGE_JSON_PATH = path.resolve(__dirname, '../data/knowledge.json');
@@ -18,16 +16,17 @@ const KNOWLEDGE_JSON_PATH = path.resolve(__dirname, '../data/knowledge.json');
 async function fetchDymensionData() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
-    console.log("Fetched data:", response.data);
-
-    // Adjust extraction based on the API response structure.
-    // For example, if tokens are under response.data.data.tokens:
-    let tokens = (response.data.data && response.data.data.tokens) || [];
-
-    // Verify that tokens is an array
-    if (!Array.isArray(tokens)) {
-      console.warn("Expected tokens array, but got:", tokens);
-      tokens = [];
+    console.log("Full API response:", JSON.stringify(response.data, null, 2));
+    // Attempt to extract tokens from the response:
+    let tokens = [];
+    if (response.data) {
+      if (response.data.data && Array.isArray(response.data.data.tokens)) {
+        tokens = response.data.data.tokens;
+      } else if (Array.isArray(response.data.tokens)) {
+        tokens = response.data.tokens;
+      } else {
+        console.warn("Tokens not found under expected keys in the API response.");
+      }
     }
     console.log("Extracted tokens array:", tokens);
     return tokens;
@@ -47,20 +46,14 @@ async function updateKnowledgeJson(tokens) {
       console.log("knowledge.json not found; creating a new file.");
     }
 
-    // Log tokens array before finding HELON token
-    console.log("Looking for HELON token in tokens array...");
-    const helonToken = tokens.find(token => {
-      if (!token) return false;
-      if (!token.symbol) return false;
-      return token.symbol.toLowerCase() === 'helon';
-    });
+    // Find the HELON token (using a case-insensitive search)
+    const helonToken = tokens.find(token => token && token.symbol && token.symbol.toLowerCase() === 'helon');
     console.log("helonToken found:", helonToken);
-
+    
     if (helonToken) {
-      // Use a safe check for the token name
       const tokenName = helonToken.name;
       if (typeof tokenName === 'undefined') {
-        console.warn("Warning: HELON token found but no 'name' property exists. Full token object:", helonToken);
+        console.warn("Warning: HELON token found but the 'name' property is undefined. Full token object:", helonToken);
       }
       knowledge.token = {
         name: tokenName || "Heil Elon",
@@ -70,6 +63,7 @@ async function updateKnowledgeJson(tokens) {
         decimals: helonToken.decimals || 18,
         official_source: "https://helon.space",
         rpc_endpoint: helonToken.rpc_endpoint || "https://dymension-mainnet.public.blastapi.io",
+        tendermint_endpoint: helonToken.tendermint_endpoint || "https://dymension-mainnet-tendermint.public.blastapi.io",
         wss_endpoint: helonToken.wss_endpoint || "wss://dymension-mainnet.public.blastapi.io"
       };
       fs.writeFileSync(KNOWLEDGE_JSON_PATH, JSON.stringify(knowledge, null, 2));
