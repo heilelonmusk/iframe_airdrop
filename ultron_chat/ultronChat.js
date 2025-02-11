@@ -1,97 +1,82 @@
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("Ultron Chat Initialized");
-
-    const chatContainer = document.createElement("div");
-    chatContainer.id = "ultron-chat-container";
-    document.body.appendChild(chatContainer);
-
-    // Add Chat Icon
-    chatContainer.innerHTML = `
-        <div id="ultron-chat-icon">
-            <img src="https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.png" alt="Ultron Chat">
+(function() {
+    if (window.self !== window.top) return;
+  
+    // Create the chat container
+    const container = document.createElement("div");
+    container.id = "ultron-chat-container";
+    container.style.position = "fixed";
+    container.style.bottom = "20px";
+    container.style.right = "20px";
+    container.style.zIndex = "1000";
+    document.body.appendChild(container);
+  
+    // Define the chat widget HTML
+    container.innerHTML = `
+      <div id="ultron-chat-icon">
+        <img src="https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.png" alt="Ultron">
+      </div>
+      <div id="ultron-chat-window">
+        <div id="ultron-chat-header">
+          Ultron – Heil Elon
+          <button id="ultron-close-btn">&times;</button>
         </div>
-        <div id="ultron-chat-window">
-            <div id="ultron-chat-header">
-                Ultron Chat
-                <button id="ultron-close-btn">✖</button>
-            </div>
-            <div id="ultron-chat-messages"></div>
-            <div id="ultron-chat-input">
-                <input type="text" id="ultron-user-input" placeholder="Type a message..." />
-                <button id="ultron-send-btn">Send</button>
-            </div>
+        <div id="ultron-chat-messages">
+          <p class="ultron-bot-message">Hi, I'm ULTRON. 🤖</p>
+          <p class="ultron-bot-message">Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
+          <p class="ultron-bot-message">💡 Ask me anything about Helon, its vision, the ecosystem, or token details.</p>
         </div>
+        <div id="ultron-chat-input">
+          <input type="text" id="ultron-user-input" placeholder="Type your question...">
+          <button id="ultron-send-btn">Send</button>
+        </div>
+      </div>
     `;
-
-    const chatIcon = document.getElementById("ultron-chat-icon");
-    const chatWindow = document.getElementById("ultron-chat-window");
-    const closeButton = document.getElementById("ultron-close-btn");
-    const sendButton = document.getElementById("ultron-send-btn");
-    const userInput = document.getElementById("ultron-user-input");
-    const messagesDiv = document.getElementById("ultron-chat-messages");
-
-    if (!chatIcon || !chatWindow || !sendButton || !userInput || !messagesDiv || !closeButton) {
-        console.error("Ultron Chat: Elements not found!");
-        return;
-    }
-
-    chatWindow.style.display = "none"; // Hide chat initially
-
-    // Toggle Chat Window
-    chatIcon.addEventListener("click", function () {
-        chatWindow.style.display = chatWindow.style.display === "none" ? "block" : "none";
+  
+    // Reveal the chat icon after 3 seconds
+    setTimeout(() => {
+      document.getElementById("ultron-chat-icon").style.opacity = "1";
+    }, 3000);
+  
+    // Chat button click event
+    document.getElementById("ultron-chat-icon").addEventListener("click", () => {
+      document.getElementById("ultron-chat-window").style.display = "block";
     });
-
-    // Close Chat Window
-    closeButton.addEventListener("click", function () {
-        chatWindow.style.display = "none";
+  
+    // Close button event
+    document.getElementById("ultron-close-btn").addEventListener("click", () => {
+      document.getElementById("ultron-chat-window").style.display = "none";
     });
-
-    // Send message when clicking the send button
-    sendButton.addEventListener("click", sendMessage);
-
-    // Send message when pressing Enter
-    userInput.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-            sendMessage();
+  
+    // Send message function
+    document.getElementById("ultron-send-btn").addEventListener("click", async () => {
+      const inputField = document.getElementById("ultron-user-input");
+      const message = inputField.value.trim();
+      if (!message) return;
+  
+      const chatBody = document.getElementById("ultron-chat-messages");
+      chatBody.innerHTML += `<p class="ultron-user-message">You: ${message}</p>`;
+      inputField.value = "";
+      chatBody.scrollTop = chatBody.scrollHeight;
+  
+      try {
+        const response = await fetch('/.netlify/functions/logQuestion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: message })
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          if (data.answer) {
+            chatBody.innerHTML += `<p class="ultron-bot-message">Ultron: ${data.answer}</p>`;
+          } else {
+            chatBody.innerHTML += `<p class="ultron-bot-message">Ultron: I’m still learning, try again later!</p>`;
+          }
+        } else {
+          console.error("Error logging question:", response.status);
         }
+      } catch (err) {
+        console.error("Network error:", err);
+      }
     });
-
-    function sendMessage() {
-        const userMessage = userInput.value.trim();
-        if (userMessage === "") return;
-
-        // Append user message
-        appendMessage(userMessage, "ultron-user-message");
-
-        // Simulate bot response
-        setTimeout(() => {
-            const botResponse = getBotResponse(userMessage);
-            appendMessage(botResponse, "ultron-bot-message");
-        }, 1000);
-
-        userInput.value = ""; // Clear input field
-    }
-
-    function appendMessage(text, className) {
-        const messageDiv = document.createElement("div");
-        messageDiv.className = className;
-        messageDiv.textContent = text;
-        messagesDiv.appendChild(messageDiv);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll
-    }
-
-    function getBotResponse(input) {
-        // Basic predefined responses (this can be connected to a real AI later)
-        const responses = {
-            "hello": "Hi there! How can I assist you?",
-            "who are you": "I'm Ultron AI, here to help!",
-            "help": "Sure! What do you need help with?",
-            "dymension": "Dymension is an ecosystem supporting modular blockchain rollups!",
-            "default": "I'm not sure about that. Try asking something else!"
-        };
-
-        const lowerInput = input.toLowerCase();
-        return responses[lowerInput] || responses["default"];
-    }
-});
+  })();
