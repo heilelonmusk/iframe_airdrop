@@ -10,7 +10,7 @@
 #ultron-chat-icon {
     width: 60px;
     height: 60px;
-    background: #FF6A00; /* Arancione */
+    background: #FF6A00; /* Orange */
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -18,6 +18,7 @@
     cursor: pointer;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease-in-out;
+    opacity: 0;
 }
 
 #ultron-chat-icon:hover {
@@ -42,7 +43,7 @@
     right: 20px;
     overflow: hidden;
     animation: fadeIn 0.3s ease-in-out;
-    border: 1px solid #FF6A00; /* Arancione */
+    border: 1px solid #FF6A00; /* Orange */
 }
 
 @keyframes fadeIn {
@@ -52,7 +53,7 @@
 
 /* Chat Header */
 #ultron-chat-header {
-    background: #FF6A00; /* Arancione */
+    background: #FF6A00; /* Orange */
     color: white;
     padding: 12px;
     font-size: 18px;
