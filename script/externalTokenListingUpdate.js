@@ -7,7 +7,9 @@ const path = require('path');
 const axios = require('axios');
 
 // Use the BlastAPI endpoint for Dymension token listing
-// Documentation: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
+// Refer to the documentation: 
+// - Dymension Core API: https://docs.blastapi.io/blast-documentation/apis-documentation/core-api/dymension/
+// - Tendermint API: https://docs.blastapi.io/blast-documentation/tendermint/
 const DYMENSION_API_URL = 'https://blastapi.io/public-api/dymension';
 
 // Path to the knowledge.json file
@@ -18,8 +20,8 @@ async function fetchDymensionData() {
   try {
     const response = await axios.get(DYMENSION_API_URL);
     console.log("Fetched data:", response.data);
-    // Adjust this line based on the actual response structure.
-    // For example, if the token data is located under response.data.data.tokens:
+    // Adjust the extraction based on the API response.
+    // For example, if the tokens are under response.data.data.tokens:
     return (response.data.data && response.data.data.tokens) || [];
   } catch (error) {
     console.error('Error fetching tokens from BlastAPI:', error.message);
@@ -48,8 +50,6 @@ async function updateKnowledgeJson(tokens) {
         address: helonToken.address || "0xae2d11954812a870aec79f73a948d7f3c31607ae",
         decimals: helonToken.decimals || 18,
         official_source: "https://helon.space",
-        // If the fetched token data includes RPC or WSS endpoints, you can update these.
-        // Otherwise, we fall back to our pre‐defined endpoints:
         rpc_endpoint: helonToken.rpc_endpoint || "https://dymension-mainnet.public.blastapi.io",
         wss_endpoint: helonToken.wss_endpoint || "wss://dymension-mainnet.public.blastapi.io"
       };
