@@ -1,82 +1,127 @@
 (function() {
-    if (window.self !== window.top) return;
-  
-    // Create the chat container
-    const container = document.createElement("div");
-    container.id = "ultron-chat-container";
-    container.style.position = "fixed";
-    container.style.bottom = "20px";
-    container.style.right = "20px";
-    container.style.zIndex = "1000";
-    document.body.appendChild(container);
-  
-    // Define the chat widget HTML
-    container.innerHTML = `
-      <div id="ultron-chat-icon">
-        <img src="https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.png" alt="Ultron">
+  if (window.self !== window.top) return;
+
+  // Create the chat container
+  const container = document.createElement("div");
+  container.id = "ultronChatContainer";
+  container.style.position = "fixed";
+  container.style.bottom = "80px";
+  container.style.right = "40px";
+  container.style.zIndex = "1100";
+  document.body.appendChild(container);
+
+  // Define the chat widget HTML
+  container.innerHTML = `
+    <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button" style="
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff9300, #ff9300);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      position: relative;">
+      <div class="ultron-pulse"></div>
+      <img src="https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.png" 
+           alt="Ultron" class="ultron-button-img" style="
+           width: 85%; height: 85%; border-radius: 50%; position: absolute; top: 10%; left: 10%;">
+    </button>
+    <div id="ultronChatWidget" class="ultron-widget" style="
+      width: 320px; max-width: 90%; height: 400px;
+      background: #1c1c1c; border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      display: none; flex-direction: column; overflow: hidden; margin-top: 10px;">
+      <header class="ultron-header" style="
+        background: linear-gradient(135deg, #ff9300, #ff9300);
+        padding: 12px; font-weight: 600; color: white; text-align: center;">
+        Ultron – Heil Elon
+      </header>
+      <div class="ultron-body" id="chatBody" style="
+        flex: 1; padding: 12px; overflow-y: auto;
+        background: #2e2e2e; font-size: 14px; line-height: 1.5; color: white;">
+        <p>Hi, I'm ULTRON. 🤖</p>
+        <p>Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
+        <p>💡 Ask me anything about Helon, its vision, the ecosystem, or token details.<br>
+           🔗 For official links, type “channels”.</p>
+        <p>The system runs. The answers are yours to uncover. 🚀</p>
       </div>
-      <div id="ultron-chat-window">
-        <div id="ultron-chat-header">
-          Ultron – Heil Elon
-          <button id="ultron-close-btn">&times;</button>
-        </div>
-        <div id="ultron-chat-messages">
-          <p class="ultron-bot-message">Hi, I'm ULTRON. 🤖</p>
-          <p class="ultron-bot-message">Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
-          <p class="ultron-bot-message">💡 Ask me anything about Helon, its vision, the ecosystem, or token details.</p>
-        </div>
-        <div id="ultron-chat-input">
-          <input type="text" id="ultron-user-input" placeholder="Type your question...">
-          <button id="ultron-send-btn">Send</button>
-        </div>
+      <div class="ultron-input" style="
+        display: flex; padding: 12px; background: #2e2e2e;">
+        <input type="text" id="chatInput" placeholder="Type your question here..." style="
+          flex: 1; padding: 8px; border: 1px solid #444; border-radius: 4px;
+          font-size: 14px; background: transparent; color: white; outline: none;">
+        <button id="ultronSendButton" style="
+          margin-left: 8px; padding: 8px 12px; border: none;
+          background: #ff9300; color: #000; font-weight: bold; border-radius: 4px;
+          cursor: pointer; transition: background 0.3s;">Send</button>
       </div>
-    `;
-  
-    // Reveal the chat icon after 3 seconds
-    setTimeout(() => {
-      document.getElementById("ultron-chat-icon").style.opacity = "1";
-    }, 3000);
-  
-    // Chat button click event
-    document.getElementById("ultron-chat-icon").addEventListener("click", () => {
-      document.getElementById("ultron-chat-window").style.display = "block";
-    });
-  
-    // Close button event
-    document.getElementById("ultron-close-btn").addEventListener("click", () => {
-      document.getElementById("ultron-chat-window").style.display = "none";
-    });
-  
-    // Send message function
-    document.getElementById("ultron-send-btn").addEventListener("click", async () => {
-      const inputField = document.getElementById("ultron-user-input");
-      const message = inputField.value.trim();
-      if (!message) return;
-  
-      const chatBody = document.getElementById("ultron-chat-messages");
-      chatBody.innerHTML += `<p class="ultron-user-message">You: ${message}</p>`;
-      inputField.value = "";
-      chatBody.scrollTop = chatBody.scrollHeight;
-  
-      try {
-        const response = await fetch('/.netlify/functions/logQuestion', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: message })
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          if (data.answer) {
-            chatBody.innerHTML += `<p class="ultron-bot-message">Ultron: ${data.answer}</p>`;
-          } else {
-            chatBody.innerHTML += `<p class="ultron-bot-message">Ultron: I’m still learning, try again later!</p>`;
-          }
+    </div>
+  `;
+
+  // Inject additional CSS styles for the widget
+  const styleOverride = document.createElement('style');
+  styleOverride.innerHTML = `
+    #ultronChatContainer, #ultronChatContainer * {
+      color: white !important;
+      font-family: inherit;
+    }
+    .ultron-button { position: relative; overflow: visible; }
+    .ultron-pulse {
+      position: absolute; width: 100%; height: 100%; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,147,0,0.7) 0%, transparent 75%);
+      animation: pulseGlow 1.7s infinite; top: 0; left: 0; z-index: -1;
+    }
+    @keyframes pulseGlow {
+      0% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.6); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 0.7; }
+    }
+  `;
+  document.head.appendChild(styleOverride);
+
+  // Reveal the chat button after 3 seconds
+  setTimeout(() => {
+    document.getElementById("ultronChatButton").style.opacity = "1";
+  }, 3000);
+
+  // Toggle widget visibility when the chat button is clicked
+  document.getElementById("ultronChatButton").addEventListener("click", () => {
+    const widget = document.getElementById("ultronChatWidget");
+    widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
+  });
+
+  // Function to send a chat message to the backend and display the response
+  document.getElementById("ultronSendButton").addEventListener("click", sendChat);
+
+  async function sendChat() {
+    const input = document.getElementById("chatInput").value.trim();
+    const chatBody = document.getElementById("chatBody");
+    if (!input) return;
+
+    // Append user's question
+    chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
+    document.getElementById("chatInput").value = "";
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    try {
+      const response = await fetch('/.netlify/functions/logQuestion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: input })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.answer) {
+          chatBody.innerHTML += `<p><strong>Ultron:</strong> ${data.answer} <small>(Source: ${data.source})</small></p>`;
         } else {
-          console.error("Error logging question:", response.status);
+          chatBody.innerHTML += `<p><strong>Ultron:</strong> This is an interesting question! 🚀 I'm gathering information, please try again later.</p>`;
         }
-      } catch (err) {
-        console.error("Network error:", err);
+      } else {
+        console.error("Error logging question:", response.status);
       }
-    });
-  })();
+    } catch (err) {
+      console.error("Network error:", err);
+    }
+  };
+})();
