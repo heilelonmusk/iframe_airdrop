@@ -1,4 +1,11 @@
 {
+  "name": "iframe_airdrop",
+  "version": "1.0.0",
+  "description": "Ultron Chat and related Dymension integrations",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev"
+  },
   "dependencies": {
     "@cosmjs/encoding": "^0.33.0",
     "axios": "^1.7.9",
