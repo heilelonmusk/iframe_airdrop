@@ -12,11 +12,11 @@
   container.id = "ultronChatContainer";
   document.body.appendChild(container);
   
-  // Definisci l'HTML del widget di chat
+  // Definisci l'HTML del widget di chat (aggiornato per usare l'immagine corretta)
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button">
       <div class="ultron-pulse"></div>
-      <img src="https://heilelonmusk.github.io/iframe_airdrop/data/img/img_ultronai.png" alt="Ultron" class="ultron-button-img">
+      <img src="https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.png" alt="Ultron" class="ultron-button-img">
     </button>
     <div id="ultronChatWidget" class="ultron-widget">
       <header class="ultron-header">Ultron – Heil Elon</header>
