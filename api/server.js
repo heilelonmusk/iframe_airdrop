@@ -45,7 +45,7 @@ const questionSchema = new mongoose.Schema({
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
 // API per il logging delle domande
-router.post('api/server.js', async (req, res) => {
+router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
     if (!question) {
