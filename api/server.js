@@ -25,10 +25,16 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// ✅ Configura CORS per Netlify (gestione avanzata)
+// ✅ Configura CORS per Netlify (Gestione avanzata)
 const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  credentials: true
+}));
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -37,7 +43,7 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   }
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
   next();
 });
