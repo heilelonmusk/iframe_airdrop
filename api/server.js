@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { findAnswer } = require('./knowledge');
 const express = require('express');
 const mongoose = require('mongoose');
 const serverless = require("serverless-http");
@@ -7,9 +6,10 @@ const serverless = require("serverless-http");
 const app = express();
 const router = express.Router();
 
-// Middleware globale per CORS
+// Global CORS middleware: sets headers for every request, including preflight OPTIONS.
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // For testing purposes, you may use "*" or restrict to your specific domain (e.g., "https://helon.space")
+  res.setHeader("Access-Control-Allow-Origin", "https://helon.space");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") {
@@ -18,24 +18,22 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.json());
+
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
-  console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
+  console.error("ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
   process.exit(1);
 }
 
-app.use(express.json());
-
-// Connessione a MongoDB
 mongoose.connect(MONGO_URI)
-
-  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .then(() => console.log("Connected to MongoDB Atlas"))
   .catch(err => {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("MongoDB connection error:", err);
     process.exit(1);
   });
 
-// Definizione dello schema e del modello
+// Define the schema and model for questions
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -44,55 +42,67 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
-// API per il logging delle domande
+// API endpoint for logging questions
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
     if (!question) {
-      return res.status(400).json({ error: "❌ Question is required" });
+      return res.status(400).json({ error: "Question is required" });
     }
     console.log(`Received question: "${question}"`);
+
+    // Custom handling for "channels"
+    if (question.trim().toLowerCase() === "channels") {
+      return res.json({
+        answer: "Here are the official channels: \n- Twitter: [https://x.com/heilelon_](https://x.com/heilelon_) \n- Instagram: [https://instagram.com/heil.elonmusk](https://instagram.com/heil.elonmusk) \n- Telegram: [https://t.me/heil_elon](https://t.me/heil_elon)",
+        source: "Official Documentation"
+      });
+    }
+
+    // Check if the question already exists in the database
     let existing = await Question.findOne({ question });
     if (existing) {
-      console.log(`✅ Answer found: ${existing.answer}`);
+      console.log(`Answer found: ${existing.answer}`);
       return res.json({ answer: existing.answer, source: existing.source });
     }
+
+    // If not found, create a new question record and return the default answer
     const newQuestion = new Question({ question });
     await newQuestion.save();
     console.log("New question logged in database");
-    res.json({ answer: "I'm thinking... ", source: "Ultron AI" });
+    res.json({ answer: "I'm thinking...", source: "Ultron AI" });
   } catch (error) {
-    console.error("❌ Error saving question:", error);
-    res.status(500).json({ error: "❌ Server error" });
+    console.error("Error saving question:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// (Opzionale) API per aggiornare la risposta
+// (Optional) API endpoint for updating the answer
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
     if (!question || !answer) {
-      return res.status(400).json({ error: "❌ Both question and answer are required" });
+      return res.status(400).json({ error: "Both question and answer are required" });
     }
     let updated = await Question.findOneAndUpdate(
       { question },
       { answer, source: source || "Ultron AI" },
       { new: true, upsert: true }
     );
-    console.log(`Updated answer: "${answer}" for question: "${question}"`);
-    res.json({ message: "✅ Answer updated!", updated });
+    console.log(`Updated answer for "${question}": "${answer}"`);
+    res.json({ message: "Answer updated!", updated });
   } catch (error) {
-    console.error("❌ Error updating answer:", error);
-    res.status(500).json({ error: "❌ Server error" });
+    console.error("Error updating answer:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// API Base Route (opzionale)
+// (Optional) Base route
 router.get('/', (req, res) => {
   res.json({ message: "Ultron AI API is running!" });
 });
 
-// Usa il router come funzione Netlify
+// Mount the router as a Netlify function
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
