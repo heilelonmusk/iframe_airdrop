@@ -58,7 +58,7 @@
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
-    // Crea il payload e aggiungi un log per verificare il JSON inviato
+    // Crea il payload e logga il JSON inviato
     const payload = { question: input };
     console.log("Payload inviato:", JSON.stringify(payload));
     

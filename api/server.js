@@ -12,9 +12,9 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// Middleware globale per CORS: imposta gli header per ogni richiesta (incluse le preflight OPTIONS)
+// Middleware globale per CORS: viene eseguito per ogni richiesta, comprese le preflight OPTIONS.
 app.use((req, res, next) => {
-  // Per test, se preferisci puoi usare "*" oppure specificare "https://helon.space"
+  // Per test, usa "*" oppure "https://helon.space" se sei sicuro dell'origine
   res.setHeader("Access-Control-Allow-Origin", "https://helon.space");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -37,7 +37,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// Definizione dello schema e del modello in modo condizionale (evita OverwriteModelError)
+// Definizione dello schema e del modello (evita OverwriteModelError)
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -46,7 +46,7 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
-// Middleware aggiuntivo per il router (doppio controllo CORS)
+// Middleware per "forzare" gli header CORS sulle risposte del router (doppio controllo)
 router.use((req, res, next) => {
   res.set("Access-Control-Allow-Origin", "https://helon.space");
   res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -77,7 +77,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// (Opzionale) API per aggiornare la risposta
+// API per aggiornare la risposta (opzionale)
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
