@@ -1,3 +1,15 @@
+app.use((req, res, next) => {
+  // Imposta l'origine consentita (per test, potresti provare con "*" per diagnosticare)
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // Se il metodo è OPTIONS, rispondi immediatamente
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -11,18 +23,6 @@ if (!MONGO_URI) {
   console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
   process.exit(1);
 }
-
-// Middleware globale per CORS: viene eseguito per ogni richiesta, comprese le preflight OPTIONS.
-app.use((req, res, next) => {
-  // Per test, usa "*" oppure "https://helon.space" se sei sicuro dell'origine
-  res.setHeader("Access-Control-Allow-Origin", "https://helon.space");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
 
 app.use(express.json());
 
