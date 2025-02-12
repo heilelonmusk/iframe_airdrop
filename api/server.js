@@ -1,4 +1,4 @@
-require('dotenv').config(); // Carica variabili d'ambiente
+require('dotenv').config(); // Carica le variabili d'ambiente
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -7,39 +7,46 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ CORS migliorato: Accetta solo richieste da Helon.Space e localhost
+// ✅ Configura CORS per accettare solo richieste da Helon.Space e localhost
 const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`🚫 CORS BLOCKED: Request from ${origin}`);
       callback(new Error("CORS blocked this request 🚫"));
     }
-  }
+  },
+  methods: ["GET", "POST"], 
+  allowedHeaders: ["Content-Type"]
 }));
 
 app.use(express.json());
 
-// ✅ Connessione a MongoDB
+// ✅ Connessione a MongoDB con miglior gestione errori
 const mongoUri = process.env.MONGO_URI;
 if (!mongoUri) {
   console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
   process.exit(1);
 }
 
-mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
     process.exit(1);
   });
 
-// ✅ Schema e modello per le domande e risposte
+// ✅ Definizione Schema e Modello
 const questionSchema = new mongoose.Schema({
-  question: String,
-  answer: String,
-  source: String,
+  question: { type: String, required: true, unique: true },
+  answer: { type: String, default: "Processing..." },
+  source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now }
 });
 const Question = mongoose.model('Question', questionSchema);
@@ -52,7 +59,6 @@ app.post('/api/logQuestion', async (req, res) => {
 
     console.log(`📩 Received question: "${question}"`);
 
-    // Cerca la domanda nel database
     let existing = await Question.findOne({ question });
 
     if (existing) {
@@ -60,8 +66,7 @@ app.post('/api/logQuestion', async (req, res) => {
       return res.json({ answer: existing.answer, source: existing.source });
     }
 
-    // Salva la domanda nel database
-    const newQuestion = new Question({ question, answer: "Processing...", source: "Ultron AI" });
+    const newQuestion = new Question({ question });
     await newQuestion.save();
 
     console.log("📌 New question logged in database");
