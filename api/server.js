@@ -5,6 +5,7 @@ const serverless = require("serverless-http");
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
 const { logConversation } = require('../modules/logging/logger');
+console.log("🔑 OPENAI_API_KEY is set:", process.env.OPENAI_API_KEY ? "✅ Yes" : "❌ No");
 const tendermintRpcUrl = process.env.TENDERMINT_RPC_URL;
 const lcdRestUrl = process.env.LCD_REST_URL;
 const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
