@@ -6,14 +6,6 @@ const serverless = require("serverless-http");
 const app = express();
 const router = express.Router();
 
-const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) {
-  console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
-  process.exit(1);
-}
-
-app.use(express.json());
-
 // Middleware globale per CORS
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,6 +17,13 @@ app.use((req, res, next) => {
   next();
 });
 
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
+  process.exit(1);
+}
+
+app.use(express.json());
 
 // Connessione a MongoDB
 mongoose.connect(MONGO_URI, {
