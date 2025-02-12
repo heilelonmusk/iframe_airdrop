@@ -19,7 +19,7 @@
     "express": "^4.21.2",
     "mongodb": "^6.13.0",
     "mongoose": "^8.10.0",
-    "node-nlp": "^5.0.0-alpha.5",
+    "node-nlp": "^3.10.2",
     "serverless-http": "^3.2.0",
     "web3": "^4.16.0"
   },
