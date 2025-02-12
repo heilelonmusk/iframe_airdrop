@@ -1,10 +1,13 @@
 {
   "name": "iframe_airdrop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Ultron Chat and related Dymension integrations",
-  "main": "index.js",
+  "main": "api/server.js",
   "scripts": {
-    "start": "netlify dev"
+    "start": "node api/server.js",
+    "dev": "nodemon api/server.js",
+    "deploy": "netlify deploy --prod",
+    "test": "node tests/test.js"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.33.0",
@@ -15,5 +18,13 @@
     "mongodb": "^6.13.0",
     "mongoose": "^8.10.0",
     "serverless-http": "^3.2.0"
-  }
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "Helon.Space Dev Team",
+  "license": "MIT"
 }
