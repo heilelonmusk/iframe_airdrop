@@ -1,47 +1,31 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const serverless = require("serverless-http");
 
 const app = express();
-const router = express.Router();
 
+// Middleware globale per CORS: viene eseguito per ogni richiesta, comprese le preflight OPTIONS.
+app.use((req, res, next) => {
+  // Per testing, puoi impostare "*" e poi restringere in produzione.
+  res.setHeader("Access-Control-Allow-Origin", "https://helon.space");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
+app.use(express.json());
+
+// Connessione a MongoDB
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
   console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
   process.exit(1);
 }
 
-// Middleware globale per CORS: aggiunge gli header per ogni richiesta, comprese le preflight OPTIONS.
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://helon.space");
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// (Opzionale) Usa anche il middleware cors di express, nel caso in cui voglia gestire ulteriormente la logica:
-const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`CORS BLOCKED: Request from ${origin}`);
-      callback(new Error("CORS blocked this request"));
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type']
-}));
-
-app.use(express.json());
-
-// Connessione a MongoDB
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -52,7 +36,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// Definizione dello schema e del modello in modo condizionale per evitare OverwriteModelError
+// Definizione dello schema e del modello (con controllo per evitare OverwriteModelError)
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -60,6 +44,9 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
+
+// Crea il router per le API
+const router = express.Router();
 
 // API per il logging delle domande
 router.post('/logQuestion', async (req, res) => {
@@ -83,7 +70,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// API per aggiornare la risposta (se necessario)
+// (Eventuale) API per aggiornare la risposta
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
@@ -102,12 +89,12 @@ router.post('/updateAnswer', async (req, res) => {
   }
 });
 
-// API Base Route
+// API Base Route (opzionale)
 router.get('/', (req, res) => {
   res.json({ message: "Ultron AI API is running!" });
 });
 
-// Utilizza il router come funzione Netlify
+// Usa il router come funzione Netlify (tutte le rotte saranno accessibili all'URL "/.netlify/functions/server/*")
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
