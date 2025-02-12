@@ -58,11 +58,15 @@
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
+    // Crea il payload e aggiungi un log per verificare il JSON inviato
+    const payload = { question: input };
+    console.log("Payload inviato:", JSON.stringify(payload));
+    
     try {
       const response = await fetch('https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/server/logQuestion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: input })
+        body: JSON.stringify(payload)
       });
       if (response.ok) {
         const data = await response.json();
