@@ -3,11 +3,38 @@ require('dotenv').config(); // Carica le variabili d'ambiente
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const serverless = require("serverless-http"); // 🚀 Netlify Serverless Support
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const router = express.Router();
+const MONGO_URI = process.env.MONGO_URI;
 
-// ✅ Configura CORS per accettare solo richieste da Helon.Space e localhost
+if (!MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
+  process.exit(1);
+}
+
+// ✅ Connessione a MongoDB Atlas
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
+
+// ✅ Schema e Modello per MongoDB
+const questionSchema = new mongoose.Schema({
+  question: { type: String, required: true, unique: true },
+  answer: { type: String, default: "Processing..." },
+  source: { type: String, default: "Ultron AI" },
+  createdAt: { type: Date, default: Date.now }
+});
+const Question = mongoose.model('Question', questionSchema);
+
+// ✅ Configura CORS per Netlify
 const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 
 app.use(cors({
@@ -19,40 +46,14 @@ app.use(cors({
       callback(new Error("CORS blocked this request 🚫"));
     }
   },
-  methods: ["GET", "POST"], 
+  methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"]
 }));
 
 app.use(express.json());
 
-// ✅ Connessione a MongoDB con miglior gestione errori
-const mongoUri = process.env.MONGO_URI;
-if (!mongoUri) {
-  console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
-  process.exit(1);
-}
-
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch(err => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
-  });
-
-// ✅ Definizione Schema e Modello
-const questionSchema = new mongoose.Schema({
-  question: { type: String, required: true, unique: true },
-  answer: { type: String, default: "Processing..." },
-  source: { type: String, default: "Ultron AI" },
-  createdAt: { type: Date, default: Date.now }
-});
-const Question = mongoose.model('Question', questionSchema);
-
-// ✅ API per loggare le domande e fornire risposte
-app.post('/api/logQuestion', async (req, res) => {
+// ✅ API per loggare le domande
+router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
     if (!question) return res.status(400).json({ error: "❌ Question is required" });
@@ -77,8 +78,8 @@ app.post('/api/logQuestion', async (req, res) => {
   }
 });
 
-// ✅ API per aggiornare le risposte nel database
-app.post('/api/updateAnswer', async (req, res) => {
+// ✅ API per aggiornare le risposte
+router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
     if (!question || !answer) return res.status(400).json({ error: "❌ Both question and answer are required" });
@@ -97,5 +98,13 @@ app.post('/api/updateAnswer', async (req, res) => {
   }
 });
 
-// ✅ Avvia il server
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// ✅ API Base Route
+router.get('/', (req, res) => {
+  res.json({ message: "🚀 Ultron AI API is running!" });
+});
+
+// ✅ Usa router per Netlify Functions
+app.use("/.netlify/functions/server", router);
+
+module.exports = app;
+module.exports.handler = serverless(app);
