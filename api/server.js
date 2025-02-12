@@ -21,23 +21,33 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     process.exit(1);
   });
 
-// ✅ Configura CORS per Netlify
+// ✅ Configura CORS per Netlify (Sicurezza Migliorata)
+const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 app.use(cors({
-  origin: '*', // Permette richieste da qualsiasi dominio
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error(`🚫 CORS BLOCKED: Request from ${origin}`);
+      callback(new Error("CORS blocked this request 🚫"));
+    }
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
 
-// ✅ Schema e Modello per MongoDB
+// ✅ Schema e Modello per MongoDB (Fix OverwriteModelError)
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now }
 });
-const Question = mongoose.model('Question', questionSchema);
+
+// Controlla se il modello esiste già per evitare errori
+const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
 // ✅ API per loggare le domande
 router.post('/logQuestion', async (req, res) => {
