@@ -9,11 +9,11 @@ const openai = new OpenAI({
 async function generateResponse(prompt) {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Usa il modello più recente
+      model: "gpt-3.5-turbo", // 🔹 Usa il modello più economico
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 150,
+      max_tokens: 50, // 🔹 Riduce il consumo di token per risposta
       temperature: 0.7,
-    });
+   });
 
     return response.choices[0].message.content.trim();
   } catch (error) {
