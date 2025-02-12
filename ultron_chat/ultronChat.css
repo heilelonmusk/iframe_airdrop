@@ -13,7 +13,11 @@
   cursor: pointer;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.3s ease-in-out, transform 0.3s;
+}
+
+#ultronChatButton:hover {
+  transform: scale(1.1);
 }
 
 #ultronChatWidget {
@@ -25,6 +29,7 @@
   position: fixed;
   bottom: 90px;
   right: 20px;
+  padding: 10px;
 }
 
 .ultron-header {
@@ -35,28 +40,32 @@
 }
 
 .ultron-body {
+  max-height: 250px;
+  overflow-y: auto;
   padding: 12px;
-  background: #2e2e2e;
   color: white;
-}
-
-.ultron-input {
-  display: flex;
-  padding: 10px;
   background: #2e2e2e;
+  font-size: 14px;
 }
 
-.ultron-input input {
-  flex: 1;
-  padding: 8px;
-  background: #1c1c1c;
-  color: white;
-}
-
-.ultron-input button {
+.user-message {
   background: #ff9300;
-  color: #000;
-  font-weight: bold;
-  padding: 8px 12px;
-  border-radius: 4px;
+  color: white;
+  padding: 8px;
+  border-radius: 10px;
+  margin: 5px 0;
+  text-align: right;
+}
+
+.bot-message {
+  background: #444;
+  color: white;
+  padding: 8px;
+  border-radius: 10px;
+  margin: 5px 0;
+  text-align: left;
+}
+
+.error-message {
+  color: red;
 }

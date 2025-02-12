@@ -1,20 +1,21 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
-const TOKEN_API_URL = "https://dymension-api.com/latestTokens";
-const TOKEN_FILE_PATH = path.resolve(__dirname, 'data', 'tokens.json');
+const API_URL = 'https://api.dymension.xyz/tokens';
 
 async function updateTokenListings() {
-    try {
-        const response = await fetch(TOKEN_API_URL);
-        const tokens = await response.json();
-        
-        fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokens, null, 2));
-        console.log("✅ Token listings updated.");
-    } catch (error) {
-        console.error("❌ Failed to update token listings:", error);
-    }
+  try {
+    const response = await axios.get(API_URL);
+    const tokens = response.data || [];
+
+    const filePath = path.join(__dirname, '../data/tokens.json');
+    fs.writeFileSync(filePath, JSON.stringify(tokens, null, 2));
+
+    console.log('✅ Token listings updated');
+  } catch (error) {
+    console.error('❌ Error updating tokens:', error);
+  }
 }
 
 updateTokenListings();

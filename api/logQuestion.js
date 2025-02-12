@@ -1,21 +1,22 @@
-const mongoose = require('mongoose');
+const fetch = require('node-fetch');
 
-const questionSchema = new mongoose.Schema({
-    question: String,
-    timestamp: { type: Date, default: Date.now }
-});
+exports.handler = async function(event) {
+  try {
+    const { question } = JSON.parse(event.body);
 
-const Question = mongoose.model('Question', questionSchema);
+    const response = await fetch(process.env.SERVER_URL + "/logQuestion", {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
 
-async function logQuestion(question) {
-    try {
-        const newQuestion = new Question({ question });
-        await newQuestion.save();
-        return { answer: "Processing your question...", source: "Ultron AI" };
-    } catch (error) {
-        console.error("❌ Error logging question:", error);
-        return { error: "Could not log the question." };
-    }
-}
-
-module.exports = logQuestion;
+    const data = await response.json();
+    return {
+      statusCode: 200,
+      body: JSON.stringify(data)
+    };
+  } catch (error) {
+    console.error("❌ logQuestion Error:", error);
+    return { statusCode: 500, body: JSON.stringify({ error: "Server error" }) };
+  }
+};
