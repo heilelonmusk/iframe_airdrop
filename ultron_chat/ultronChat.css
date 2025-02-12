@@ -1,3 +1,4 @@
+/* Container della chat */
 #ultronChatContainer {
   position: fixed;
   bottom: 20px;
@@ -5,6 +6,7 @@
   z-index: 1000;
 }
 
+/* Pulsante della chat */
 #ultronChatButton {
   width: 80px;
   height: 80px;
@@ -14,8 +16,12 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
   opacity: 0;
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  border: none;
+  outline: none;
+  padding: 0;
 }
 
+/* Immagine all'interno del pulsante */
 #ultronChatButton img {
   width: 85%;
   height: 85%;
@@ -25,17 +31,22 @@
   left: 7%;
 }
 
+/* Widget della chat */
 #ultronChatWidget {
   display: none;
   width: 320px;
+  max-width: 90%;
   background: #1c1c1c;
   border-radius: 10px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
   position: fixed;
   bottom: 100px;
   right: 20px;
+  flex-direction: column;
+  overflow: hidden;
 }
 
+/* Header del widget */
 .ultron-header {
   background: linear-gradient(135deg, #ff9300, #ff9300);
   padding: 12px;
@@ -44,20 +55,25 @@
   font-weight: bold;
 }
 
+/* Corpo della chat */
 .ultron-body {
   padding: 12px;
   background: #2e2e2e;
   color: white;
   max-height: 250px;
   overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
+/* Sezione input */
 .ultron-input {
   display: flex;
   padding: 10px;
   background: #2e2e2e;
 }
 
+/* Campo di input */
 .ultron-input input {
   flex: 1;
   padding: 8px;
@@ -65,32 +81,30 @@
   color: white;
   border: 1px solid #444;
   border-radius: 4px;
+  outline: none;
 }
 
+/* Bottone di invio */
 .ultron-input button {
   background: #ff9300;
   color: #000;
   font-weight: bold;
   padding: 8px 12px;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.3s;
+  margin-left: 8px;
 }
 
 .ultron-input button:hover {
   background: #ffad33;
 }
 
-/* Effetto di comparsa */
+/* Animazione di comparsa per il widget */
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 #ultronChatWidget.show {
