@@ -12,13 +12,12 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// Middleware globale per CORS: viene eseguito per ogni richiesta, comprese le preflight OPTIONS.
+// Middleware globale per CORS: imposta gli header per ogni richiesta (incluse le preflight OPTIONS)
 app.use((req, res, next) => {
-  // Imposta l'origine consentita (modifica se necessario)
+  // Per test, se preferisci puoi usare "*" oppure specificare "https://helon.space"
   res.setHeader("Access-Control-Allow-Origin", "https://helon.space");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  // Se è una richiesta OPTIONS, rispondi immediatamente
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
@@ -38,7 +37,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// Definizione dello schema e del modello (evita OverwriteModelError)
+// Definizione dello schema e del modello in modo condizionale (evita OverwriteModelError)
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -47,7 +46,7 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
-// Middleware per "forzare" gli header CORS sulle risposte del router
+// Middleware aggiuntivo per il router (doppio controllo CORS)
 router.use((req, res, next) => {
   res.set("Access-Control-Allow-Origin", "https://helon.space");
   res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -78,7 +77,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// API per aggiornare la risposta (se necessario)
+// (Opzionale) API per aggiornare la risposta
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
@@ -98,12 +97,12 @@ router.post('/updateAnswer', async (req, res) => {
   }
 });
 
-// API Base Route
+// API Base Route (opzionale)
 router.get('/', (req, res) => {
   res.json({ message: "Ultron AI API is running!" });
 });
 
-// Usa il router come funzione Netlify; tutte le rotte saranno accessibili con l'URL "/.netlify/functions/server/*"
+// Usa il router come funzione Netlify: tutte le rotte saranno accessibili tramite "/.netlify/functions/server/*"
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
