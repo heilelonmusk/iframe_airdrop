@@ -1,17 +1,20 @@
 const { handler } = require('../api/server.js');
 
 async function runTests() {
-  // Crea un evento simulato per una richiesta POST all'endpoint logQuestion,
-  // utilizzando il percorso completo come montato in server.js
+  // Crea un evento simulato per una richiesta POST all'endpoint logQuestion.
+  // È importante includere le intestazioni e specificare che il body non è codificato in base64.
   const event = {
     httpMethod: 'POST',
     path: '/.netlify/functions/server/logQuestion',
-    body: JSON.stringify({ question: "What is Helon?" })
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ question: "What is Helon?" }),
+    isBase64Encoded: false
   };
 
   try {
     const response = await handler(event, {});
-    // Verifica il corpo della risposta (deve essere un JSON valido)
     const data = JSON.parse(response.body);
     
     if (data.answer) {
