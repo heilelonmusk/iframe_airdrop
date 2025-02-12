@@ -1,7 +1,9 @@
 [build]
-  publish = "iframe_airdrop"
-  functions = "netlify/functions"
+  functions = "api"  # <-- Indica a Netlify di usare la cartella api/ per le Functions
 
-[dev]
-  command = "echo 'No app server specified'; sleep 9999"
-  port = 8888
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "https://helon.space"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"

@@ -54,11 +54,11 @@
     chatBody.scrollTop = chatBody.scrollHeight;
 
     try {
-      const response = await fetch('https://your-api-url.com/logQuestion', { 
+      const response = await fetch('https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/logQuestion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: input })
-      });
+      })
 
       if (response.ok) {
         const data = await response.json();
