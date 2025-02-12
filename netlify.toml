@@ -1,5 +1,5 @@
 [build]
-  functions = "api"  # <-- Indica a Netlify di usare la cartella api/ per le Functions
+  functions = "api"  # ✅ Indica a Netlify di usare la cartella API per le Functions
 
 [[headers]]
   for = "/.netlify/functions/*"
