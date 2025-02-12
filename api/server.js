@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const serverless = require("serverless-http");  // ✅ NECESSARIO PER NETLIFY!
+const serverless = require("serverless-http");
 
 const app = express();
 const router = express.Router();
@@ -13,7 +13,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// ✅ Connessione a MongoDB Atlas
+// ✅ MongoDB Connection
 mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch(err => {
@@ -21,25 +21,34 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     process.exit(1);
   });
 
-// ✅ Configura CORS per Netlify
+// ✅ CORS Configuration
+const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 app.use(cors({
-  origin: '*', // Permette richieste da qualsiasi dominio
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.error(`🚫 CORS BLOCKED: Request from ${origin}`);
+      callback(new Error("CORS blocked this request 🚫"));
+    }
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
 
-// ✅ Schema e Modello per MongoDB
+// ✅ Define MongoDB Schema
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now }
 });
+
 const Question = mongoose.model('Question', questionSchema);
 
-// ✅ API per loggare le domande
+// ✅ API for Logging Questions
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
@@ -65,7 +74,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// ✅ API per aggiornare le risposte
+// ✅ API to Update Answers
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
@@ -90,7 +99,7 @@ router.get('/', (req, res) => {
   res.json({ message: "🚀 Ultron AI API is running!" });
 });
 
-// ✅ Usa router per Netlify Functions
+// ✅ Use Router for Netlify Functions
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
