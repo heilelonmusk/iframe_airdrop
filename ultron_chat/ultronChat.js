@@ -36,7 +36,7 @@
   console.log("✅ Ultron Chat elements added to the page.");
 
   // **Aggiunta manuale del CSS se non viene caricato**
-  if (!document.querySelector('link[href="ultron_chat/ultronChat.css"]')) {
+  if (!document.querySelector('link[href="https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.css"]')) {
     const styleSheet = document.createElement("link");
     styleSheet.rel = "stylesheet";
     styleSheet.href = "ultron_chat/ultronChat.css";
