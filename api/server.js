@@ -1,4 +1,4 @@
-require('dotenv').config(); // Carica le variabili d'ambiente
+require('dotenv').config(); // Load environment variables
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -14,7 +14,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// ✅ Connessione a MongoDB Atlas
+// ✅ MongoDB Connection
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -25,7 +25,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// ✅ Schema e Modello per MongoDB
+// ✅ Schema & Model for MongoDB
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -34,8 +34,8 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.model('Question', questionSchema);
 
-// ✅ Configura CORS per Netlify
-const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
+// ✅ CORS Configuration
+const allowedOrigins = ['https://helon.space', 'http://localhost:3000', 'https://superlative-empanada-0c1b37.netlify.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -46,13 +46,13 @@ app.use(cors({
       callback(new Error("CORS blocked this request 🚫"));
     }
   },
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
 
 app.use(express.json());
 
-// ✅ API per loggare le domande
+// ✅ API for logging user questions
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
@@ -78,7 +78,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// ✅ API per aggiornare le risposte
+// ✅ API to update answers in the database
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
@@ -103,7 +103,7 @@ router.get('/', (req, res) => {
   res.json({ message: "🚀 Ultron AI API is running!" });
 });
 
-// ✅ Usa router per Netlify Functions
+// ✅ Use router for Netlify Functions
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
