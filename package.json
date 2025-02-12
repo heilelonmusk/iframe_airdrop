@@ -3,6 +3,9 @@
   "version": "1.0.1",
   "description": "Ultron Chat and related Dymension integrations",
   "main": "api/server.js",
+  "overrides": {
+    "xlsx": "file:xlsx-0.20.1.tgz"
+  },
   "scripts": {
     "start": "node api/server.js",
     "dev": "nodemon api/server.js",
