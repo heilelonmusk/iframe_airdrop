@@ -5,24 +5,30 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error("❌ MONGO_URI is not defined. Please set it in the environment variables.");
+  process.exit(1);
+}
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
 // ✅ Connessione a MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("✅ Connected to MongoDB"))
-.catch(err => console.error("❌ MongoDB connection error:", err));
+mongoose.connect(MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 // Schema per le domande e risposte
 const questionSchema = new mongoose.Schema({
-  question: String,
-  answer: String,
-  source: String,
+  question: { type: String, required: true },
+  answer: { type: String, default: "Processing..." },
+  source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -32,6 +38,7 @@ const Question = mongoose.model('Question', questionSchema);
 app.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
+    if (!question) return res.status(400).json({ error: "Question is required." });
 
     // Verifica se la domanda è già presente
     let existing = await Question.findOne({ question });
@@ -41,7 +48,7 @@ app.post('/logQuestion', async (req, res) => {
     }
 
     // Se non esiste, salva la nuova domanda senza risposta
-    const newQuestion = new Question({ question, answer: "Processing...", source: "Ultron AI" });
+    const newQuestion = new Question({ question });
     await newQuestion.save();
 
     res.json({ answer: "I'm thinking... 🤖", source: "Ultron AI" });
@@ -55,16 +62,28 @@ app.post('/logQuestion', async (req, res) => {
 app.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
+    if (!question || !answer) return res.status(400).json({ error: "Question and answer are required." });
 
     let updated = await Question.findOneAndUpdate(
       { question },
-      { answer, source },
+      { answer, source: source || "Ultron AI" },
       { new: true, upsert: true }
     );
 
     res.json({ message: "✅ Answer updated!", updated });
   } catch (error) {
     console.error("❌ Error updating answer:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// 🔹 API per ottenere tutte le domande salvate (utile per debugging e analisi)
+app.get('/allQuestions', async (req, res) => {
+  try {
+    const questions = await Question.find().sort({ createdAt: -1 });
+    res.json(questions);
+  } catch (error) {
+    console.error("❌ Error fetching questions:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
