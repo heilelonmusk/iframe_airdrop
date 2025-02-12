@@ -10,6 +10,7 @@
     "@cosmjs/encoding": "^0.33.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "mongodb": "^6.13.0",
     "mongoose": "^8.10.0"
   }
