@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const serverless = require("serverless-http");
+const serverless = require("serverless-http");  // ✅ NECESSARIO PER NETLIFY!
 
 const app = express();
 const router = express.Router();
@@ -21,33 +21,23 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     process.exit(1);
   });
 
-// ✅ Configura CORS per Netlify (Sicurezza Migliorata)
-const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
+// ✅ Configura CORS per Netlify
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`🚫 CORS BLOCKED: Request from ${origin}`);
-      callback(new Error("CORS blocked this request 🚫"));
-    }
-  },
+  origin: '*', // Permette richieste da qualsiasi dominio
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
 
-// ✅ Schema e Modello per MongoDB (Fix OverwriteModelError)
+// ✅ Schema e Modello per MongoDB
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now }
 });
-
-// Controlla se il modello esiste già per evitare errori
-const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
+const Question = mongoose.model('Question', questionSchema);
 
 // ✅ API per loggare le domande
 router.post('/logQuestion', async (req, res) => {
