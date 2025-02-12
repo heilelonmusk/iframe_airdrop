@@ -24,7 +24,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// CORS Configuration
+// Configurazione CORS
 const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 app.use(cors({
   origin: function (origin, callback) {
@@ -50,6 +50,14 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
+// Aggiungi handler per le richieste OPTIONS sulla rotta /logQuestion
+router.options('/logQuestion', (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://helon.space");
+  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.sendStatus(200);
+});
+
 // API per il logging delle domande
 router.post('/logQuestion', async (req, res) => {
   try {
@@ -72,26 +80,8 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// API per aggiornare la risposta
-router.post('/updateAnswer', async (req, res) => {
-  try {
-    const { question, answer, source } = req.body;
-    if (!question || !answer)
-      return res.status(400).json({ error: "❌ Both question and answer are required" });
-    let updated = await Question.findOneAndUpdate(
-      { question },
-      { answer, source: source || "Ultron AI" },
-      { new: true, upsert: true }
-    );
-    console.log(`Updated answer: "${answer}" for question: "${question}"`);
-    res.json({ message: "✅ Answer updated!", updated });
-  } catch (error) {
-    console.error("❌ Error updating answer:", error);
-    res.status(500).json({ error: "❌ Server error" });
-  }
-});
+// (Eventuale handler per /updateAnswer, se necessario, con logica simile)
 
-// API Base Route
 router.get('/', (req, res) => {
   res.json({ message: "Ultron AI API is running!" });
 });
