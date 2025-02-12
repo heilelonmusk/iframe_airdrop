@@ -7,11 +7,9 @@
     "start": "node api/server.js",
     "dev": "nodemon api/server.js",
     "deploy": "netlify deploy --prod",
-    "test": "node tests/test.js"
+    "test": "node tests/test.js",
+    "postinstall": "patch-package"
   },
-  "scripts": {
-  "postinstall": "patch-package"
-}
   "dependencies": {
     "@cosmjs/encoding": "^0.33.0",
     "axios": "^1.7.9",
