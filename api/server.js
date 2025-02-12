@@ -47,7 +47,7 @@ const Question = mongoose.models.Question || mongoose.model('Question', question
 
 // Middleware aggiuntivo per il router (doppio controllo CORS)
 router.use((req, res, next) => {
-  res.set("Access-Control-Allow-Origin", "https://helon.space");
+  res.set("Access-Control-Allow-Origin", "*");
   res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type");
   next();
