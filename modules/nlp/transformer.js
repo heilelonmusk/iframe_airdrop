@@ -1,26 +1,25 @@
 // modules/nlp/transformer.js
-const axios = require('axios');
+require('dotenv').config();
+const { Configuration, OpenAIApi } = require("openai");
+
+const openai = new OpenAIApi(
+  new Configuration({
+    apiKey: process.env.OPENAI_API_KEY, // Legge la chiave API dal file .env
+  })
+);
 
 async function generateResponse(prompt) {
   try {
-    const response = await axios.post(
-      'https://api.openai.com/v1/completions',
-      {
-        model: "text-davinci-003",
-        prompt: prompt,
-        max_tokens: 150,
-        temperature: 0.7
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-        }
-      }
-    );
-    return response.data.choices[0].text.trim();
+    const response = await openai.createChatCompletion({
+      model: "gpt-4o-mini", // Usa il modello più recente
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 150,
+      temperature: 0.7,
+    });
+
+    return response.data.choices[0].message.content.trim();
   } catch (error) {
-    console.error("Error generating response:", error);
+    console.error("❌ OpenAI API Error:", error.response ? error.response.data : error);
     return "Sorry, I'm having trouble processing your request.";
   }
 }
