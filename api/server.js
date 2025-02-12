@@ -1,3 +1,14 @@
+// Middleware globale per CORS
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -11,17 +22,6 @@ if (!MONGO_URI) {
   console.error("❌ ERROR: MONGO_URI is not set! Check Netlify Environment Variables.");
   process.exit(1);
 }
-
-// Middleware globale per CORS
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
 
 app.use(express.json());
 
@@ -44,14 +44,6 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
-
-// Middleware aggiuntivo per il router (doppio controllo CORS)
-router.use((req, res, next) => {
-  res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
 
 // API per il logging delle domande
 router.post('/logQuestion', async (req, res) => {
