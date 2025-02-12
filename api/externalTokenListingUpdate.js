@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Update the API_URL with the correct endpoint
-const API_URL = 'https://dymension-mainnet-rest.public.blastapi.io/tokens';
+const API_URL = 'https://dymension-mainnet.public.blastapi.io;
 
 async function updateTokenListings() {
   try {
