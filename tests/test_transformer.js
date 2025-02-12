@@ -1,4 +1,4 @@
-const { generateResponse } = require("./modules/nlp/transformer");
+const { generateResponse } = require("../modules/nlp/transformer"); // Usa '../' per risalire alla cartella giusta
 
 (async () => {
   const response = await generateResponse("What is AI?");
