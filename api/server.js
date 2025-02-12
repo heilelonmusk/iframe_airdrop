@@ -57,7 +57,7 @@ router.post('/logQuestion', async (req, res) => {
     // Custom handling for "channels"
     if (question.trim().toLowerCase() === "channels") {
       return res.json({
-        answer: "Here are the official channels: \n- Twitter: [https://x.com/heilelon_](https://x.com/heilelon_) \n- Instagram: [https://instagram.com/heil.elonmusk](https://instagram.com/heil.elonmusk) \n- Telegram: [https://t.me/heil_elon](https://t.me/heil_elon)",
+        answer: "Here are the official channels: \n- X: https://x.com/heilelon_ \n- Instagram: https://instagram.com/heil.elonmusk \n- Telegram: https://t.me/heil_elon",
         source: "Official Documentation"
       });
     }
