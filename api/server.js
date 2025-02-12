@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const serverless = require("serverless-http");
+const { getIntent } = require('../modules/intent/intentRecognizer');
+const { generateResponse } = require('../modules/nlp/transformer');
+const { logConversation } = require('../modules/logging/logger');
 const tendermintRpcUrl = process.env.TENDERMINT_RPC_URL;
 const lcdRestUrl = process.env.LCD_REST_URL;
 const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
@@ -54,28 +57,38 @@ router.post('/logQuestion', async (req, res) => {
     }
     console.log(`Received question: "${question}"`);
 
-    // Custom handling for "channels"
+    // Special handling for "channels"
     if (question.trim().toLowerCase() === "channels") {
       return res.json({
-        answer: "Here are the official channels: \n- X: https://x.com/heilelon_ \n- Instagram: https://instagram.com/heil.elonmusk \n- Telegram: https://t.me/heil_elon",
+        answer: "Here are the official channels: \n- Twitter: https://x.com/heilelon_ \n- Instagram: https://instagram.com/heil.elonmusk \n- Telegram: https://t.me/heil_elon",
         source: "Official Documentation"
       });
     }
 
-    // Check if the question already exists in the database
-    let existing = await Question.findOne({ question });
-    if (existing) {
-      console.log(`Answer found: ${existing.answer}`);
-      return res.json({ answer: existing.answer, source: existing.source });
+    // Process the intent
+    const intentResult = await getIntent(question);
+    let answer = "";
+    // If the recognized intent is among predefined ones, use its answer
+    if (intentResult.intent.startsWith("greeting") || intentResult.intent.startsWith("info")) {
+      answer = intentResult.answer || (intentResult.answers && intentResult.answers[0]) || "";
+    } else {
+      // Otherwise, use dynamic response generation
+      answer = await generateResponse(question);
     }
 
-    // If not found, create a new question record and return the default answer
-    const newQuestion = new Question({ question });
-    await newQuestion.save();
-    console.log("New question logged in database");
-    res.json({ answer: "I'm thinking...", source: "Ultron AI" });
+    // Log the conversation with additional details
+    const conversation = {
+      question,
+      answer,
+      detectedIntent: intentResult.intent,
+      confidence: intentResult.score,
+      timestamp: new Date()
+    };
+    await logConversation(conversation);
+
+    res.json({ answer, source: "Ultron AI" });
   } catch (error) {
-    console.error("Error saving question:", error);
+    console.error("Error processing question:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
