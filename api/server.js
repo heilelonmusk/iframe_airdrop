@@ -1,9 +1,9 @@
-require('dotenv').config(); // Carica variabili d'ambiente
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const serverless = require("serverless-http"); // ✅ Netlify Serverless Support
+const serverless = require("serverless-http");
 
 const app = express();
 const router = express.Router();
@@ -25,13 +25,20 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// ✅ CORS CONFIGURATION - Risolve il problema CORS
+// ✅ Configura CORS per Netlify (gestione avanzata)
+const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
+
 app.use(cors());
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");  // ✅ Permettiamo tutte le origini
-  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
   next();
 });
 
