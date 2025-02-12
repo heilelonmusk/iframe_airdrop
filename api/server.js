@@ -13,18 +13,19 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// Connessione a MongoDB
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log("✅ Connected to MongoDB Atlas"))
-  .catch(err => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
-  });
+// Middleware globale per CORS
+app.use((req, res, next) => {
+  // Imposta l'origine consentita
+  res.header("Access-Control-Allow-Origin", "https://helon.space");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
-// Configurazione CORS
+// Configurazione CORS con express-cors (opzionale, in aggiunta al middleware sopra)
 const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 app.use(cors({
   origin: function (origin, callback) {
@@ -41,6 +42,17 @@ app.use(cors({
 
 app.use(express.json());
 
+// Connessione a MongoDB
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
+
 // Definizione dello schema e del modello in modo condizionale
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
@@ -49,14 +61,6 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
-
-// Aggiungi handler per le richieste OPTIONS sulla rotta /logQuestion
-router.options('/logQuestion', (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://helon.space");
-  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  res.sendStatus(200);
-});
 
 // API per il logging delle domande
 router.post('/logQuestion', async (req, res) => {
@@ -80,8 +84,26 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// (Eventuale handler per /updateAnswer, se necessario, con logica simile)
+// API per aggiornare la risposta (se necessario)
+router.post('/updateAnswer', async (req, res) => {
+  try {
+    const { question, answer, source } = req.body;
+    if (!question || !answer)
+      return res.status(400).json({ error: "❌ Both question and answer are required" });
+    let updated = await Question.findOneAndUpdate(
+      { question },
+      { answer, source: source || "Ultron AI" },
+      { new: true, upsert: true }
+    );
+    console.log(`Updated answer: "${answer}" for question: "${question}"`);
+    res.json({ message: "✅ Answer updated!", updated });
+  } catch (error) {
+    console.error("❌ Error updating answer:", error);
+    res.status(500).json({ error: "❌ Server error" });
+  }
+});
 
+// API Base Route
 router.get('/', (req, res) => {
   res.json({ message: "Ultron AI API is running!" });
 });
