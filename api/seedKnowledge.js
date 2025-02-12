@@ -25,7 +25,13 @@ const seedData = [
     question: "What is Ultron?",
     answer: "Ultron is an AI-powered chatbot.",
     source: "Ultron Chat"
-  }
+  },
+  {
+    question: "channels",
+    answer: "Here are the official channels: \n- Twitter: [https://x.com/heilelon_](https://x.com/heilelon_) \n- Instagram: [https://instagram.com/heil.elonmusk](https://instagram.com/heil.elonmusk) \n- Telegram: [https://t.me/heil_elon](https://t.me/heil_elon)",
+    source: "Official Documentation",
+    keywords: ["channels", "official channels", "links", "socials", "community"]
+}
 ];
 
 async function seedDB() {
