@@ -1,18 +1,18 @@
 (function () {
   if (window.self !== window.top) return;
   
-  // Carica dinamicamente il CSS
+  // Dynamically load the CSS
   const style = document.createElement("link");
   style.rel = "stylesheet";
   style.href = "https://heilelonmusk.github.io/iframe_airdrop/ultron_chat/ultronChat.css";
   document.head.appendChild(style);
   
-  // Crea il container della chat
+  // Create the chat container
   const container = document.createElement("div");
   container.id = "ultronChatContainer";
   document.body.appendChild(container);
   
-  // Definisci l'HTML del widget di chat
+  // Define the HTML for the chat widget
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button">
       <div class="ultron-pulse"></div>
@@ -24,7 +24,7 @@
         <p>Hi, I'm ULTRON. 🤖</p>
         <p>Your AI guide through the Helon universe—here to assist, navigate, and inform.</p>
         <p>💡 Ask me anything about Helon, its vision, the ecosystem or token details.<br>
-           🔗 For official links, type “channels”.</p>
+           🔗 For official links, type "channels".</p>
         <p>The system runs. The answers are yours to uncover. 🚀</p>
       </div>
       <div class="ultron-input">
@@ -34,18 +34,18 @@
     </div>
   `;
   
-  // Rendi visibile il pulsante dopo 3 secondi
+  // Make the chat button visible after 3 seconds
   setTimeout(() => {
     document.getElementById("ultronChatButton").style.opacity = "1";
   }, 3000);
   
-  // Gestisci il click per mostrare/nascondere il widget
+  // Toggle widget visibility on button click
   document.getElementById("ultronChatButton").addEventListener("click", () => {
     const widget = document.getElementById("ultronChatWidget");
     widget.style.display = (widget.style.display === "flex") ? "none" : "flex";
   });
   
-  // Associa l'evento di invio al pulsante
+  // Attach event listener to the send button
   document.getElementById("ultronSendButton").addEventListener("click", sendChat);
   
   async function sendChat() {
@@ -53,14 +53,14 @@
     const chatBody = document.getElementById("chatBody");
     if (!input) return;
     
-    // Mostra la domanda dell'utente
+    // Display user's question
     chatBody.innerHTML += `<p><strong>You:</strong> ${input}</p>`;
     document.getElementById("chatInput").value = "";
     chatBody.scrollTop = chatBody.scrollHeight;
     
-    // Crea il payload e logga il JSON inviato
+    // Create payload and log it for debugging
     const payload = { question: input };
-    console.log("Payload inviato:", JSON.stringify(payload));
+    console.log("Payload sent:", JSON.stringify(payload));
     
     try {
       const response = await fetch('https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/server/logQuestion', {
@@ -72,10 +72,10 @@
         const data = await response.json();
         chatBody.innerHTML += `<p><strong>Ultron:</strong> ${data.answer} <small>(Source: ${data.source})</small></p>`;
       } else {
-        console.error("❌ Error logging question:", response.status);
+        console.error("Error logging question:", response.status);
       }
     } catch (err) {
-      console.error("❌ Network error:", err);
+      console.error("Network error:", err);
     }
   }
 })();
