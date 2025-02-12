@@ -1,15 +1,17 @@
 const { handler } = require('../api/server.js');
 
 async function runTests() {
-  // Crea un evento simulato per una richiesta POST all'endpoint /logQuestion
+  // Crea un evento simulato per una richiesta POST all'endpoint logQuestion,
+  // utilizzando il percorso completo come montato in server.js
   const event = {
     httpMethod: 'POST',
-    path: '/logQuestion',
+    path: '/.netlify/functions/server/logQuestion',
     body: JSON.stringify({ question: "What is Helon?" })
   };
 
   try {
     const response = await handler(event, {});
+    // Verifica il corpo della risposta (deve essere un JSON valido)
     const data = JSON.parse(response.body);
     
     if (data.answer) {
