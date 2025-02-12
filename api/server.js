@@ -1,9 +1,9 @@
-require('dotenv').config(); // Load environment variables
+require('dotenv').config(); // Carica variabili d'ambiente
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const serverless = require("serverless-http"); // 🚀 Netlify Serverless Support
+const serverless = require("serverless-http"); // ✅ Netlify Serverless Support
 
 const app = express();
 const router = express.Router();
@@ -14,7 +14,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// ✅ MongoDB Connection
+// ✅ Connessione a MongoDB
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -25,7 +25,19 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// ✅ Schema & Model for MongoDB
+// ✅ CORS CONFIGURATION - Risolve il problema CORS
+app.use(cors());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");  // ✅ Permettiamo tutte le origini
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
+app.use(express.json());
+
+// ✅ Schema & Model per MongoDB
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -34,25 +46,7 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.model('Question', questionSchema);
 
-// ✅ CORS Configuration
-const allowedOrigins = ['https://helon.space', 'http://localhost:3000', 'https://superlative-empanada-0c1b37.netlify.app'];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`🚫 CORS BLOCKED: Request from ${origin}`);
-      callback(new Error("CORS blocked this request 🚫"));
-    }
-  },
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
-}));
-
-app.use(express.json());
-
-// ✅ API for logging user questions
+// ✅ API per loggare le domande
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
@@ -78,7 +72,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// ✅ API to update answers in the database
+// ✅ API per aggiornare le risposte
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
@@ -103,7 +97,7 @@ router.get('/', (req, res) => {
   res.json({ message: "🚀 Ultron AI API is running!" });
 });
 
-// ✅ Use router for Netlify Functions
+// ✅ Usa router per Netlify Functions
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
