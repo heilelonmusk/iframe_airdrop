@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const serverless = require("serverless-http");
+const tendermintRpcUrl = process.env.TENDERMINT_RPC_URL;
+const lcdRestUrl = process.env.LCD_REST_URL;
+const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
 
 const app = express();
 const router = express.Router();

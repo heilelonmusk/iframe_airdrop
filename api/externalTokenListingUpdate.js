@@ -1,3 +1,7 @@
+require('dotenv').config();
+const tendermintRpcUrl = process.env.TENDERMINT_RPC_URL;
+const lcdRestUrl = process.env.LCD_REST_URL;
+const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
