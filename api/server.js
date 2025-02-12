@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { findAnswer } = require('./knowledge');
 const express = require('express');
 const mongoose = require('mongoose');
 const serverless = require("serverless-http");
@@ -46,7 +47,7 @@ const questionSchema = new mongoose.Schema({
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
 // API per il logging delle domande
-router.post('/logQuestion', async (req, res) => {
+router.post('api/server.js', async (req, res) => {
   try {
     const { question } = req.body;
     if (!question) {
