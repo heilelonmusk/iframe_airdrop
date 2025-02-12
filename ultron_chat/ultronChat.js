@@ -12,7 +12,7 @@
   container.id = "ultronChatContainer";
   document.body.appendChild(container);
   
-  // Definisci l'HTML del widget di chat (aggiornato per usare l'immagine corretta)
+  // Definisci l'HTML del widget di chat
   container.innerHTML = `
     <button id="ultronChatButton" title="Chat with Ultron" class="ultron-button">
       <div class="ultron-pulse"></div>

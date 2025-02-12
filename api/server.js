@@ -13,9 +13,8 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-// Middleware globale per CORS
+// Middleware globale per CORS: aggiunge gli header per ogni richiesta, comprese le preflight OPTIONS.
 app.use((req, res, next) => {
-  // Imposta l'origine consentita
   res.header("Access-Control-Allow-Origin", "https://helon.space");
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type");
@@ -25,7 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configurazione CORS con express-cors (opzionale, in aggiunta al middleware sopra)
+// (Opzionale) Usa anche il middleware cors di express, nel caso in cui voglia gestire ulteriormente la logica:
 const allowedOrigins = ['https://helon.space', 'http://localhost:3000'];
 app.use(cors({
   origin: function (origin, callback) {
@@ -53,7 +52,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// Definizione dello schema e del modello in modo condizionale
+// Definizione dello schema e del modello in modo condizionale per evitare OverwriteModelError
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -108,7 +107,7 @@ router.get('/', (req, res) => {
   res.json({ message: "Ultron AI API is running!" });
 });
 
-// Usa il router come funzione Netlify
+// Utilizza il router come funzione Netlify
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;
