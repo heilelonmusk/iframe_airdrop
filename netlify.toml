@@ -1,5 +1,6 @@
 [build]
-  functions = "api"
+  command = "npm install && npm run build"  # Ensures dependencies are installed
+  functions = "api"  # Specifies the folder containing Netlify functions
 
 [[headers]]
   for = "/.netlify/functions/*"
@@ -7,3 +8,8 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
+
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
