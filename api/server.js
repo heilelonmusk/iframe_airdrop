@@ -117,18 +117,22 @@ router.post('/logQuestion', async (req, res) => {
       console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
 
       let safeAnswer;
-      
+      let safeSource;
+
       if (!storedAnswer.answer) {
         safeAnswer = "No answer found.";
+        safeSource = "Ultron AI";
       } else if (typeof storedAnswer.answer === "object") {
-        safeAnswer = storedAnswer.answer.answer || "No answer found.";  // 🔹 Prende la chiave "answer"
+        safeAnswer = storedAnswer.answer.answer || "No answer found.";  // 🔹 Prende la chiave "answer" dall'oggetto
+        safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";  // 🔹 Prende "source" in sicurezza
       } else {
         safeAnswer = storedAnswer.answer;
+        safeSource = storedAnswer.source || "Ultron AI";
       }
 
       return res.json({
         answer: safeAnswer,
-        source: storedAnswer.answer.source || storedAnswer.source || "Unknown"
+        source: safeSource
       });
     }
 
