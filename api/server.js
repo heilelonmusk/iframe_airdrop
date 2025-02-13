@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
-const timeout = require('connect-timeout'); // npm install connect-timeout
+const timeout = require('connect-timeout');
 const { NlpManager } = require('node-nlp');
 
 // Import moduli necessari
@@ -102,10 +102,13 @@ async function trainAndSaveNLP() {
 // ✅ **API Endpoint: Handle User Questions**
 router.post('/logQuestion', async (req, res) => {
   try {
-    const { question } = req.body;
+    const { question, userId } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
 
     console.log(`📩 Received question: "${question}"`);
+
+    // Usa un valore predefinito per userId se non è fornito
+    const anonymousUser = userId || "anonymous";
 
     // 🔍 **Step 1: Check the Knowledge Base First**
     let storedAnswer = await Question.findOne({ question });
@@ -120,8 +123,9 @@ router.post('/logQuestion', async (req, res) => {
 
     // 📌 **Log the interaction**
     await logConversation({
+      userId: anonymousUser,
       question,
-      answer: finalAnswer,
+      answer: JSON.stringify(finalAnswer), // Evita errore Mongoose Object
       detectedIntent: intentResult.intent,
       confidence: intentResult.score,
       timestamp: new Date()

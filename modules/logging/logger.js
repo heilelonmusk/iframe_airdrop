@@ -15,7 +15,7 @@ mongoose.connect(MONGO_URI)
 
 // ✅ **Schema Definition for Conversation Logging**
 const logSchema = new mongoose.Schema({
-  userId: { type: String, required: true }, // Anonymous user tracking
+  userId: { type: String, default: "anonymous" }, // 
   question: { type: String, required: true },
   answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Permette stringhe e oggetti
   detectedIntent: { type: String },
