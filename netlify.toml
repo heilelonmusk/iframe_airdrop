@@ -1,10 +1,10 @@
 [build]
-  command = "npm install"
+  command = "npm install && npm run build"
   functions = "api"
 
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Origin = "https://helon.space"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"

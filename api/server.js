@@ -15,7 +15,7 @@ const app = express();
 const router = express.Router();
 
 // ✅ **CORS Configuration**
-const allowedOrigins = ["*"];
+const allowedOrigins = ["https://helon.space"];
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -26,11 +26,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ✅ **Rate Limiting to Prevent Spam & Abuse**
-app.set('trust proxy', 1); // Enable trust proxy for rate limit headers
+// ✅ **Rate Limiting**
+app.set('trust proxy', 1); // Required for Netlify rate limiting
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, // 🔹 Stricter limit: 10 requests per minute
+  max: 10, 
   message: "Too many requests. Please try again later."
 });
 app.use(limiter);
