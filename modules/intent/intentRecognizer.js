@@ -1,30 +1,54 @@
-// modules/intent/intentRecognizer.js
-const { NlpManager } = require('node-nlp'); // Ensure node-nlp is installed
+require('dotenv').config();
+const { NlpManager } = require('node-nlp');
+
 const manager = new NlpManager({ languages: ['en'], forceNER: true });
 
-// Train the model with basic intents
-async function trainModel() {
-  // Greetings intents
-  manager.addDocument('en', 'Hello', 'greeting.hello');
-  manager.addDocument('en', 'Hi', 'greeting.hello');
-  manager.addDocument('en', 'Good morning', 'greeting.hello');
+// ✅ **Predefined Intents & Responses**
+const predefinedIntents = {
+  "greeting": "Hello! How can I assist you today?",
+  "farewell": "Goodbye! Have a great day!",
+  "channels": "Here are the official channels:\n- Twitter: https://x.com/heilelon_\n- Instagram: https://instagram.com/heil.elonmusk\n- Telegram: https://t.me/heil_elon",
+  "help": "I can help you with information about Helon, its ecosystem, and tokens. Just ask!"
+};
 
-  // Information requests
-  manager.addDocument('en', 'I need information', 'info.request');
-  manager.addDocument('en', 'Tell me something', 'info.request');
+// ✅ **Train NLP Model**
+async function trainNLP() {
+  console.log("🧠 Training NLP Model...");
 
-  // Add static answers for specific intents
-  manager.addAnswer('en', 'greeting.hello', 'Hello, how can I help you today?');
-  manager.addAnswer('en', 'info.request', 'Please let me know what information you need.');
+  manager.addDocument('en', 'hello', 'greeting');
+  manager.addDocument('en', 'hi there', 'greeting');
+  manager.addDocument('en', 'goodbye', 'farewell');
+  manager.addDocument('en', 'bye', 'farewell');
+  manager.addDocument('en', 'where can I find official channels?', 'channels');
+  manager.addDocument('en', 'how can I contact Helon?', 'channels');
+  manager.addDocument('en', 'help', 'help');
+  manager.addDocument('en', 'what can you do?', 'help');
 
   await manager.train();
-  manager.save();
+  console.log("✅ NLP Model Trained Successfully!");
 }
 
-// Process the text and return the intent result
-async function getIntent(text) {
-  const result = await manager.process('en', text);
-  return result;
+// ✅ **Intent Recognition Function**
+async function getIntent(question) {
+  console.log(`🔍 Analyzing intent for: "${question}"`);
+
+  const result = await manager.process('en', question);
+  
+  if (result.intent && result.score > 0.7) {
+    console.log(`✅ Intent Detected: "${result.intent}" (Score: ${result.score})`);
+    
+    if (predefinedIntents[result.intent]) {
+      return { intent: result.intent, answer: predefinedIntents[result.intent], score: result.score };
+    }
+    
+    return { intent: result.intent, answer: null, score: result.score };
+  }
+
+  console.warn("⚠ Unrecognized Intent - Fallback Triggered.");
+  return { intent: "unknown", answer: "I'm not sure how to answer that yet. Try rephrasing?", score: 0 };
 }
 
-module.exports = { trainModel, getIntent };
+// ✅ **Train Model on Startup**
+trainNLP();
+
+module.exports = { getIntent };
