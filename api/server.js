@@ -100,7 +100,6 @@ async function trainAndSaveNLP() {
 }
 
 // ✅ **API Endpoint: Handle User Questions**
-// ✅ **API Endpoint: Handle User Questions**
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question, userId } = req.body;
@@ -124,11 +123,11 @@ router.post('/logQuestion', async (req, res) => {
         safeAnswer = "No answer found.";
         safeSource = "Ultron AI";
       } else if (typeof storedAnswer.answer === "object" && storedAnswer.answer !== null) {
-        // 🔹 Assicurati che l'oggetto abbia la chiave "answer" e che venga restituito come stringa
-        safeAnswer = storedAnswer.answer.answer || "No answer found.";
+        // 🔹 Se la risposta è un oggetto annidato, estrai il valore corretto
+        safeAnswer = storedAnswer.answer.answer || "No answer found.";  
         safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";
       } else {
-        // 🔹 Se è una stringa, la usa direttamente
+        // 🔹 Se è già una stringa, la usa direttamente
         safeAnswer = storedAnswer.answer;
         safeSource = storedAnswer.source || "Ultron AI";
       }
@@ -156,7 +155,7 @@ router.post('/logQuestion', async (req, res) => {
     // ✅ **Salva la risposta per usi futuri**
     const newEntry = new Question({
       question,
-      answer: typeof finalAnswer === "string" ? finalAnswer : JSON.stringify({ answer: finalAnswer, source: "Ultron AI" }),
+      answer: typeof finalAnswer === "string" ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" }, // 🔹 Evita doppi oggetti
       source: "Ultron AI"
     });
 
