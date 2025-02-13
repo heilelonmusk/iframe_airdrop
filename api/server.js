@@ -4,8 +4,6 @@ const mongoose = require('mongoose');
 const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
@@ -42,7 +40,10 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => console.log("📚 Connected to MongoDB"))
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
@@ -58,9 +59,9 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
-// ✅ **Schema for Storing NLP Model**
+// ✅ **Schema for Storing NLP Model in MongoDB**
 const NLPModelSchema = new mongoose.Schema({
-  model: { type: Object, required: true }
+  modelData: { type: Object, required: true }
 });
 const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
 
@@ -68,9 +69,9 @@ const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModel
 const loadNLPModel = async () => {
   try {
     const savedModel = await NLPModel.findOne({});
-    if (savedModel && savedModel.model) {
+    if (savedModel && savedModel.modelData) {
       console.log("✅ NLP Model loaded from MongoDB");
-      return savedModel.model;
+      return savedModel.modelData;
     }
     console.log("⚠️ No NLP Model found in database. Training required.");
     return null;
@@ -83,12 +84,27 @@ const loadNLPModel = async () => {
 // ✅ **Save NLP Model to MongoDB**
 const saveNLPModel = async (modelData) => {
   try {
-    await NLPModel.updateOne({}, { model: modelData }, { upsert: true });
+    await NLPModel.updateOne({}, { modelData }, { upsert: true });
     console.log("✅ NLP Model saved in MongoDB");
   } catch (error) {
     console.error("❌ Error saving NLP model:", error);
   }
 };
+
+// ✅ **Initialize NLP Model**
+(async () => {
+  const savedModel = await loadNLPModel();
+  if (savedModel) {
+    manager.import(savedModel);
+    console.log("🧠 NLP Model Loaded from DB");
+  } else {
+    console.log("🚀 Training new NLP Model...");
+    await manager.train();
+    const exportedModel = manager.export();
+    await saveNLPModel(exportedModel);
+    console.log("✅ New NLP Model trained and saved!");
+  }
+})();
 
 // ✅ **API Endpoint: Handle User Questions**
 router.post('/logQuestion', async (req, res) => {
