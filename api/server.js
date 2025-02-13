@@ -116,17 +116,19 @@ router.post('/logQuestion', async (req, res) => {
     if (storedAnswer) {
       console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
 
-      // Se storedAnswer.answer è `null` o `undefined`, impostiamo un valore di default
-      let safeAnswer = storedAnswer.answer;
-      if (!safeAnswer) {
+      let safeAnswer;
+      
+      if (!storedAnswer.answer) {
         safeAnswer = "No answer found.";
-      } else if (typeof safeAnswer === "object") {
-        safeAnswer = safeAnswer.answer || "No answer found.";
+      } else if (typeof storedAnswer.answer === "object") {
+        safeAnswer = storedAnswer.answer.answer || "No answer found.";  // 🔹 Prende la chiave "answer"
+      } else {
+        safeAnswer = storedAnswer.answer;
       }
 
       return res.json({
         answer: safeAnswer,
-        source: storedAnswer.source || "Unknown"
+        source: storedAnswer.answer.source || storedAnswer.source || "Unknown"
       });
     }
 
