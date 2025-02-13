@@ -54,7 +54,7 @@ if (!MONGO_URI) {
 // ✅ **Schema & Model for Knowledge Base**
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
-  answer: { type: String, required: true }, // Ora sempre salvato come stringa JSON
+  answer: { type: mongoose.Schema.Types.Mixed, required: true }, // 🔹 Accetta sia stringhe che oggetti
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now },
 });
@@ -107,10 +107,10 @@ router.post('/logQuestion', async (req, res) => {
 
     console.log(`📩 Received question: "${question}"`);
 
-    // Usa un valore predefinito per userId se non è fornito
+    // 🔹 Usa un valore predefinito per userId se non è fornito
     const anonymousUser = userId || "anonymous";
 
-    // 🔍 **Step 1: Check the Knowledge Base First**
+    // 🔍 **Step 1: Controlla se la risposta è già nel database**
     let storedAnswer = await Question.findOne({ question });
 
     if (storedAnswer) {
@@ -122,25 +122,24 @@ router.post('/logQuestion', async (req, res) => {
       if (!storedAnswer.answer) {
         safeAnswer = "No answer found.";
         safeSource = "Ultron AI";
-      } else if (typeof storedAnswer.answer === "object") {
-        safeAnswer = storedAnswer.answer.answer || "No answer found.";  // 🔹 Prende la chiave "answer" dall'oggetto
-        safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";  // 🔹 Prende "source" in sicurezza
+      } else if (typeof storedAnswer.answer === "object" && storedAnswer.answer !== null) {
+        // 🔹 Controlla che l'oggetto contenga una chiave "answer"
+        safeAnswer = storedAnswer.answer.answer || "No answer found.";
+        safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";
       } else {
+        // 🔹 Se è una stringa, la usa direttamente
         safeAnswer = storedAnswer.answer;
         safeSource = storedAnswer.source || "Ultron AI";
       }
 
-      return res.json({
-        answer: safeAnswer,
-        source: safeSource
-      });
+      return res.json({ answer: safeAnswer, source: safeSource });
     }
 
-    // 🔍 **Step 2: Process Intent Detection**
+    // 🔍 **Step 2: Processa la richiesta con NLP**
     const intentResult = await manager.process('en', question);
     let finalAnswer = intentResult.answer || await generateResponse(question) || "I'm not sure how to answer that yet.";
 
-    // 📌 **Log the interaction**
+    // 📌 **Log della conversazione**
     await logConversation({
       userId: anonymousUser,
       question,
@@ -150,12 +149,13 @@ router.post('/logQuestion', async (req, res) => {
       timestamp: new Date()
     });
 
-    // ✅ **Store Answer for Future Use**
+    // ✅ **Salva la risposta per usi futuri**
     const newEntry = new Question({
       question,
-      answer: typeof finalAnswer === 'string' ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
+      answer: typeof finalAnswer === "string" ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
       source: "Ultron AI"
     });
+
     await newEntry.save();
 
     res.json({ answer: finalAnswer, source: "Ultron AI" });

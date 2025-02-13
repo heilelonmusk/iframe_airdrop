@@ -29,14 +29,14 @@ const ConversationLog = mongoose.models.ConversationLog || mongoose.model('Conve
 // ✅ **Log a Conversation**
 async function logConversation({ userId, question, answer, detectedIntent, confidence }) {
   try {
-    const formattedAnswer = typeof answer === 'string' ? answer : JSON.stringify(answer);
     const logEntry = new ConversationLog({
-      userId: userId || "anonymous",
+      userId,
       question,
-      answer: formattedAnswer, 
+      answer: typeof answer === "string" ? answer : JSON.stringify(answer), // 🔹 Converte oggetti in stringhe JSON
       detectedIntent,
       confidence
     });
+
     await logEntry.save();
     console.log("📝 Conversation logged successfully.");
   } catch (error) {
