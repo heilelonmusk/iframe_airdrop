@@ -130,22 +130,23 @@ router.get('/', (req, res) => {
 
 // ✅ **New API Endpoint: Repository Structure**
 const getRepoStructure = (dirPath, baseDir = "") => {
-    let results = [];
-    const files = fs.readdirSync(dirPath);
+  let results = [];
+  try {
+      const files = fs.readdirSync(dirPath, { withFileTypes: true });
 
-    files.forEach((file) => {
-        const filePath = path.join(dirPath, file);
-        const stat = fs.statSync(filePath);
-
-        if (stat.isDirectory()) {
-            results.push({ type: "folder", name: file, path: path.join(baseDir, file) });
-            results = results.concat(getRepoStructure(filePath, path.join(baseDir, file)));
-        } else {
-            results.push({ type: "file", name: file, path: path.join(baseDir, file) });
-        }
-    });
-
-    return results;
+      files.forEach((file) => {
+          const filePath = path.join(dirPath, file.name);
+          if (file.isDirectory()) {
+              results.push({ type: "folder", name: file.name, path: path.join(baseDir, file.name) });
+              results = results.concat(getRepoStructure(filePath, path.join(baseDir, file.name)));
+          } else {
+              results.push({ type: "file", name: file.name, path: path.join(baseDir, file.name) });
+          }
+      });
+  } catch (error) {
+      console.error(`❌ Error accessing directory: ${dirPath}`, error);
+  }
+  return results;
 };
 
 // ✅ **API: Get Repository Structure**
