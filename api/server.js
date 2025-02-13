@@ -100,6 +100,7 @@ async function trainAndSaveNLP() {
 }
 
 // ✅ **API Endpoint: Handle User Questions**
+// ✅ **API Endpoint: Handle User Questions**
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question, userId } = req.body;
@@ -123,7 +124,7 @@ router.post('/logQuestion', async (req, res) => {
         safeAnswer = "No answer found.";
         safeSource = "Ultron AI";
       } else if (typeof storedAnswer.answer === "object" && storedAnswer.answer !== null) {
-        // 🔹 Controlla che l'oggetto contenga una chiave "answer"
+        // 🔹 Assicurati che l'oggetto abbia la chiave "answer" e che venga restituito come stringa
         safeAnswer = storedAnswer.answer.answer || "No answer found.";
         safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";
       } else {
@@ -132,7 +133,10 @@ router.post('/logQuestion', async (req, res) => {
         safeSource = storedAnswer.source || "Ultron AI";
       }
 
-      return res.json({ answer: safeAnswer, source: safeSource });
+      return res.json({
+        answer: safeAnswer.toString(),  // 🔹 Assicura che venga sempre restituita una stringa
+        source: safeSource
+      });
     }
 
     // 🔍 **Step 2: Processa la richiesta con NLP**
@@ -152,13 +156,13 @@ router.post('/logQuestion', async (req, res) => {
     // ✅ **Salva la risposta per usi futuri**
     const newEntry = new Question({
       question,
-      answer: typeof finalAnswer === "string" ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
+      answer: typeof finalAnswer === "string" ? finalAnswer : JSON.stringify({ answer: finalAnswer, source: "Ultron AI" }),
       source: "Ultron AI"
     });
 
     await newEntry.save();
 
-    res.json({ answer: finalAnswer, source: "Ultron AI" });
+    res.json({ answer: finalAnswer.toString(), source: "Ultron AI" });  // 🔹 Conversione sicura a stringa
 
   } catch (error) {
     console.error("❌ Error processing question:", error);
