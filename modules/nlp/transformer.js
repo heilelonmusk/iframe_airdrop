@@ -2,37 +2,75 @@ require('dotenv').config();
 const OpenAI = require("openai");
 const mongoose = require("mongoose");
 
+// ✅ Load OpenAI API key
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ✅ Knowledge Base Schema
-const Question = mongoose.models.Question || mongoose.model('Question', new mongoose.Schema({
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is missing! Knowledge Base will not function.");
+  process.exit(1);
+}
+
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("📚 Connected to MongoDB for Knowledge Base"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
+
+// ✅ **Knowledge Base Schema**
+const knowledgeSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, required: true },
-}));
+  source: { type: String, default: "Knowledge Base" },
+  createdAt: { type: Date, default: Date.now }
+});
 
-async function generateResponse(prompt) {
+const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", knowledgeSchema);
+
+// ✅ **Check Knowledge Base Before Calling GPT**
+async function getAnswerFromKnowledgeBase(question) {
   try {
-    // ✅ Check the database first
-    const storedAnswer = await Question.findOne({ question: prompt });
-    if (storedAnswer) {
-      console.log("Serving response from database.");
-      return storedAnswer.answer;
+    const result = await Knowledge.findOne({ question: new RegExp(`^${question}$`, 'i') });
+    if (result) {
+      console.log(`📖 Answer found in Knowledge Base for: "${question}"`);
+      return { answer: result.answer, source: result.source };
     }
+    return null;
+  } catch (error) {
+    console.error("❌ Error querying Knowledge Base:", error);
+    return null;
+  }
+}
 
-    // ✅ If not found, use GPT-3.5
+// ✅ **Generate AI Response Using GPT (if needed)**
+async function generateResponse(question) {
+  try {
+    // 🔹 Step 1: First check the Knowledge Base
+    const knowledgeResponse = await getAnswerFromKnowledgeBase(question);
+    if (knowledgeResponse) return knowledgeResponse;
+
+    // 🔹 Step 2: If not found, ask GPT-3.5
+    console.log(`🤖 Querying GPT-3.5 for: "${question}"`);
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 50, 
+      model: "gpt-3.5-turbo",  // Using cost-effective model
+      messages: [{ role: "user", content: question }],
+      max_tokens: 100,  // Limits response length to reduce token usage
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content.trim();
+    const answer = response.choices[0]?.message?.content?.trim();
+    if (!answer) throw new Error("Empty response from GPT");
+
+    // 🔹 Step 3: Store AI-generated response in Knowledge Base
+    const newEntry = new Knowledge({ question, answer, source: "GPT-3.5" });
+    await newEntry.save();
+    console.log("✅ Saved GPT response to Knowledge Base.");
+
+    return { answer, source: "GPT-3.5" };
   } catch (error) {
     console.error("❌ OpenAI API Error:", error.response ? error.response.data : error);
-    return "Sorry, I'm having trouble processing your request.";
+    return { answer: "Sorry, I'm having trouble processing your request.", source: "Ultron AI" };
   }
 }
 

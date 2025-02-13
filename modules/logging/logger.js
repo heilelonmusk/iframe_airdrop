@@ -1,19 +1,71 @@
-// modules/logging/logger.js
-const { MongoClient } = require('mongodb');
-const uri = process.env.MONGO_URI;
+require('dotenv').config();
+const mongoose = require('mongoose');
 
-async function logConversation(conversation) {
-  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const LOG_RETENTION_DAYS = 30; // Auto-delete logs older than this
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is missing! Logging is disabled.");
+  process.exit(1);
+}
+
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("📜 Connected to MongoDB for logging"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
+
+// ✅ **Schema Definition for Conversation Logging**
+const logSchema = new mongoose.Schema({
+  userId: { type: String, required: true }, // Anonymous user tracking
+  question: { type: String, required: true },
+  answer: { type: String, default: "Processing..." },
+  detectedIntent: { type: String },
+  confidence: { type: Number },
+  timestamp: { type: Date, default: Date.now }
+});
+
+const ConversationLog = mongoose.models.ConversationLog || mongoose.model('ConversationLog', logSchema);
+
+// ✅ **Log a Conversation**
+async function logConversation({ userId, question, answer, detectedIntent, confidence }) {
   try {
-    await client.connect();
-    const database = client.db('ultron_ai');
-    const collection = database.collection('conversations');
-    await collection.insertOne(conversation);
-  } catch (err) {
-    console.error("Error logging conversation:", err);
-  } finally {
-    await client.close();
+    const logEntry = new ConversationLog({ userId, question, answer, detectedIntent, confidence });
+    await logEntry.save();
+    console.log("📝 Conversation logged successfully.");
+  } catch (error) {
+    console.error("❌ Error logging conversation:", error);
   }
 }
 
-module.exports = { logConversation };
+// ✅ **Retrieve Most Frequent Questions (for improvements)**
+async function getFrequentQuestions(limit = 5) {
+  try {
+    const results = await ConversationLog.aggregate([
+      { $group: { _id: "$question", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: limit }
+    ]);
+
+    return results.map(q => ({ question: q._id, count: q.count }));
+  } catch (error) {
+    console.error("❌ Error retrieving frequent questions:", error);
+    return [];
+  }
+}
+
+// ✅ **Auto-Delete Old Logs (Retention Policy)**
+async function cleanupOldLogs() {
+  try {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - LOG_RETENTION_DAYS);
+    const result = await ConversationLog.deleteMany({ timestamp: { $lt: cutoff } });
+    
+    console.log(`🗑 Deleted ${result.deletedCount} old log entries.`);
+  } catch (error) {
+    console.error("❌ Error deleting old logs:", error);
+  }
+}
+
+// Schedule log cleanup every 24 hours
+setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
+
+module.exports = { logConversation, getFrequentQuestions };
