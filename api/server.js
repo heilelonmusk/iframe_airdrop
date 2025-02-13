@@ -22,7 +22,8 @@ app.use(cors({
       return callback(null, true);
     }
     return callback(new Error("CORS policy: Not allowed by CORS"));
-  }
+  },
+  credentials: true
 }));
 app.use(express.json());
 
@@ -31,7 +32,8 @@ app.set('trust proxy', 1);
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 10,
-  message: "Too many requests. Please try again later."
+  message: "Too many requests. Please try again later.",
+  keyGenerator: (req) => req.headers["x-forwarded-for"] || req.ip || "unknown-ip",
 });
 app.use(limiter);
 
@@ -45,7 +47,7 @@ if (!MONGO_URI) {
 mongoose.connect(MONGO_URI)
   .then(() => console.log("📚 Connected to MongoDB"))
   .catch(err => {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
   });
 
@@ -107,9 +109,9 @@ const saveNLPModel = async (modelData) => {
     manager.addDocument('en', 'help', 'help');
     manager.addDocument('en', 'what can you do?', 'help');
 
-    await manager.train();
-    const exportedModel = manager.export();
-    await saveNLPModel(exportedModel);
+    await manager.train(); // 🚀 Training del modello
+    const exportedModel = manager.export(); // 📦 Esportazione
+    await saveNLPModel(exportedModel); // 💾 Salvataggio nel DB
     console.log("✅ New NLP Model trained and saved!");
   }
 })();
