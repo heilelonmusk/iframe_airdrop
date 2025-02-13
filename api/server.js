@@ -116,9 +116,11 @@ router.post('/logQuestion', async (req, res) => {
     if (storedAnswer) {
       console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
 
-      // Se storedAnswer.answer è un oggetto, estrai il campo `answer`
+      // Se storedAnswer.answer è `null` o `undefined`, impostiamo un valore di default
       let safeAnswer = storedAnswer.answer;
-      if (typeof safeAnswer === "object" && safeAnswer !== null) {
+      if (!safeAnswer) {
+        safeAnswer = "No answer found.";
+      } else if (typeof safeAnswer === "object") {
         safeAnswer = safeAnswer.answer || "No answer found.";
       }
 
