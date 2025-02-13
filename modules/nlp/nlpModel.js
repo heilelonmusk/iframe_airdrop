@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 
-// ✅ **Schema per Salvare il Modello NLP**
+//
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true }
 });
 
 const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
 
-// ✅ **Carica il Modello NLP da MongoDB**
+// ✅ 
 async function loadNLPModel() {
   try {
     const savedModel = await NLPModel.findOne({});
@@ -23,7 +23,7 @@ async function loadNLPModel() {
   }
 }
 
-// ✅ **Salva il Modello NLP su MongoDB**
+// ✅
 async function saveNLPModel(modelData) {
   try {
     await NLPModel.updateOne({}, { modelData }, { upsert: true });

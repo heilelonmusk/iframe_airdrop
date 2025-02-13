@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { NlpManager } = require('node-nlp');
-const { saveNLPModel, loadNLPModel } = require('../modules/nlp/nlpModel');
+const { saveNLPModel, loadNLPModel } = require('../nlp/nlpModel');
 
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 
