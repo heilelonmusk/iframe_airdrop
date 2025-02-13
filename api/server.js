@@ -135,7 +135,11 @@ router.post('/logQuestion', async (req, res) => {
     });
 
     // ✅ **Store Answer for Future Use**
-    const newEntry = new Question({ question, answer: finalAnswer, source: "Ultron AI" });
+    const newEntry = new Question({ 
+      question, 
+      answer: typeof finalAnswer === 'string' ? finalAnswer : JSON.stringify(finalAnswer), 
+      source: "Ultron AI" 
+    });
     await newEntry.save();
 
     res.json({ answer: finalAnswer, source: "Ultron AI" });
