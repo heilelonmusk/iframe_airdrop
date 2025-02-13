@@ -116,19 +116,15 @@ router.post('/logQuestion', async (req, res) => {
     if (storedAnswer) {
       console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
 
-      // 🔹 Evita JSON.parse(undefined) con un fallback
+      // Se storedAnswer.answer è un oggetto, estrai il campo `answer`
       let safeAnswer = storedAnswer.answer;
-      if (typeof safeAnswer === "string") {
-        try {
-          safeAnswer = JSON.parse(safeAnswer);
-        } catch (e) {
-          console.warn("⚠ Warning: Invalid JSON format for answer. Using raw string.");
-        }
+      if (typeof safeAnswer === "object" && safeAnswer !== null) {
+        safeAnswer = safeAnswer.answer || "No answer found.";
       }
 
       return res.json({
-        answer: typeof safeAnswer === "object" ? safeAnswer.answer || "No answer found." : safeAnswer,
-        source: storedAnswer.source
+        answer: safeAnswer,
+        source: storedAnswer.source || "Unknown"
       });
     }
 
@@ -140,7 +136,7 @@ router.post('/logQuestion', async (req, res) => {
     await logConversation({
       userId: anonymousUser,
       question,
-      answer: JSON.stringify(finalAnswer) || "No answer recorded.",
+      answer: typeof finalAnswer === "string" ? finalAnswer : JSON.stringify(finalAnswer),
       detectedIntent: intentResult.intent,
       confidence: intentResult.score,
       timestamp: new Date()
@@ -149,7 +145,7 @@ router.post('/logQuestion', async (req, res) => {
     // ✅ **Store Answer for Future Use**
     const newEntry = new Question({
       question,
-      answer: typeof finalAnswer === 'string' ? finalAnswer : JSON.stringify(finalAnswer),
+      answer: typeof finalAnswer === 'string' ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
       source: "Ultron AI"
     });
     await newEntry.save();
