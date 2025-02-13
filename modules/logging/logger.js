@@ -32,7 +32,7 @@ async function logConversation({ userId, question, answer, detectedIntent, confi
     const logEntry = new ConversationLog({
       userId,
       question,
-      answer, // Ora può essere un oggetto
+      answer: typeof answer === 'string' ? answer : JSON.stringify(answer), // 🔹 Converte sempre in stringa
       detectedIntent,
       confidence
     });
