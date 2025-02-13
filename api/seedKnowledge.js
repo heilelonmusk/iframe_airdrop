@@ -2,7 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const { Knowledge } = require('./knowledge');
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB for seeding"))
   .catch(err => console.error("MongoDB connection error:", err));
 
