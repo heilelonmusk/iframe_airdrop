@@ -1,8 +1,8 @@
 require('dotenv').config();
-const { saveNLPModel } = require('../../api/server');
 const { NlpManager } = require('node-nlp');
+const { saveNLPModel, loadNLPModel } = require('../modules/nlp/nlpModel');
 
-const manager = new NlpManager({ languages: ['en'], forceNER: true });
+const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 
 // ✅ **Predefined Intents & Responses**
 const predefinedIntents = {
@@ -54,6 +54,15 @@ async function getIntent(question) {
 }
 
 // ✅ **Train Model on Startup**
-trainNLP();
+async function initializeNLP() {
+  const savedModel = await loadNLPModel();
+  if (savedModel) {
+    manager.import(savedModel);
+    console.log("🧠 NLP Model Loaded from DB");
+  } else {
+    console.log("🚀 Training new NLP Model...");
+    await trainNLP();
+  }
+}
 
-module.exports = { getIntent };
+module.exports = { getIntent, initializeNLP };
