@@ -98,7 +98,6 @@ async function trainAndSaveNLP() {
   await saveNLPModel(exportedModel);
   console.log("✅ New NLP Model trained and saved!");
 }
-
 // ✅ **API Endpoint: Handle User Questions**
 router.post('/logQuestion', async (req, res) => {
   try {
@@ -133,7 +132,7 @@ router.post('/logQuestion', async (req, res) => {
       }
 
       return res.json({
-        answer: safeAnswer.toString(),  // 🔹 Converte sempre in stringa
+        answer: typeof safeAnswer === "string" ? safeAnswer : JSON.stringify(safeAnswer), // 🔹 Converte sempre in stringa
         source: safeSource
       });
     }
@@ -161,7 +160,10 @@ router.post('/logQuestion', async (req, res) => {
 
     await newEntry.save();
 
-    res.json({ answer: finalAnswer.toString(), source: "Ultron AI" });  // 🔹 Conversione sicura a stringa
+    res.json({ 
+      answer: typeof finalAnswer === "string" ? finalAnswer : JSON.stringify(finalAnswer),  // 🔹 Conversione sicura a stringa
+      source: "Ultron AI" 
+    });
 
   } catch (error) {
     console.error("❌ Error processing question:", error);
