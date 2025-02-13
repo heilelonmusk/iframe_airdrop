@@ -2,21 +2,25 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const serverless = require("serverless-http");
+const rateLimit = require("express-rate-limit");
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
 const { logConversation } = require('../modules/logging/logger');
-console.log("🔑 OPENAI_API_KEY is set:", process.env.OPENAI_API_KEY ? "✅ Yes" : "❌ No");
-const tendermintRpcUrl = process.env.TENDERMINT_RPC_URL;
-const lcdRestUrl = process.env.LCD_REST_URL;
-const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
 
 const app = express();
 const router = express.Router();
 
-// Global CORS middleware: sets headers for every request, including preflight OPTIONS.
+// ✅ Rate Limiting to prevent abuse
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10, // Limit each IP to 10 requests per minute
+  message: "Too many requests from this IP, please try again later."
+});
+app.use(limiter);
+
+// ✅ CORS Middleware
 app.use((req, res, next) => {
-  // For testing purposes, you may use "*" or restrict to your specific domain (e.g., "https://helon.space")
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "https://helon.space");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") {
@@ -40,7 +44,7 @@ mongoose.connect(MONGO_URI)
     process.exit(1);
   });
 
-// Define the schema and model for questions
+// ✅ Define Schema for questions
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: String, default: "Processing..." },
@@ -49,7 +53,7 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 
-// API endpoint for logging questions
+// ✅ API for logging user questions
 router.post('/logQuestion', async (req, res) => {
   try {
     const { question } = req.body;
@@ -58,33 +62,16 @@ router.post('/logQuestion', async (req, res) => {
     }
     console.log(`Received question: "${question}"`);
 
-    // Special handling for "channels"
-    if (question.trim().toLowerCase() === "channels") {
-      return res.json({
-        answer: "Here are the official channels: \n- Twitter: https://x.com/heilelon_ \n- Instagram: https://instagram.com/heil.elonmusk \n- Telegram: https://t.me/heil_elon",
-        source: "Official Documentation"
-      });
-    }
-
-    // Process the intent
     const intentResult = await getIntent(question);
     let answer = "";
-    // If the recognized intent is among predefined ones, use its answer
+
     if (intentResult.intent.startsWith("greeting") || intentResult.intent.startsWith("info")) {
       answer = intentResult.answer || (intentResult.answers && intentResult.answers[0]) || "";
     } else {
-      // Otherwise, use dynamic response generation
       answer = await generateResponse(question);
     }
 
-    // Log the conversation with additional details
-    const conversation = {
-      question,
-      answer,
-      detectedIntent: intentResult.intent,
-      confidence: intentResult.score,
-      timestamp: new Date()
-    };
+    const conversation = { question, answer, detectedIntent: intentResult.intent, confidence: intentResult.score, timestamp: new Date() };
     await logConversation(conversation);
 
     res.json({ answer, source: "Ultron AI" });
@@ -94,7 +81,7 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// (Optional) API endpoint for updating the answer
+// ✅ API for updating responses
 router.post('/updateAnswer', async (req, res) => {
   try {
     const { question, answer, source } = req.body;
@@ -114,12 +101,6 @@ router.post('/updateAnswer', async (req, res) => {
   }
 });
 
-// (Optional) Base route
-router.get('/', (req, res) => {
-  res.json({ message: "Ultron AI API is running!" });
-});
-
-// Mount the router as a Netlify function
 app.use("/.netlify/functions/server", router);
 
 module.exports = app;

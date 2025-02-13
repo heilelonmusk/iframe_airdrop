@@ -1,11 +1,6 @@
 require('dotenv').config();
-const tendermintRpcUrl = process.env.TENDERMINT_RPC_URL;
-const lcdRestUrl = process.env.LCD_REST_URL;
-const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
-
 const mongoose = require('mongoose');
-require('dotenv').config();
-const { Knowledge } = require('./knowledge');  // if you use the knowledge module from earlier
+const { Knowledge } = require('./knowledge');
 
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB for seeding"))
@@ -13,22 +8,19 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 
 const seedData = [
   {
-    question: "What is Helon?",
+    question: "what is helon?",
     answer: "Helon is a decentralized AI ecosystem.",
-    source: "Official Documentation",
-    keywords: ["helon", "ecosystem"]
+    source: "Official Documentation"
   },
   {
-    question: "What is Ultron?",
+    question: "what is ultron?",
     answer: "Ultron is an AI-powered chatbot.",
-    source: "Ultron Chat",
-    keywords: ["ultron", "chatbot"]
+    source: "Ultron Chat"
   },
   {
     question: "channels",
-    answer: "Here are the official channels: \n- Twitter: https://x.com/heilelon_ \n- Instagram: https://instagram.com/heil.elonmusk \n- Telegram: https://t.me/heil_elon",
-    source: "Official Documentation",
-    keywords: ["channels", "official channels", "links", "socials", "community"]
+    answer: "Official channels: Twitter (https://x.com/heilelon_), Instagram (https://instagram.com/heil.elonmusk), Telegram (https://t.me/heil_elon).",
+    source: "Official Documentation"
   }
 ];
 
