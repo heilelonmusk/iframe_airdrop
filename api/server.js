@@ -183,5 +183,5 @@ router.post('/updateAnswer', async (req, res) => {
 // ✅ **Netlify Functions Integration**
 app.use("/.netlify/functions/server", router);
 
-module.exports = app;
+module.exports = { app, handler: serverless(app), saveNLPModel };
 module.exports.handler = serverless(app);
