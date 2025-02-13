@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
-
+const fs = require('fs');
+fs.writeFileSync = () => { throw new Error("File system write disabled on Netlify!"); };
 const { NlpManager } = require('node-nlp');
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
