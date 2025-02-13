@@ -1,4 +1,7 @@
 const fs = require('fs');
+const { initializeNLP } = require('../modules/intent/intentRecognizer');
+initializeNLP();
+const { loadNLPModel, saveNLPModel } = require('../modules/nlp/nlpModel');
 
 fs.writeFileSync = () => { throw new Error("File system write disabled!"); };
 fs.appendFileSync = () => { throw new Error("File system write disabled!"); };
@@ -10,7 +13,6 @@ const mongoose = require('mongoose');
 const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
-const { NlpManager } = require('node-nlp');
 const manager = new NlpManager({ languages: ['en'], autoSave: false, autoLoad: false });
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
@@ -70,32 +72,6 @@ const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true }
 });
 const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
-
-// ✅ **Load NLP Model from MongoDB**
-const loadNLPModel = async () => {
-  try {
-    const savedModel = await NLPModel.findOne({});
-    if (savedModel && savedModel.modelData) {
-      console.log("✅ NLP Model loaded from MongoDB");
-      return savedModel.modelData;
-    }
-    console.log("⚠️ No NLP Model found in database. Training required.");
-    return null;
-  } catch (error) {
-    console.error("❌ Error loading NLP model from MongoDB:", error);
-    return null;
-  }
-};
-
-// ✅ **Save NLP Model to MongoDB**
-const saveNLPModel = async (modelData) => {
-  try {
-    await NLPModel.updateOne({}, { modelData }, { upsert: true });
-    console.log("✅ NLP Model saved in MongoDB");
-  } catch (error) {
-    console.error("❌ Error saving NLP model:", error);
-  }
-};
 
 // ✅ **Initialize NLP Model**
 (async () => {
@@ -183,5 +159,5 @@ router.post('/updateAnswer', async (req, res) => {
 // ✅ **Netlify Functions Integration**
 app.use("/.netlify/functions/server", router);
 
-module.exports = { app, handler: serverless(app), saveNLPModel };
+module.exports = { app, handler: serverless(app) };
 module.exports.handler = serverless(app);
