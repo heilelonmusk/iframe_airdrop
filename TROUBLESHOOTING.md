@@ -1,131 +1,129 @@
-# 🧐 Troubleshooting & Debugging Guide
+# Troubleshooting Guide - Iframe Airdrop
 
-## 📌 Overview
-This document provides **common issues** and **solutions** encountered when developing and deploying the **iframe_airdrop & Ultron AI Chat System**.
-
----
-## ⚠️ **Common Errors & Fixes**
-
-### 🚨 **1. API CORS Issues**
-#### ❌ Problem:
-- **Frontend requests blocked** due to CORS policy.
-- Error message: `Access-Control-Allow-Origin blocked`.
-
-#### ✅ Solution:
-- Modify `netlify.toml` to allow cross-origin requests:
-```toml
-[[headers]]
-  for = "/api/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-```
-- Ensure Express API sets appropriate headers:
-```javascript
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-});
-```
+## Overview
+This troubleshooting guide provides solutions for common issues encountered while running the **Iframe Airdrop** backend system. It covers connectivity, NLP model handling, API errors, and performance issues, ensuring seamless operation for developers and future AI improvements.
 
 ---
+## Common Issues & Fixes
 
-### 🚨 **2. MongoDB Connection Issues**
-#### ❌ Problem:
-- Cannot connect to **MongoDB Atlas**.
-- Error: `MongooseServerSelectionError: Could not connect to primary node`.
+### 1. **MongoDB Connection Error**
+**Issue:**
+- The API fails to connect to MongoDB.
+- Requests return a `500 Internal Server Error` due to database inaccessibility.
 
-#### ✅ Solution:
-- Ensure `.env` file contains the correct **MongoDB URI**:
-```env
-MONGO_URI=mongodb+srv://your_username:your_password@your-cluster.mongodb.net/dbname
-```
-- **Whitelist IPs** in MongoDB Atlas settings.
-- Restart the application after modifying `.env`:
-```bash
-npm run dev
-```
-
----
-
-### 🚨 **3. Netlify Serverless Function Errors (502/504 Bad Gateway)**
-#### ❌ Problem:
-- API returns `502 Bad Gateway`.
-- **Netlify functions fail to execute properly**.
-
-#### ✅ Solution:
-- Ensure `server.js` is wrapped correctly using `serverless-http`:
-```javascript
-const serverless = require("serverless-http");
-module.exports.handler = serverless(app);
-```
-- Check logs with:
-```bash
-netlify functions:invoke server
-```
+**Fix:**
+- Ensure `MONGO_URI` is correctly set in the `.env` file.
+- Verify that MongoDB Atlas IP whitelisting includes the current server.
+- Test the connection manually with:
+  ```bash
+  mongosh "MONGO_URI"
+  ```
+- If using a local MongoDB instance, ensure the service is running:
+  ```bash
+  systemctl status mongod
+  ```
 
 ---
+### 2. **NLP Model Not Loading**
+**Issue:**
+- The NLP model fails to initialize or loads an empty model.
 
-### 🚨 **4. WebSocket Connection Issues**
-#### ❌ Problem:
-- WebSocket closes immediately after connecting.
-- Console error: `WebSocket connection closed unexpectedly`.
-
-#### ✅ Solution:
-- Ensure proper WebSocket initialization in **frontend and backend**:
-```javascript
-const socket = new WebSocket("wss://your-api-url.com/socket");
-socket.onopen = () => console.log("Connected");
-socket.onerror = (error) => console.error("WebSocket Error", error);
-```
-- Implement **auto-reconnect** for better stability.
+**Fix:**
+- Check if `loadNLPModel()` retrieves valid data from MongoDB.
+- If no model exists, retrain using:
+  ```javascript
+  await trainAndSaveNLP();
+  ```
+- Ensure the model is saved correctly after training.
 
 ---
+### 3. **Responses Returning `[object Object]`**
+**Issue:**
+- Answers from MongoDB appear as `[object Object]` instead of strings.
+- JSON structure issues when retrieving stored responses.
 
-### 🚨 **5. Chatbot Response Delays**
-#### ❌ Problem:
-- **Slow response times** when querying Ultron AI.
-- Users experience **laggy interactions**.
-
-#### ✅ Solution:
-- **Optimize MongoDB queries** by indexing relevant fields:
-```javascript
-db.collection("messages").createIndex({ query: 1 });
-```
-- Enable **API response caching** to reduce redundant calls.
-
----
-## 🎯 **How to Debug Issues Faster**
-### 📝 **1. Enable Debug Logging**
-Modify `.env`:
-```env
-DEBUG_MODE=true
-```
-Modify `server.js`:
-```javascript
-if (process.env.DEBUG_MODE === "true") {
-    app.use(morgan("dev"));
-}
-```
-
-### 🛠 **2. Check Netlify Logs**
-```bash
-netlify logs --functions
-```
-
-### 🔍 **3. Use Postman for API Testing**
-- Send `GET` and `POST` requests to debug API endpoints.
-- Verify JSON responses for correctness.
+**Fix:**
+- Update all stored answers to ensure they are saved as strings:
+  ```javascript
+  db.questions.updateMany(
+    { answer: { $type: "object" } },
+    { $set: { answer: { $toString: "$answer.answer" } } }
+  )
+  ```
+- Modify `server.js` to correctly handle object-to-string conversions:
+  ```javascript
+  res.json({ answer: typeof safeAnswer === "string" ? safeAnswer : JSON.stringify(safeAnswer), source: safeSource });
+  ```
 
 ---
-## 🔮 **Future Enhancements for Stability**
-✅ **Auto-healing mechanisms** for WebSocket disconnections.  
-✅ **AI-based monitoring** to detect errors in real-time.  
-✅ **Rate limiting** to prevent API abuse.
+### 4. **CORS Policy Errors**
+**Issue:**
+- The frontend fails to make API requests due to CORS restrictions.
+- Requests are blocked by `Access-Control-Allow-Origin` errors.
+
+**Fix:**
+- Ensure the correct domain is whitelisted in `cors` settings:
+  ```javascript
+  app.use(cors({
+    origin: "https://helon.space",
+    credentials: true
+  }));
+  ```
+- Restart the server after changes:
+  ```bash
+  npm run dev
+  ```
 
 ---
-This document will be **continuously updated** to improve debugging efficiency! 🚀
+### 5. **Rate Limit Exceeded**
+**Issue:**
+- Users report being blocked after multiple API requests.
+- API returns a `429 Too Many Requests` error.
 
+**Fix:**
+- Adjust the rate limiter settings in `server.js`:
+  ```javascript
+  app.use(rateLimit({
+    windowMs: 2 * 60 * 1000, // 2 minutes
+    max: 20
+  }));
+  ```
+- If necessary, increase the limit for trusted users.
+
+---
+### 6. **Timeout Errors on API Calls**
+**Issue:**
+- Requests take too long to respond and result in timeouts.
+
+**Fix:**
+- Increase request timeout in `server.js`:
+  ```javascript
+  app.use(timeout('15s'));
+  ```
+- Optimize MongoDB queries with indexing:
+  ```javascript
+  db.questions.createIndex({ question: 1 });
+  ```
+- Use async processing where possible.
+
+---
+## Recent Fixes & Updates
+
+### [2025-02-13]
+- Fixed incorrect object storage in MongoDB.
+- Enhanced response formatting to ensure string output.
+- Improved logging to track API failures.
+
+### [2025-02-12]
+- Increased request timeout settings.
+- Improved database indexing for better performance.
+- Introduced stricter error handling for NLP processing.
+
+### [2025-02-11]
+- Added enhanced security policies to API endpoints.
+- Implemented stricter type validation for requests.
+- Improved logging mechanisms for better debugging.
+
+---
+## Reporting Issues
+For unresolved issues, open a ticket on GitHub or contact support at `support@helon.space`.
