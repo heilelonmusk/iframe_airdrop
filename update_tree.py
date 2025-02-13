@@ -31,6 +31,16 @@ def file_changed(file_path, new_content):
         old_content = f.read()
     return old_content != new_content
 
+def last_commit_is_update():
+    """
+    Controlla se l'ultimo commit ha già il messaggio "Aggiornamento file tree".
+    In tal caso, lo script non eseguirà un nuovo commit per evitare loop.
+    """
+    result = run_command('git log -1 --pretty=%B')
+    if result.returncode != 0:
+        return False
+    return "Aggiornamento file tree" in result.stdout
+
 def main():
     parser = argparse.ArgumentParser(
         description="Aggiorna il file_tree.txt con la struttura corrente del repository"
@@ -74,18 +84,22 @@ def main():
         print(f"Il file '{args.output}' è stato aggiornato.")
         
         if commit_auto:
-            print("Eseguo commit e push delle modifiche...")
-            # Configurazione base di Git
-            run_command(f'git config user.email "{git_email}"')
-            run_command(f'git config user.name "{git_name}"')
-            
-            # Aggiunge il file e committa le modifiche
-            subprocess.run(f"git add {args.output}", shell=True)
-            commit_result = subprocess.run('git commit -m "Aggiornamento file tree"', shell=True)
-            if commit_result.returncode == 0:
-                subprocess.run("git push", shell=True)
+            # Controlla se l'ultimo commit è già un aggiornamento del file tree
+            if last_commit_is_update():
+                print("Commit saltato per evitare un loop infinito.")
             else:
-                print("Nessun cambiamento da committare.")
+                print("Eseguo commit e push delle modifiche...")
+                # Configurazione base di Git
+                run_command(f'git config user.email "{git_email}"')
+                run_command(f'git config user.name "{git_name}"')
+                
+                # Aggiunge il file e committa le modifiche
+                subprocess.run(f"git add {args.output}", shell=True)
+                commit_result = subprocess.run('git commit -m "Aggiornamento file tree"', shell=True)
+                if commit_result.returncode == 0:
+                    subprocess.run("git push", shell=True)
+                else:
+                    print("Nessun cambiamento da committare.")
     else:
         print(f"Nessuna modifica rilevata in '{args.output}'.")
 
