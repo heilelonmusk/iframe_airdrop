@@ -123,8 +123,8 @@ router.post('/logQuestion', async (req, res) => {
         safeAnswer = "No answer found.";
         safeSource = "Ultron AI";
       } else if (typeof storedAnswer.answer === "object" && storedAnswer.answer !== null) {
-        // 🔹 Se la risposta è un oggetto annidato, estrai il valore corretto
-        safeAnswer = storedAnswer.answer.answer || "No answer found.";  
+        // 🔹 Se la risposta è un oggetto annidato, prendiamo il valore corretto
+        safeAnswer = storedAnswer.answer.answer || JSON.stringify(storedAnswer.answer);
         safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";
       } else {
         // 🔹 Se è già una stringa, la usa direttamente
@@ -133,7 +133,7 @@ router.post('/logQuestion', async (req, res) => {
       }
 
       return res.json({
-        answer: safeAnswer.toString(),  // 🔹 Assicura che venga sempre restituita una stringa
+        answer: safeAnswer.toString(),  // 🔹 Converte sempre in stringa
         source: safeSource
       });
     }
