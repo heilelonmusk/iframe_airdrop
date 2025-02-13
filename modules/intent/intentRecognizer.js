@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { saveNLPModel } = require('../server');  // Assicurati che il path sia corretto!
 const { NlpManager } = require('node-nlp');
 
 const manager = new NlpManager({ languages: ['en'], forceNER: true });
