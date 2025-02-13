@@ -27,6 +27,7 @@ app.use(cors({
 app.use(express.json());
 
 // ✅ **Rate Limiting to Prevent Spam & Abuse**
+app.set('trust proxy', 1); // Enable trust proxy for rate limit headers
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
   max: 10, // 🔹 Stricter limit: 10 requests per minute
@@ -41,7 +42,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGO_URI)
   .then(() => console.log("📚 Connected to MongoDB"))
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
@@ -56,6 +57,38 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
+
+// ✅ **Schema for Storing NLP Model**
+const NLPModelSchema = new mongoose.Schema({
+  model: { type: Object, required: true }
+});
+const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
+
+// ✅ **Load NLP Model from MongoDB**
+const loadNLPModel = async () => {
+  try {
+    const savedModel = await NLPModel.findOne({});
+    if (savedModel && savedModel.model) {
+      console.log("✅ NLP Model loaded from MongoDB");
+      return savedModel.model;
+    }
+    console.log("⚠️ No NLP Model found in database. Training required.");
+    return null;
+  } catch (error) {
+    console.error("❌ Error loading NLP model from MongoDB:", error);
+    return null;
+  }
+};
+
+// ✅ **Save NLP Model to MongoDB**
+const saveNLPModel = async (modelData) => {
+  try {
+    await NLPModel.updateOne({}, { model: modelData }, { upsert: true });
+    console.log("✅ NLP Model saved in MongoDB");
+  } catch (error) {
+    console.error("❌ Error saving NLP model:", error);
+  }
+};
 
 // ✅ **API Endpoint: Handle User Questions**
 router.post('/logQuestion', async (req, res) => {
@@ -74,23 +107,16 @@ router.post('/logQuestion', async (req, res) => {
 
     // 🔍 **Step 2: Process Intent Detection**
     const intentResult = await getIntent(question);
-    let finalAnswer = "";
-
-    if (intentResult.intent.startsWith("greeting") || intentResult.intent.startsWith("info")) {
-      finalAnswer = intentResult.answer || intentResult.answers?.[0] || "";
-    } else {
-      finalAnswer = await generateResponse(question);
-    }
+    let finalAnswer = intentResult.answer || intentResult.answers?.[0] || await generateResponse(question);
 
     // 📌 **Log the interaction**
-    const conversation = {
+    await logConversation({
       question,
       answer: finalAnswer,
       detectedIntent: intentResult.intent,
       confidence: intentResult.score,
       timestamp: new Date()
-    };
-    await logConversation(conversation);
+    });
 
     // ✅ **Store Answer for Future Use**
     const newEntry = new Question({ question, answer: finalAnswer, source: "Ultron AI" });
@@ -120,42 +146,6 @@ router.post('/updateAnswer', async (req, res) => {
   } catch (error) {
     console.error("❌ Error updating answer:", error);
     res.status(500).json({ error: "Server error" });
-  }
-});
-
-// ✅ **Health Check Endpoint**
-router.get('/', (req, res) => {
-  res.json({ message: "✅ Ultron AI API is running!" });
-});
-
-// ✅ **New API Endpoint: Repository Structure**
-const getRepoStructure = (dirPath, baseDir = "") => {
-  let results = [];
-  try {
-      const files = fs.readdirSync(dirPath, { withFileTypes: true });
-
-      files.forEach((file) => {
-          const filePath = path.join(dirPath, file.name);
-          if (file.isDirectory()) {
-              results.push({ type: "folder", name: file.name, path: path.join(baseDir, file.name) });
-              results = results.concat(getRepoStructure(filePath, path.join(baseDir, file.name)));
-          } else {
-              results.push({ type: "file", name: file.name, path: path.join(baseDir, file.name) });
-          }
-      });
-  } catch (error) {
-      console.error(`❌ Error accessing directory: ${dirPath}`, error);
-  }
-  return results;
-};
-
-// ✅ **API: Get Repository Structure**
-router.get('/repository-structure', (req, res) => {
-  try {
-    const repoStructure = getRepoStructure(__dirname); // Root directory
-    res.json({ status: "success", data: repoStructure });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: "Failed to retrieve repository structure", error });
   }
 });
 
