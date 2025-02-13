@@ -54,9 +54,9 @@ if (!MONGO_URI) {
 // ✅ **Schema & Model for Knowledge Base**
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
-  answer: { type: String, default: "Processing..." },
+  answer: { type: mongoose.Schema.Types.Mixed, required: true },
   source: { type: String, default: "Ultron AI" },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 const Question = mongoose.models.Question || mongoose.model('Question', questionSchema);
 

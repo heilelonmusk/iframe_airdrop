@@ -17,18 +17,25 @@ mongoose.connect(MONGO_URI)
 const logSchema = new mongoose.Schema({
   userId: { type: String, required: true }, // Anonymous user tracking
   question: { type: String, required: true },
-  answer: { type: String, default: "Processing..." },
+  answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Permette stringhe e oggetti
   detectedIntent: { type: String },
   confidence: { type: Number },
   timestamp: { type: Date, default: Date.now }
 });
 
+// ✅ **Crea il modello**
 const ConversationLog = mongoose.models.ConversationLog || mongoose.model('ConversationLog', logSchema);
 
 // ✅ **Log a Conversation**
 async function logConversation({ userId, question, answer, detectedIntent, confidence }) {
   try {
-    const logEntry = new ConversationLog({ userId, question, answer, detectedIntent, confidence });
+    const logEntry = new ConversationLog({
+      userId,
+      question,
+      answer, // Ora può essere un oggetto
+      detectedIntent,
+      confidence
+    });
     await logEntry.save();
     console.log("📝 Conversation logged successfully.");
   } catch (error) {
