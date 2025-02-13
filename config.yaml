@@ -1,0 +1,6 @@
+# config.yaml
+commit: true         # Abilita commit automatico se non in ambiente Netlify
+git:
+  user_email: "auto@local.com"
+  user_name: "Auto Commit"
+tree_command: "tree -a"  # Comando per generare l'albero dei file
