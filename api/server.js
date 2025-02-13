@@ -1,3 +1,9 @@
+const fs = require('fs');
+
+fs.writeFileSync = () => { throw new Error("File system write disabled!"); };
+fs.appendFileSync = () => { throw new Error("File system write disabled!"); };
+fs.createWriteStream = () => { throw new Error("File system write disabled!"); };
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -5,15 +11,14 @@ const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
 const fs = require('fs');
-fs.writeFileSync = () => { throw new Error("File system write disabled on Netlify!"); };
 const { NlpManager } = require('node-nlp');
+const manager = new NlpManager({ languages: ['en'], autoSave: false, autoLoad: false });
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
 const { logConversation } = require('../modules/logging/logger');
 
 const app = express();
 const router = express.Router();
-const manager = new NlpManager({ languages: ['en'], autoSave: false, autoLoad: false });
 
 // ✅ **CORS Configuration**
 const allowedOrigins = ["https://helon.space"];

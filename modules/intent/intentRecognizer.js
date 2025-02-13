@@ -26,6 +26,10 @@ async function trainNLP() {
 
   await manager.train();
   console.log("✅ NLP Model Trained Successfully!");
+
+  const exportedModel = manager.export();
+  await saveNLPModel(exportedModel);
+  console.log("✅ NLP Model saved in MongoDB");
 }
 
 // ✅ **Intent Recognition Function**
