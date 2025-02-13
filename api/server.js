@@ -12,7 +12,7 @@ const { logConversation } = require('../modules/logging/logger');
 
 const app = express();
 const router = express.Router();
-const manager = new NlpManager({ languages: ['en'] });
+const manager = new NlpManager({ languages: ['en'], autoSave: false, autoLoad: false });
 
 // ✅ **CORS Configuration**
 const allowedOrigins = ["https://helon.space"];
