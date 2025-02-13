@@ -54,7 +54,7 @@ if (!MONGO_URI) {
 // ✅ **Schema & Model for Knowledge Base**
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
-  answer: { type: mongoose.Schema.Types.Mixed, required: true },
+  answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Ora può essere stringa o oggetto
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now },
 });
@@ -113,8 +113,11 @@ router.post('/logQuestion', async (req, res) => {
     // 🔍 **Step 1: Check the Knowledge Base First**
     let storedAnswer = await Question.findOne({ question });
     if (storedAnswer) {
-      console.log(`✅ Found answer in DB: "${storedAnswer.answer}"`);
-      return res.json({ answer: storedAnswer.answer, source: storedAnswer.source });
+      console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
+      return res.json({
+        answer: typeof storedAnswer.answer === "object" ? storedAnswer.answer.answer : storedAnswer.answer,
+        source: storedAnswer.source
+      });
     }
 
     // 🔍 **Step 2: Process Intent Detection**
