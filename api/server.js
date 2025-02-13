@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
 const { logConversation } = require('../modules/logging/logger');
@@ -123,6 +126,36 @@ router.post('/updateAnswer', async (req, res) => {
 // ✅ **Health Check Endpoint**
 router.get('/', (req, res) => {
   res.json({ message: "✅ Ultron AI API is running!" });
+});
+
+// ✅ **New API Endpoint: Repository Structure**
+const getRepoStructure = (dirPath, baseDir = "") => {
+    let results = [];
+    const files = fs.readdirSync(dirPath);
+
+    files.forEach((file) => {
+        const filePath = path.join(dirPath, file);
+        const stat = fs.statSync(filePath);
+
+        if (stat.isDirectory()) {
+            results.push({ type: "folder", name: file, path: path.join(baseDir, file) });
+            results = results.concat(getRepoStructure(filePath, path.join(baseDir, file)));
+        } else {
+            results.push({ type: "file", name: file, path: path.join(baseDir, file) });
+        }
+    });
+
+    return results;
+};
+
+// ✅ **API: Get Repository Structure**
+router.get('/repository-structure', (req, res) => {
+  try {
+    const repoStructure = getRepoStructure(__dirname); // Root directory
+    res.json({ status: "success", data: repoStructure });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: "Failed to retrieve repository structure", error });
+  }
 });
 
 // ✅ **Netlify Functions Integration**
