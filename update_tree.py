@@ -32,6 +32,11 @@ def file_changed(file_path, new_content):
     return old_content != new_content
 
 def main():
+    # Se la variabile SKIP_TREE_UPDATE è impostata, esce per evitare loop
+    if os.environ.get("SKIP_TREE_UPDATE") == "1":
+        print("SKIP_TREE_UPDATE impostato, salto l'aggiornamento per evitare loop.")
+        sys.exit(0)
+    
     parser = argparse.ArgumentParser(
         description="Aggiorna il file_tree.txt con la struttura corrente del repository"
     )
@@ -66,7 +71,7 @@ def main():
     tree_cmd  = config.get("tree_command", "tree -a")
     
     new_tree = generate_tree(tree_cmd)
-
+    
     if file_changed(args.output, new_tree):
         with open(args.output, "w") as f:
             f.write(new_tree)
@@ -74,14 +79,13 @@ def main():
         
         if commit_auto:
             print("Eseguo commit e push delle modifiche...")
-            # Configurazione base di Git
             run_command(f'git config user.email "{git_email}"')
             run_command(f'git config user.name "{git_name}"')
-            
-            # Aggiunge il file e committa le modifiche
             subprocess.run(f"git add {args.output}", shell=True)
             commit_result = subprocess.run('git commit -m "Aggiornamento file tree"', shell=True)
             if commit_result.returncode == 0:
+                # Imposta la variabile per evitare che il nuovo commit inneschi un loop
+                os.environ["SKIP_TREE_UPDATE"] = "1"
                 subprocess.run("git push", shell=True)
             else:
                 print("Nessun cambiamento da committare.")
