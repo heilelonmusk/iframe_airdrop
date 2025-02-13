@@ -10,7 +10,6 @@ const mongoose = require('mongoose');
 const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
-const fs = require('fs');
 const { NlpManager } = require('node-nlp');
 const manager = new NlpManager({ languages: ['en'], autoSave: false, autoLoad: false });
 const { getIntent } = require('../modules/intent/intentRecognizer');
