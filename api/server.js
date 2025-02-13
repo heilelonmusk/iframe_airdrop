@@ -112,33 +112,50 @@ router.post('/logQuestion', async (req, res) => {
 
     // 🔍 **Step 1: Check the Knowledge Base First**
     let storedAnswer = await Question.findOne({ question });
+
     if (storedAnswer) {
-      console.log(`✅ Found answer in DB: ${storedAnswer.answer}`);
+      console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
+
+      // 🔹 Evita JSON.parse(undefined) con un fallback
+      let safeAnswer = storedAnswer.answer;
+      if (typeof safeAnswer === "string") {
+        try {
+          safeAnswer = JSON.parse(safeAnswer);
+        } catch (e) {
+          console.warn("⚠ Warning: Invalid JSON format for answer. Using raw string.");
+        }
+      }
+
       return res.json({
-        answer: JSON.parse(storedAnswer.answer), // 🔹 Decodifica stringa JSON in oggetto
+        answer: typeof safeAnswer === "object" ? safeAnswer.answer || "No answer found." : safeAnswer,
         source: storedAnswer.source
       });
     }
 
+    // 🔍 **Step 2: Process Intent Detection**
     const intentResult = await manager.process('en', question);
     let finalAnswer = intentResult.answer || await generateResponse(question) || "I'm not sure how to answer that yet.";
 
+    // 📌 **Log the interaction**
     await logConversation({
       userId: anonymousUser,
       question,
-      answer: JSON.stringify(finalAnswer),
+      answer: JSON.stringify(finalAnswer) || "No answer recorded.",
       detectedIntent: intentResult.intent,
-      confidence: intentResult.score
+      confidence: intentResult.score,
+      timestamp: new Date()
     });
 
+    // ✅ **Store Answer for Future Use**
     const newEntry = new Question({
       question,
-      answer: JSON.stringify(finalAnswer),
+      answer: typeof finalAnswer === 'string' ? finalAnswer : JSON.stringify(finalAnswer),
       source: "Ultron AI"
     });
     await newEntry.save();
 
     res.json({ answer: finalAnswer, source: "Ultron AI" });
+
   } catch (error) {
     console.error("❌ Error processing question:", error);
     res.status(500).json({ error: "Server error" });
