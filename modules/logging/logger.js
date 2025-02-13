@@ -9,7 +9,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGO_URI)
   .then(() => console.log("📜 Connected to MongoDB for logging"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 

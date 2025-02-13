@@ -4,7 +4,7 @@ const { MongoClient } = require('mongodb');
 const uri = process.env.MONGO_URI;
 
 async function retrainFromLogs() {
-  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+  const client = new MongoClient(uri);
   try {
     await client.connect();
     const database = client.db('ultron_ai');
