@@ -5,12 +5,14 @@ const serverless = require("serverless-http");
 const rateLimit = require("express-rate-limit");
 const cors = require('cors');
 
+const { NlpManager } = require('node-nlp');
 const { getIntent } = require('../modules/intent/intentRecognizer');
 const { generateResponse } = require('../modules/nlp/transformer');
 const { logConversation } = require('../modules/logging/logger');
 
 const app = express();
 const router = express.Router();
+const manager = new NlpManager({ languages: ['en'] });
 
 // ✅ **CORS Configuration**
 const allowedOrigins = ["https://helon.space"];
@@ -25,10 +27,10 @@ app.use(cors({
 app.use(express.json());
 
 // ✅ **Rate Limiting**
-app.set('trust proxy', 1); // Required for Netlify rate limiting
+app.set('trust proxy', 1);
 const limiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10, 
+  windowMs: 1 * 60 * 1000,
+  max: 10,
   message: "Too many requests. Please try again later."
 });
 app.use(limiter);
@@ -40,10 +42,7 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(MONGO_URI)
   .then(() => console.log("📚 Connected to MongoDB"))
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
@@ -99,6 +98,15 @@ const saveNLPModel = async (modelData) => {
     console.log("🧠 NLP Model Loaded from DB");
   } else {
     console.log("🚀 Training new NLP Model...");
+    manager.addDocument('en', 'hello', 'greeting');
+    manager.addDocument('en', 'hi there', 'greeting');
+    manager.addDocument('en', 'goodbye', 'farewell');
+    manager.addDocument('en', 'bye', 'farewell');
+    manager.addDocument('en', 'where can I find official channels?', 'channels');
+    manager.addDocument('en', 'how can I contact Helon?', 'channels');
+    manager.addDocument('en', 'help', 'help');
+    manager.addDocument('en', 'what can you do?', 'help');
+
     await manager.train();
     const exportedModel = manager.export();
     await saveNLPModel(exportedModel);
@@ -122,8 +130,8 @@ router.post('/logQuestion', async (req, res) => {
     }
 
     // 🔍 **Step 2: Process Intent Detection**
-    const intentResult = await getIntent(question);
-    let finalAnswer = intentResult.answer || intentResult.answers?.[0] || await generateResponse(question);
+    const intentResult = await manager.process('en', question);
+    let finalAnswer = intentResult.answer || await generateResponse(question);
 
     // 📌 **Log the interaction**
     await logConversation({
