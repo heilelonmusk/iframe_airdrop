@@ -54,7 +54,7 @@ if (!MONGO_URI) {
 // ✅ **Schema & Model for Knowledge Base**
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
-  answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Ora può essere stringa o oggetto
+  answer: { type: String, required: true }, // Ora sempre salvato come stringa JSON
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now },
 });
@@ -113,32 +113,28 @@ router.post('/logQuestion', async (req, res) => {
     // 🔍 **Step 1: Check the Knowledge Base First**
     let storedAnswer = await Question.findOne({ question });
     if (storedAnswer) {
-      console.log(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
+      console.log(`✅ Found answer in DB: ${storedAnswer.answer}`);
       return res.json({
-        answer: typeof storedAnswer.answer === "object" ? storedAnswer.answer.answer : storedAnswer.answer,
+        answer: JSON.parse(storedAnswer.answer), // 🔹 Decodifica stringa JSON in oggetto
         source: storedAnswer.source
       });
     }
 
-    // 🔍 **Step 2: Process Intent Detection**
     const intentResult = await manager.process('en', question);
     let finalAnswer = intentResult.answer || await generateResponse(question) || "I'm not sure how to answer that yet.";
 
-    // 📌 **Log the interaction**
     await logConversation({
       userId: anonymousUser,
       question,
-      answer: JSON.stringify(finalAnswer), // Evita errore Mongoose Object
+      answer: JSON.stringify(finalAnswer),
       detectedIntent: intentResult.intent,
-      confidence: intentResult.score,
-      timestamp: new Date()
+      confidence: intentResult.score
     });
 
-    // ✅ **Store Answer for Future Use**
-    const newEntry = new Question({ 
-      question, 
-      answer: typeof finalAnswer === 'string' ? finalAnswer : JSON.stringify(finalAnswer), 
-      source: "Ultron AI" 
+    const newEntry = new Question({
+      question,
+      answer: JSON.stringify(finalAnswer),
+      source: "Ultron AI"
     });
     await newEntry.save();
 
@@ -149,30 +145,8 @@ router.post('/logQuestion', async (req, res) => {
   }
 });
 
-// ✅ **API: Update Answers**
-router.post('/updateAnswer', async (req, res) => {
-  try {
-    const { question, answer, source } = req.body;
-    if (!question || !answer) return res.status(400).json({ error: "Both question and answer are required" });
-
-    let updated = await Question.findOneAndUpdate(
-      { question },
-      { answer, source: source || "Ultron AI" },
-      { new: true, upsert: true }
-    );
-
-    console.log(`🔄 Updated answer for "${question}": "${answer}"`);
-    res.json({ message: "Answer updated!", updated });
-  } catch (error) {
-    console.error("❌ Error updating answer:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// ✅ **Netlify Functions Integration**
 app.use("/.netlify/functions/server", router);
 
-// ✅ **Disable File System Writing**
 const fs = require('fs');
 fs.writeFileSync = () => { throw new Error("File system write disabled!"); };
 fs.appendFileSync = () => { throw new Error("File system write disabled!"); };

@@ -15,9 +15,9 @@ mongoose.connect(MONGO_URI)
 
 // ✅ **Schema Definition for Conversation Logging**
 const logSchema = new mongoose.Schema({
-  userId: { type: String, default: "anonymous" }, // 
+  userId: { type: String, default: "anonymous" },
   question: { type: String, required: true },
-  answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Permette stringhe e oggetti
+  answer: { type: String, required: true }, // 🔹 Ora sempre salvato come stringa JSON
   detectedIntent: { type: String },
   confidence: { type: Number },
   timestamp: { type: Date, default: Date.now }
@@ -29,10 +29,11 @@ const ConversationLog = mongoose.models.ConversationLog || mongoose.model('Conve
 // ✅ **Log a Conversation**
 async function logConversation({ userId, question, answer, detectedIntent, confidence }) {
   try {
+    const formattedAnswer = typeof answer === 'string' ? answer : JSON.stringify(answer);
     const logEntry = new ConversationLog({
-      userId,
+      userId: userId || "anonymous",
       question,
-      answer: typeof answer === 'string' ? answer : JSON.stringify(answer), // 🔹 Converte sempre in stringa
+      answer: formattedAnswer, 
       detectedIntent,
       confidence
     });
@@ -51,7 +52,6 @@ async function getFrequentQuestions(limit = 5) {
       { $sort: { count: -1 } },
       { $limit: limit }
     ]);
-
     return results.map(q => ({ question: q._id, count: q.count }));
   } catch (error) {
     console.error("❌ Error retrieving frequent questions:", error);
@@ -65,7 +65,7 @@ async function cleanupOldLogs() {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - LOG_RETENTION_DAYS);
     const result = await ConversationLog.deleteMany({ timestamp: { $lt: cutoff } });
-    
+
     console.log(`🗑 Deleted ${result.deletedCount} old log entries.`);
   } catch (error) {
     console.error("❌ Error deleting old logs:", error);
