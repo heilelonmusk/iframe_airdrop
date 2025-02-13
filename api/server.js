@@ -15,7 +15,7 @@ const app = express();
 const router = express.Router();
 
 // ✅ **CORS Configuration**
-const allowedOrigins = ["https://helon.space"];
+const allowedOrigins = ["*"];
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
