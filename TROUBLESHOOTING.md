@@ -1,4 +1,4 @@
-# 🛠 Troubleshooting & Debugging Guide
+# 🧐 Troubleshooting & Debugging Guide
 
 ## 📌 Overview
 This document provides **common issues** and **solutions** encountered when developing and deploying the **iframe_airdrop & Ultron AI Chat System**.
