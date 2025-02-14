@@ -15,3 +15,8 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS, PUT, DELETE"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+    [[redirects]]
+  from = "/example.json"
+  to = "/example.json"
+  status = 200
