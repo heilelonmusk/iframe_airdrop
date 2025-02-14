@@ -10,8 +10,11 @@ const winston = require("winston");
 const fs = require("fs");
 const path = require("path");
 
-// ✅ Verifica ed eventuale creazione della cartella logs
-const logDir = "logs";
+// Determina se siamo in ambiente di produzione/Netlify
+const isProduction = process.env.NODE_ENV === "production" || process.env.NETLIFY === "true";
+
+// Imposta la directory dei log: in produzione, usa /tmp (scrivibile in ambiente serverless), altrimenti usa la cartella logs nella root
+const logDir = isProduction ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }

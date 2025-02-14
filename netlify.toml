@@ -11,13 +11,13 @@
   targetPort = 5000
   autoLaunch = false
 
-# ✅ Pass Environment Variables to Build
+# ✅ Pass Environment Variables to Build (sostituite con riferimenti alle variabili d'ambiente)
 [context.production.environment]
-  MONGO_URI = "your-mongodb-connection-string"
-  REDIS_URL = "your-redis-url"
-  MY_GITHUB_OWNER = "your-github-owner"
-  MY_GITHUB_REPO = "your-repo-name"
-  MY_GITHUB_TOKEN = "your-github-token"
+  MONGO_URI = "$MONGO_URI"
+  REDIS_URL = "$REDIS_URL"
+  MY_GITHUB_OWNER = "$MY_GITHUB_OWNER"
+  MY_GITHUB_REPO = "$MY_GITHUB_REPO"
+  MY_GITHUB_TOKEN = "$MY_GITHUB_TOKEN"
 
 # ✅ Security & CORS Headers
 [[headers]]
