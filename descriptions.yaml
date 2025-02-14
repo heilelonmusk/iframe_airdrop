@@ -10,6 +10,7 @@ descriptions:
     functionality, and contribution guidelines.
   ./TROUBLESHOOTING.md: In-depth guide for debugging known issues, resolving API failures,
     database connectivity, and deployment problems.
+  ./_redirects: "\U0001F680 Add a description here"
   ./checkQuestions.js: Script for validating and processing stored chatbot questions,
     ensuring consistency in AI-generated responses.
   ./config.yaml: Global configuration file managing system-wide settings, service

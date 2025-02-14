@@ -7,6 +7,7 @@
      📄 TROUBLESHOOTING.md - In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
      📄 config.yaml - Global configuration file managing system-wide settings, service integrations, and environment variables.
      📄 example.json - 🚀 Add a description here
+     📄 _redirects - 🚀 Add a description here
      📄 downloaded_netlify_index.html - 🚀 Add a description here
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
      📄 yarn.lock - Dependency lock file for Yarn, ensuring package versions remain consistent across installations.
@@ -85,7 +86,6 @@
      📄 logger.js - Manages structured logging of chatbot interactions, debugging events, and system performance metrics.
   📁 data/ - Stores persistent data files, including whitelist and AI-related knowledge bases.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `data/` directory structure.
-     📄 _redirects - 🚀 Add a description here
      📄 whitelist.csv - Maintains a list of wallet addresses eligible for airdrop rewards, cross-referenced in API checks.
      📄 non_eligible.csv - Dataset tracking wallet addresses that are not eligible for airdrop rewards.
      📄 iframe_setting.csv - CSV configuration file containing iframe-related settings for UI rendering.
