@@ -1,7 +1,7 @@
 # 🚀 Netlify Build Settings
 [build]
   command = "npm install && npm run build"
-  functionsDirectory = "api"
+  functions = "api"
   publish = "public" # Ensures only static content is deployed
 
 # 🛠️ Local Development Settings
