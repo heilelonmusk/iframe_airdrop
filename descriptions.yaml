@@ -49,6 +49,10 @@ descriptions:
     dataset tracking disqualified wallet addresses.
   .github/workflows/update_whitelist.yml: CI/CD workflow responsible for updating
     the whitelist dataset (`whitelist.csv`).
+  .netlify/: "\U0001F680 Add a description here"
+  .netlify/functions-internal/: "\U0001F680 Add a description here"
+  .netlify/v1/: "\U0001F680 Add a description here"
+  .netlify/v1/functions/: "\U0001F680 Add a description here"
   api/: Backend API module managing chatbot logic, data retrieval, and integrations
     with external systems.
   api/dymensionAPI.js: API module responsible for fetching and processing data from
