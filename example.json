@@ -1,1 +1,4 @@
-Found. Redirecting to https://superlative-empanada-0c1b37.netlify.app//example.json
+{
+    "message": "This is a valid JSON response",
+    "status": "success"
+  }
