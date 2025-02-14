@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
-import subprocess
 import os
 import sys
 import argparse
 import yaml
-
-def run_command(cmd):
-    """Esegue un comando in shell e restituisce il risultato."""
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    return result
 
 def load_config(config_file="config.yaml"):
     if not os.path.exists(config_file):
@@ -17,12 +11,43 @@ def load_config(config_file="config.yaml"):
     with open(config_file, "r") as f:
         return yaml.safe_load(f)
 
-def generate_tree(tree_cmd):
-    result = run_command(tree_cmd)
-    if result.returncode != 0:
-        print("Errore nell'esecuzione del comando per generare il tree. Assicurati che il comando sia corretto e installato.")
-        sys.exit(1)
-    return result.stdout
+def count_files_in_directory(directory):
+    """Conta il numero totale di file in una cartella e nelle sue sottocartelle."""
+    count = 0
+    for _, _, files in os.walk(directory):
+        count += len(files)
+    return count
+
+def generate_tree(root_dir, max_files=100):
+    """
+    Genera la struttura del repository, raggruppando cartelle con troppi file.
+    """
+    tree_structure = []
+
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        # Rimuove le cartelle da ignorare (come .git e venv)
+        dirnames[:] = [d for d in dirnames if d not in ['.git', 'venv']]
+
+        # Conta i file nella cartella corrente
+        total_files = len(filenames)
+        for d in dirnames:
+            sub_dir = os.path.join(dirpath, d)
+            total_files += count_files_in_directory(sub_dir)
+
+        # Normalizza il percorso per una visualizzazione più chiara
+        relative_path = os.path.relpath(dirpath, root_dir)
+        if relative_path == ".":
+            relative_path = root_dir
+
+        # Se il numero di file è alto, raggruppa la cartella
+        if total_files > max_files:
+            tree_structure.append(f"{relative_path}/  [Troppi file, omessi: {total_files}]")
+        else:
+            tree_structure.append(f"{relative_path}/")
+            for filename in filenames:
+                tree_structure.append(f"{relative_path}/{filename}")
+
+    return "\n".join(tree_structure)
 
 def file_changed(file_path, new_content):
     if not os.path.exists(file_path):
@@ -32,13 +57,8 @@ def file_changed(file_path, new_content):
     return old_content != new_content
 
 def main():
-    # Se la variabile SKIP_TREE_UPDATE è impostata, esce per evitare loop
-    if os.environ.get("SKIP_TREE_UPDATE") == "1":
-        print("SKIP_TREE_UPDATE impostato, salto l'aggiornamento per evitare loop.")
-        sys.exit(0)
-    
     parser = argparse.ArgumentParser(
-        description="Aggiorna il file_tree.txt con la struttura corrente del repository"
+        description="Aggiorna il file_tree.txt con la struttura corrente del repository, raggruppando cartelle con troppi file."
     )
     parser.add_argument(
         "--commit", 
@@ -57,36 +77,24 @@ def main():
     )
     args = parser.parse_args()
     config = load_config(args.config)
-    
-    # Abilita commit automatico se richiesto via flag, configurazione o variabile d'ambiente.
+
     commit_auto = args.commit or config.get("commit", False) or os.environ.get("AUTO_COMMIT") == "1"
+    root_dir = "."
+    max_files = config.get("max_files_per_folder", 100)
 
-    # Se siamo in ambiente Netlify, disabilita il commit per evitare conflitti nel deploy.
-    if os.environ.get("NETLIFY", "false").lower() == "true":
-        print("Ambiente Netlify rilevato: disabilito commit automatico per evitare conflitti con il deploy.")
-        commit_auto = False
+    new_tree = generate_tree(root_dir, max_files)
 
-    git_email = config.get("git", {}).get("user_email", "auto@local.com")
-    git_name  = config.get("git", {}).get("user_name", "Auto Commit")
-    tree_cmd  = config.get("tree_command", "tree -a")
-    
-    new_tree = generate_tree(tree_cmd)
-    
     if file_changed(args.output, new_tree):
         with open(args.output, "w") as f:
             f.write(new_tree)
         print(f"Il file '{args.output}' è stato aggiornato.")
-        
+
         if commit_auto:
             print("Eseguo commit e push delle modifiche...")
-            run_command(f'git config user.email "{git_email}"')
-            run_command(f'git config user.name "{git_name}"')
-            subprocess.run(f"git add {args.output}", shell=True)
-            commit_result = subprocess.run('git commit -m "Aggiornamento file tree"', shell=True)
-            if commit_result.returncode == 0:
-                # Imposta la variabile per evitare che il nuovo commit inneschi un loop
-                os.environ["SKIP_TREE_UPDATE"] = "1"
-                subprocess.run("git push", shell=True)
+            os.system("git add file_tree.txt")
+            commit_result = os.system('git commit -m "Aggiornamento file tree"')
+            if commit_result == 0:
+                os.system("git push")
             else:
                 print("Nessun cambiamento da committare.")
     else:
