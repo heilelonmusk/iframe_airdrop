@@ -53,8 +53,13 @@ router.get('/fetch', async (req, res) => {
         } else if (source === "netlify") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
 
-            // ✅ Fix per evitare il doppio slash nella URL di reindirizzamento
-            res.redirect(`${process.env.NETLIFY_URL.replace(/\/$/, '')}/${file}`);
+            if (!process.env.NETLIFY_URL) {
+                return res.status(500).json({ error: "NETLIFY_URL is not defined in environment variables" });
+            }
+            
+            const netlifyFileUrl = new URL(file, process.env.NETLIFY_URL).href;
+            console.log("🔹 Fetching from Netlify:", netlifyFileUrl);
+            res.redirect(netlifyFileUrl);
 
         } else if (source === "mongodb") {
             if (!query) return res.status(400).json({ error: "Missing query parameter for MongoDB source." });
@@ -123,7 +128,6 @@ router.get('/download', async (req, res) => {
             // Download file content
             const fileResponse = await axios.get(response.data.download_url, { responseType: 'arraybuffer' });
             
-            // ✅ Evitiamo di sovrascrivere se il contenuto è un errore JSON
             try {
                 const jsonResponse = JSON.parse(fileResponse.data.toString('utf-8'));
                 if (jsonResponse.error || jsonResponse.message) {
@@ -131,7 +135,6 @@ router.get('/download', async (req, res) => {
                     return res.status(500).json({ error: "GitHub returned an error instead of a file.", details: jsonResponse });
                 }
             } catch (err) {
-                // Il file non è JSON (quindi è un file valido), possiamo salvarlo
                 const filePath = `./${file}`;
                 fs.writeFileSync(filePath, fileResponse.data);
                 res.download(filePath, () => fs.unlinkSync(filePath));
