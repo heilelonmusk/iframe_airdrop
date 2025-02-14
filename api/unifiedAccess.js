@@ -17,13 +17,13 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI, { 
     useNewUrlParser: true, 
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000, // 🔹 Timeout di 5s se il server non risponde
-    socketTimeoutMS: 45000 // 🔹 Chiude la connessione se non risponde per 45s
+    serverSelectionTimeoutMS: 5000, 
+    socketTimeoutMS: 45000 
 })
 .then(() => console.log("✅ MongoDB Connected Successfully"))
 .catch(err => {
     console.error("❌ MongoDB Connection Error:", err.message);
-    process.exit(1); // 🔥 Esce dall’applicazione se non può connettersi
+    process.exit(1);
 });
 
 const KnowledgeSchema = new mongoose.Schema({
@@ -36,8 +36,31 @@ const Knowledge = mongoose.models.Knowledge || mongoose.model('Knowledge', Knowl
 const memoryCache = new Map();
 
 /**
+ * 📌 Route: GET /.netlify/functions/unifiedAccess/static/:file
+ * Serves any static file from the deployment
+ */
+router.get('/static/:file', async (req, res) => {
+    const { file } = req.params;
+    
+    try {
+        if (!file) return res.status(400).json({ error: "Missing file parameter." });
+
+        const filePath = path.join(process.cwd(), "public", file);
+        if (fs.existsSync(filePath)) {
+            console.log("🔹 Serving Static File:", filePath);
+            return res.sendFile(filePath);
+        } else {
+            return res.status(404).json({ error: `File ${file} not found.` });
+        }
+    } catch (error) {
+        console.error("❌ File Serving Error:", error.message);
+        res.status(500).json({ error: "Error serving file", details: error.message });
+    }
+});
+
+/**
  * 📌 Route: GET /.netlify/functions/unifiedAccess/fetch
- * Fetch a file or dataset from GitHub, Netlify, or MongoDB
+ * Fetch a file or dataset from GitHub, MongoDB, or Netlify
  */
 router.get('/fetch', async (req, res) => {
     const { source, file, query } = req.query;
@@ -67,17 +90,6 @@ router.get('/fetch', async (req, res) => {
                 return res.status(error.response?.status || 500).json({ error: "Error fetching file from GitHub", details: error.message });
             }
 
-        } else if (source === "netlify") {
-            if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
-
-            const filePath = path.join(process.cwd(), "public", file);
-            if (fs.existsSync(filePath)) {
-                console.log("🔹 Serving local Netlify file:", filePath);
-                return res.sendFile(filePath);
-            } else {
-                return res.status(404).json({ error: "File not found in Netlify deployment." });
-            }
-
         } else if (source === "mongodb") {
             if (!query) return res.status(400).json({ error: "Missing query parameter for MongoDB source." });
 
@@ -98,7 +110,7 @@ router.get('/fetch', async (req, res) => {
                 res.status(500).json({ error: "Error fetching data from MongoDB", details: error.message });
             }
         } else {
-            res.status(400).json({ error: "Invalid source parameter. Use 'github', 'netlify', or 'mongodb'." });
+            res.status(400).json({ error: "Invalid source parameter. Use 'github' or 'mongodb'." });
         }
     } catch (error) {
         console.error("❌ Fetch Error:", error.message);
@@ -131,55 +143,6 @@ router.post('/store', async (req, res) => {
     } catch (error) {
         console.error("❌ Storage Error:", error.message);
         res.status(500).json({ error: "Error storing data", details: error.message });
-    }
-});
-
-/**
- * 📌 Route: GET /.netlify/functions/unifiedAccess/download
- * Allows downloading a file from GitHub or Netlify
- */
-router.get('/download', async (req, res) => {
-    const { source, file } = req.query;
-    if (!source || !file) {
-        return res.status(400).json({ error: "Missing source or file parameter." });
-    }
-
-    try {
-        if (source === "github") {
-            const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
-
-            const response = await axios.get(repoUrl, {
-                headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
-            });
-
-            if (!response.data.download_url) {
-                return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
-            }
-
-            const fileResponse = await axios.get(response.data.download_url, { responseType: 'arraybuffer' });
-
-            try {
-                const jsonResponse = JSON.parse(fileResponse.data.toString('utf-8'));
-                if (jsonResponse.error || jsonResponse.message) {
-                    return res.status(500).json({ error: "GitHub returned an error instead of a file.", details: jsonResponse });
-                }
-            } catch (err) {
-                const filePath = path.join(process.cwd(), "public", file);
-                fs.writeFileSync(filePath, fileResponse.data);
-                res.download(filePath, () => fs.unlinkSync(filePath));
-            }
-        } else if (source === "netlify") {
-            const filePath = path.join(process.cwd(), "public", file);
-            if (fs.existsSync(filePath)) {
-                res.download(filePath);
-            } else {
-                res.status(404).json({ error: "File not found in Netlify deployment." });
-            }
-        } else {
-            res.status(400).json({ error: "Invalid source for download" });
-        }
-    } catch (error) {
-        res.status(500).json({ error: "Error downloading file", details: error.message });
     }
 });
 
