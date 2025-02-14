@@ -50,6 +50,7 @@ descriptions:
   .github/workflows/update_whitelist.yml: CI/CD workflow responsible for updating
     the whitelist dataset (`whitelist.csv`).
   .netlify/: "\U0001F680 Add a description here"
+  .netlify/blobs-serve/: "\U0001F680 Add a description here"
   .netlify/functions-internal/: "\U0001F680 Add a description here"
   .netlify/functions/: "\U0001F680 Add a description here"
   .netlify/functions/dymensionAPI.zip: "\U0001F680 Add a description here"
