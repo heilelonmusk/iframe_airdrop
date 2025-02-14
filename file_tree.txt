@@ -11,6 +11,7 @@
      📄 .gitignore - Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts) to maintain repository cleanliness.
      📄 package-lock.json - Lock file for npm dependencies, ensuring version consistency across different environments.
      📄 package.json - Defines project dependencies, scripts, and metadata for backend and frontend packages.
+     📄 .env - 🚀 Add a description here
      📄 file_tree.txt - Auto-generated file tracking real-time repository structure, ensuring documentation of all directories and files.
      📄 update_tree.py - Python script dynamically updating `file_tree.txt`, ensuring the repository structure remains documented.
      📄 checkQuestions.js - Script for validating and processing stored chatbot questions, ensuring consistency in AI-generated responses.
