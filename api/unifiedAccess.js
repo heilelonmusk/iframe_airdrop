@@ -28,7 +28,7 @@ const logger = winston.createLogger({
 });
 
 // ✅ Ensure environment variables exist
-const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "GITHUB_OWNER", "GITHUB_REPO", "GITHUB_TOKEN"];
+const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
 requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
     logger.error(`❌ Missing required environment variable: ${envVar}`);
@@ -107,11 +107,11 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
     if (source === "github") {
       if (!file) return res.status(400).json({ error: "Missing file parameter." });
 
-      const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
+      const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/${file}`;
       logger.info(`🔹 Fetching from GitHub: ${repoUrl}`);
 
       const response = await axios.get(repoUrl, {
-        headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` },
+        headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` },
       });
 
       if (!response.data.download_url) {
