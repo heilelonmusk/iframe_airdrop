@@ -12,8 +12,8 @@ const router = express.Router();
 app.use(cors());
 app.use(express.json());
 
-// ✅ MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+// ✅ MongoDB Connection - Removed Deprecated Options
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
@@ -33,12 +33,13 @@ router.get('/fetch', async (req, res) => {
     try {
         if (source === "github") {
             const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
+            
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
 
             if (!response.data.download_url) {
-                return res.status(404).json({ error: "Download URL not found in GitHub API response." });
+                return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
             }
 
             // Fetch actual file content from raw GitHub URL
@@ -49,14 +50,14 @@ router.get('/fetch', async (req, res) => {
             res.redirect(`${process.env.NETLIFY_URL}/${file}`);
         } else if (source === "mongodb") {
             const data = await Knowledge.findOne({ key: query });
-            if (!data) return res.status(404).json({ error: "No data found" });
+            if (!data) return res.status(404).json({ error: "No data found in MongoDB" });
             res.json(data);
         } else {
             res.status(400).json({ error: "Invalid source parameter. Use 'github', 'netlify', or 'mongodb'." });
         }
     } catch (error) {
-        console.error("❌ Fetch Error:", error.message);
-        res.status(500).json({ error: "Error fetching data", details: error.message });
+        console.error("❌ Fetch Error:", error.response?.status, error.response?.data || error.message);
+        res.status(500).json({ error: "Error fetching data", details: error.response?.data || error.message });
     }
 });
 
@@ -93,16 +94,17 @@ router.get('/download', async (req, res) => {
     try {
         if (source === "github") {
             const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
+            
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
 
             if (!response.data.download_url) {
-                return res.status(404).json({ error: "Download URL not found in GitHub API response." });
+                return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
             }
 
             // Download file content
-            const fileResponse = await axios.get(response.data.download_url);
+            const fileResponse = await axios.get(response.data.download_url, { responseType: 'arraybuffer' });
             const filePath = `./${file}`;
             fs.writeFileSync(filePath, fileResponse.data);
 
@@ -113,8 +115,8 @@ router.get('/download', async (req, res) => {
             res.status(400).json({ error: "Invalid source for download" });
         }
     } catch (error) {
-        console.error("❌ Download Error:", error.message);
-        res.status(500).json({ error: "Error downloading file", details: error.message });
+        console.error("❌ Download Error:", error.response?.status, error.response?.data || error.message);
+        res.status(500).json({ error: "Error downloading file", details: error.response?.data || error.message });
     }
 });
 
