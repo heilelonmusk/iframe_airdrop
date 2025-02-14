@@ -1,62 +1,123 @@
-# 🚀 Iframe Airdrop - AI Chat & Airdrop Checker
+# 📌 Iframe Airdrop - AI-Driven Airdrop Verification System
 
-## 📌 Overview
-Iframe Airdrop is an **AI-driven, serverless system** that integrates **airdrop verification** with an intelligent AI chatbot, **Ultron AI**. Originally designed for **Helon Airdrop Validation**, it has evolved into a **highly modular, scalable, and self-learning NLP-powered assistant** capable of dynamic user interaction while ensuring **secure and efficient API calls**. The project integrates **MongoDB, Netlify, and GitHub Actions**, making it a fully **automated, cloud-based** solution that manages real-time user interactions, database queries, and blockchain verification processes.
-
-This document serves as the **definitive reference** for the system’s **architecture, functionality, AI integration, database structure, API logic, troubleshooting methods, deployment pipeline, and development roadmap**. It provides **detailed insights** into how each component interacts and how developers can contribute to future improvements.
-
-### 🔗 **Related Documentation**:
-- **[AI Developer Notes](./AI_DEVELOPER_NOTES.md)** - Comprehensive analysis of **NLP processing, chatbot logic, AI learning algorithms, and real-time optimizations**.
-- **[Troubleshooting Guide](./TROUBLESHOOTING.md)** - Exhaustive debugging manual covering **API failures, database inconsistencies, AI response issues, and infrastructure troubleshooting**.
-- **[Project File Tree](./file_tree.txt)** - Auto-generated **structural index** of all project files and their purposes, dynamically maintained with automation scripts.
-
----
-## 🛡️ **System Architecture & Evolution**
-
-### **1️⃣ Project Evolution & Key Milestones**
-1. **Phase 1 - Airdrop Checker**: Implemented **wallet validation** through blockchain-based verification APIs for Ethereum, Solana, and Binance Smart Chain.
-2. **Phase 2 - AI Chatbot**: Integrated **Ultron AI**, leveraging **MongoDB**, **GPT-3.5/4**, and a custom-built NLP **intent recognition engine**.
-3. **Phase 3 - Self-Learning AI**: Introduced **feedback-driven AI training loops**, allowing **real-time model adjustments** based on user input.
-4. **Phase 4 - AI Expansion (Ongoing)**: Enhancing **multi-intent processing, long-term conversational memory, and deep learning-based reasoning**.
-5. **Phase 5 - AI Security Enhancements**: Implementing **advanced spam filtering, API rate limits, and automated AI behavior monitoring**.
-6. **Phase 6 - AI Personalization & Dynamic Adaptation**: Deploying **user-specific chat profiles**, memory-based conversations, and **adaptive responses based on past interactions**.
+## 🏗️ Table of Contents
+1. [Introduction](#introduction)
+2. [Project Overview](#project-overview)
+3. [Iframe Usage](#iframe-usage)
+4. [AI-Powered Ultron Chat](#ai-powered-ultron-chat)
+5. [Technologies Used](#technologies-used)
+6. [How to Use](#how-to-use)
+7. [Setup Guide](#setup-guide)
+8. [Endpoints](#endpoints)
+9. [Contributors & Acknowledgments](#contributors--acknowledgments)
 
 ---
-## 📂 **Project Structure & Core Components**
 
-### 🔹 **Backend (API, Database & Server-Side AI Processing)**
-| File                                 | Purpose                                                                                 |
-|--------------------------------------|-----------------------------------------------------------------------------------------|
-| `api/server.js`                      | Manages **chatbot interactions, airdrop verification requests, API endpoints, and middleware processing**. |
-| `api/logQuestion.js`                 | Logs user queries to **track AI performance, refine response accuracy, and identify gaps in the knowledge base**. |
-| `api/externalTokenListingUpdate.js`  | Fetches **real-time token listing data from external sources** to enhance airdrop analysis. |
-| `api/dymensionAPI.js`                | API module for **Dymension RollApps** integration, enabling decentralized finance interactions. |
-| `modules/nlp/transformer.js`         | AI-powered **text processor and response generator**, leveraging **GPT-3.5/4 for contextual responses**. |
-| `modules/intent/intentRecognizer.js` | NLP-driven **intent recognition engine**, classifying complex queries and handling **multi-intent scenarios**. |
-| `api/seedKnowledge.js`               | Initializes **MongoDB with predefined AI knowledge** for faster response generation. |
-| `modules/security/rateLimiter.js`    | Implements **adaptive request rate limiting**, ensuring **protection against bot spam and API abuse**. |
-| `modules/cache/memoryCache.js`       | **Caches frequently accessed chatbot responses**, significantly reducing API call overhead. |
-| `modules/logging/errorHandler.js`    | Handles **structured API logging, AI query tracking, and dynamic error resolution**. |
-| `modules/training/selfLearning.js`   | Facilitates **real-time AI self-learning mechanisms**, continuously **improving chatbot accuracy**. |
-| `modules/conversation/contextHandler.js` | Stores **multi-turn conversational states**, allowing AI to **recall past interactions** for a personalized experience. |
-| `modules/ai_personalization/userProfiles.js` | Manages **user profile memory**, adapting AI interactions based on **historical usage data**. |
+## 🔹 Introduction
+Iframe Airdrop is a **fully automated, serverless system** designed to seamlessly integrate **airdrop verification** with an **AI chatbot assistant** called **Ultron AI**. The system is designed to streamline airdrop validation, optimize real-time user interactions, and provide enhanced **security** using NLP-powered verification.
 
-### 🔹 **Testing, Deployment & Automation**
-| File                              | Purpose                                                                                  |
-|-----------------------------------|------------------------------------------------------------------------------------------|
-| `tests/test.js`                   | API validation and **unit testing for key chatbot & API interactions**. |
-| `tests/test_transformer.js`        | **Ensures correctness** of AI-powered **text transformation and NLP pipelines**. |
-| `script/update_csv_github.py`      | Automates **CSV updates for airdrop eligibility**, syncing data with **GitHub Actions workflows**. |
-| `script/update_noneligible.py`     | Manages **wallet blacklist updates**, preventing fraud in airdrop distribution. |
-| `script/unified_update.py`         | **Centralized automation script**, handling **multiple scheduled tasks and repository sync**. |
+The project was initially designed for **Helon Airdrop Validation** but has since evolved into a **scalable and AI-driven assistant** capable of real-time blockchain verification and secure user interactions.
 
 ---
-## 💪 **Roadmap & Future Enhancements**
-- **🤖 AI Knowledge Graph Expansion**: Automating **data extraction, pattern recognition, and self-improving chatbot logic**.
-- **🌍 Multilingual NLP Support**: Expanding chatbot functionality to **support multiple languages** for global reach.
-- **🏃‍♂️ Performance Optimization**: Enhancing **query execution speeds, AI model efficiency, and response caching mechanisms**.
-- **🔒 Enhanced Security Protocols**: Deploying **real-time fraud detection, anti-bot measures, and authentication security layers**.
-- **🛠️ Improved API Monitoring**: Creating **intelligent debugging logs**, integrating **AI-driven diagnostics and automated issue resolution**.
 
-🚀 **This document consolidates all essential system knowledge, ensuring efficient maintenance, AI enhancements, and developer collaboration.**
+## 🔹 Project Overview
+Iframe Airdrop leverages a combination of:
+- **MongoDB** for dynamic user interactions and AI knowledge storage.
+- **Netlify Functions** for scalable and serverless execution.
+- **GitHub Integration** for version-controlled data retrieval.
+- **Ultron AI Chat** for **AI-powered airdrop verification.**
+
+The core functionalities include:
+- **Seamless airdrop verification** via an AI chatbot.
+- **Real-time database queries** to validate user interactions.
+- **Efficient data retrieval** from **GitHub, Netlify, and MongoDB.**
+- **Automated processing** to minimize human intervention in airdrop validation.
+
+---
+
+## 🔹 Iframe Usage
+Iframe Airdrop is embedded using an **iframe-based architecture**, allowing seamless integration with **any frontend**. This ensures the airdrop system can be deployed inside existing **dApps, wallets, and verification platforms** without requiring full backend integration.
+
+Iframe allows for **cross-platform compatibility**, making it easy to integrate the airdrop verification UI into any third-party application.
+
+---
+
+## 🔹 AI-Powered Ultron Chat
+
+**Ultron AI** is the advanced chatbot that interacts with users to **validate airdrop claims**.
+
+### Features:
+✅ AI-powered **airdrop eligibility checks**.
+✅ **Natural Language Processing (NLP)** to handle user interactions.
+✅ Secure **MongoDB-backed data storage** for query optimization.
+✅ **Real-time** API responses for an enhanced user experience.
+
+Ultron AI will continue to evolve with **more AI models** and **expanded datasets**, making it a **self-learning** verification assistant.
+
+---
+
+## 🔹 Technologies Used
+- **Node.js & Express**: Backend API logic
+- **Serverless (Netlify Functions)**: Scalable architecture
+- **MongoDB**: Data persistence and AI knowledge storage
+- **GitHub API**: Fetching and retrieving essential files
+- **Netlify Hosting**: Web-based function execution
+- **AI NLP Processing**: AI-powered chatbot verification
+
+---
+
+## 🔹 How to Use
+1. **Embed Iframe** in your frontend:
+   ```html
+   <iframe src="https://your-netlify-site.netlify.app" width="100%" height="600px"></iframe>
+   ```
+2. Users interact with **Ultron AI Chat** to verify their airdrop status.
+3. AI checks and **validates eligibility** using **MongoDB & GitHub data**.
+4. Users receive a **confirmation or rejection message**.
+
+---
+
+## 🔹 Setup Guide
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/heilelonmusk/iframe_airdrop.git
+cd iframe_airdrop
+```
+### 2️⃣ Install Dependencies
+```bash
+npm install
+```
+### 3️⃣ Configure Environment Variables
+Create a `.env` file and add:
+```
+MONGO_URI=your_mongo_connection_string
+GITHUB_OWNER=heilelonmusk
+GITHUB_REPO=iframe_airdrop
+MY_GITHUB_TOKEN=your_github_token
+NETLIFY_URL=https://your-netlify-site.netlify.app
+```
+### 4️⃣ Deploy to Netlify
+```bash
+netlify deploy --prod
+```
+
+---
+
+## 🔹 Endpoints
+### ✅ **Fetch Data** from GitHub, MongoDB, or Netlify
+`GET /.netlify/functions/unifiedAccess/fetch?source=github&file=README.md`
+
+### ✅ **Store Data** into MongoDB
+`POST /.netlify/functions/unifiedAccess/store`
+**Payload:** `{ "key": "test_key", "value": "Hello MongoDB!" }`
+
+### ✅ **Download File** from GitHub or Netlify
+`GET /.netlify/functions/unifiedAccess/download?source=github&file=README.md`
+
+---
+
+## 🔹 Contributors & Acknowledgments
+👤 **Helon Airdrop Team** - Original concept
+👨‍💻 **Ultron AI Developers** - AI chatbot integration
+💻 **Open Source Contributors** - Continuous improvements
 

@@ -1,94 +1,102 @@
-# 🤖 AI Developer Notes - Iframe Airdrop & Ultron AI
+# AI Developer Notes
 
-## 📝 Overview
-This document provides an **in-depth technical guide** for AI developers working on **Iframe Airdrop & Ultron AI Chatbot**. It covers **NLP processing, intent classification, AI response generation, self-learning mechanisms, system architecture, and debugging strategies**.
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Project Architecture](#project-architecture)
+3. [API Endpoints & Functionality](#api-endpoints--functionality)
+4. [MongoDB Data Schema](#mongodb-data-schema)
+5. [GitHub & Netlify Integration](#github--netlify-integration)
+6. [Security & Authentication](#security--authentication)
+7. [Error Handling & Troubleshooting](#error-handling--troubleshooting)
+8. [Future Enhancements](#future-enhancements)
+9. [Related Documentation](#related-documentation)
 
-Iframe Airdrop integrates **Ultron AI**, a chatbot system powered by **GPT-3.5/4, MongoDB, and serverless architecture**, providing users with **real-time, self-learning AI interactions** alongside **blockchain-based airdrop verification**.
+---
 
-🔗 **Related Documentation:**
-- **[README.md](./README.md)** - Complete **architecture, system design, and component breakdown**.
-- **[Troubleshooting Guide](./TROUBLESHOOTING.md)** - Covers **debugging best practices, API error handling, and AI failure resolutions**.
-- **[Project File Tree](./file_tree.txt)** - **Comprehensive breakdown** of the **repository structure, automated updates, and script execution**.
+## Introduction
+This document serves as a technical reference for the development of the **Iframe Airdrop** project. It provides insights into the architecture, API design, database schema, and integration strategies used to enable a seamless, AI-powered verification system.
 
 ---
 
-## 🔄 **AI System Components & Functional Overview**
+## Project Architecture
+Iframe Airdrop is structured to allow AI-driven, serverless airdrop validation. The core functionalities include:
+- **GitHub Integration**: Fetching and managing resources from a designated repository.
+- **Netlify Hosting**: Handling static assets and backend functions.
+- **MongoDB Storage**: Storing knowledge base information dynamically.
+- **AI Chatbot (Ultron AI)**: Future implementation of an intelligent chatbot capable of real-time verification.
 
-### 🔹 **1. NLP & AI Response Processing**
-| Component                     | Description |
-|--------------------------------|-------------|
-| `modules/nlp/transformer.js`  | Manages **AI-generated responses** leveraging **GPT-3.5/4**, handling **text pre-processing, sentiment analysis, and conversational structuring**. |
-| `modules/intent/intentRecognizer.js` | Classifies **user intent**, supporting **multi-intent detection, confidence scoring, and contextual adaptation**. |
-| `modules/conversation/contextHandler.js` | Maintains **conversational memory**, allowing the AI to **track multi-turn conversations and recall session data**. |
-| `modules/training/selfLearning.js` | **Self-learning AI system**, dynamically adjusting NLP model **based on query performance, response ratings, and user behavior**. |
-| `modules/ai_personalization/userProfiles.js` | Enables **personalized AI interactions**, adapting **response styles and stored preferences per user session**. |
-
-### 🔹 **2. AI Knowledge Base & MongoDB Integration**
-| Component                   | Description |
-|-----------------------------|-------------|
-| `api/seedKnowledge.js`      | Preloads MongoDB with **predefined AI responses** for **instant recall and reduced API costs**. |
-| `api/knowledge.js`          | **Core AI knowledge base**, handling **data retrieval, search optimization, and GPT augmentation**. |
-| `data/knowledge.json`       | Stores **static knowledge-based data**, frequently used to **reduce API dependency**. |
-| `modules/cache/memoryCache.js` | **Caches frequent chatbot queries**, improving response time and reducing computational load. |
-
-### 🔹 **3. AI & Blockchain Integration for Airdrop Validation**
-| Component                            | Description |
-|--------------------------------------|-------------|
-| `api/externalTokenListingUpdate.js` | Fetches **real-time token data** from external blockchain sources. |
-| `api/dymensionAPI.js`                | Connects to **Dymension RollApps**, handling **crypto-related AI queries and transaction data**. |
-| `iframe/airdrop_checker.js`          | **Frontend module** that connects **wallet verification with AI chatbot logic**. |
+Refer to the **[README](README.md)** for an overall project overview and to **[TROUBLESHOOTING](TROUBLESHOOTING.md)** for issue tracking.
 
 ---
-## 🔧 **AI Self-Learning & Continuous Optimization**
 
-### 🌟 **Dynamic AI Improvements**
-Ultron AI is designed with an **adaptive learning framework**, using a **multi-layered feedback loop** to refine its responses over time. 
+## API Endpoints & Functionality
+### `/fetch`
+- **Purpose**: Retrieves files or data from GitHub, Netlify, or MongoDB.
+- **Parameters**:
+  - `source` (github/netlify/mongodb)
+  - `file` (required for GitHub & Netlify)
+  - `query` (required for MongoDB)
 
-🔹 **Self-Learning Process:**
-1. **User Feedback Analysis** → Logs user ratings of AI responses.
-2. **Intent Recognition Refinement** → Improves **accuracy of detected intents** and dynamically adjusts **confidence thresholds**.
-3. **NLP Model Fine-Tuning** → Refines **GPT-4 output parameters** based on historical conversations.
-4. **Data Enrichment Pipeline** → Auto-updates **MongoDB knowledge base** with **validated responses**.
-5. **Memory Retention Mechanisms** → Tracks past interactions for **context-aware conversations**.
+### `/store`
+- **Purpose**: Stores or updates key-value pairs in MongoDB.
+- **Parameters**:
+  - `key`: Unique identifier.
+  - `value`: Data to be stored.
 
-🔹 **Automated Training Enhancements:**
-- **Retrains knowledge models** every 24 hours using user feedback data.
-- **Implements auto-correction** for inaccurate AI responses.
-- **Deploys reinforcement learning** for AI query adaptation.
-- **Auto-detects trending topics** in blockchain and airdrop discussions.
-
----
-## 🚀 **Advanced Debugging & AI Performance Monitoring**
-
-### 🔹 **1. AI Debugging & NLP Issue Resolution**
-| Issue                           | Resolution |
-|---------------------------------|-------------|
-| **Incorrect AI Responses**      | Logs queries into **MongoDB**, allowing **real-time model adjustments**. |
-| **Slow AI Performance**         | Optimizes **GPT API calls, memory caching, and MongoDB indexing**. |
-| **Context Misalignment**        | Improves **session tracking** in `contextHandler.js`. |
-
-### 🔹 **2. API & Server Troubleshooting**
-| Issue                           | Resolution |
-|---------------------------------|-------------|
-| **API Timeout Errors**         | Adjusts timeout settings in `server.js` and optimizes **async processing**. |
-| **MongoDB Connection Issues**  | Ensures `.env` has correct **MONGO_URI** and checks server connectivity. |
-| **High Latency in AI Queries** | Implements **query caching** to reduce redundant AI API calls. |
-
-### 🔹 **3. AI Query Logging & Analytics**
-🔄 **Real-time Monitoring Features:**
-- **Live AI Performance Tracking** → Measures **response accuracy, API latency, and conversation flow stability**.
-- **Chatbot Debugging Dashboard** → Displays **ongoing chat sessions, query logs, and AI adjustments**.
-- **AI Query Visualization** → Uses **interactive logs** for AI model refinement.
+### `/download`
+- **Purpose**: Downloads files from GitHub or Netlify.
+- **Parameters**:
+  - `source` (github/netlify)
+  - `file` (file path)
 
 ---
-## 💪 **Future Enhancements & AI Evolution**
 
-🔹 **Upcoming Features:**
-1. **Blockchain & DeFi Integration** → AI will provide **real-time DeFi insights** through **live market analytics**.
-2. **Full Multi-Language Support** → Expanding AI’s capability to support **multiple languages** dynamically.
-3. **AI Customization by User** → Users will be able to train Ultron AI **with custom knowledge modules**.
-4. **Advanced AI Emotion Recognition** → Enhancing chatbot interactions with **sentiment-based responses**.
-5. **Self-Healing AI Debugging** → Implementing **autonomous debugging** where AI detects and fixes its own errors.
+## MongoDB Data Schema
+Schema used for knowledge base storage:
+```javascript
+const KnowledgeSchema = new mongoose.Schema({
+    key: { type: String, required: true, unique: true },
+    value: mongoose.Schema.Types.Mixed
+});
+```
 
-🚀 **This document serves as the foundation for AI developers, ensuring continuous improvement in Ultron AI’s performance, knowledge retention, and real-time chatbot intelligence.**
+---
 
+## GitHub & Netlify Integration
+### GitHub
+- Uses the GitHub API to fetch files using an authenticated request.
+- Requires `GITHUB_OWNER`, `GITHUB_REPO`, and `MY_GITHUB_TOKEN` environment variables.
+
+### Netlify
+- Serves static files and redirects API requests.
+- Requires `NETLIFY_URL` environment variable.
+
+---
+
+## Security & Authentication
+- **GitHub API Requests**: Uses personal access tokens.
+- **MongoDB Connection**: Secure connection using `MONGO_URI`.
+- **Rate Limiting & Data Validation**: Planned enhancements.
+
+---
+
+## Error Handling & Troubleshooting
+- **404 Errors (GitHub Fetch)**: Ensure correct file paths and repository access.
+- **MongoDB Timeout Issues**: Verify database connection and schema integrity.
+- **Netlify Redirection Failures**: Ensure `NETLIFY_URL` is correctly set.
+
+More issues and fixes can be found in the **[TROUBLESHOOTING](TROUBLESHOOTING.md)** document.
+
+---
+
+## Future Enhancements
+- **Ultron AI Chatbot**: AI-powered chat verification.
+- **Enhanced Rate Limiting & Security**.
+- **Extended Netlify API Functionalities**.
+
+---
+
+## Related Documentation
+- 📄 **[README](README.md)** - General project overview and index.
+- 🛠 **[TROUBLESHOOTING](TROUBLESHOOTING.md)** - Detailed issue tracking.
+- 🌐 **[GitHub Repo](https://github.com/heilelonmusk/iframe_airdrop)** - Source code repository.
