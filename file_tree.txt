@@ -31,6 +31,8 @@
      📄 unified_update.py - Central script for orchestrating multiple update tasks in the repository.
      📄 update_noneligible.py - Updates the non_eligible.csv list, managing disqualified wallets.
      📄 trigger_dispatch.py - Python script that triggers external dispatch actions (probably via GitHub Actions).
+  📁 example_folder/ - 🚀 Add a description here
+     📄 example.py - 🚀 Add a description here
   📁 netlify/ - Netlify configuration and functions directory.
   📁 netlify/functions/ - Serverless API Functions.
      📄 triggerWhitelistUpdate.js - Netlify function that automates the update of the airdrop whitelist.

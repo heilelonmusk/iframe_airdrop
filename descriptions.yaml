@@ -59,6 +59,8 @@ descriptions:
   data/knowledge.json: JSON file storing static knowledge base data.
   data/non_eligible.csv: List of wallet addresses not eligible for airdrops.
   data/whitelist.csv: List of wallet addresses eligible for airdrop rewards.
+  example_folder/: "\U0001F680 Add a description here"
+  example_folder/example.py: "\U0001F680 Add a description here"
   iframe/: Airdrop Verification module.
   iframe/airdrop_checker.html: HTML page containing the UI for the airdrop verification
     tool.
