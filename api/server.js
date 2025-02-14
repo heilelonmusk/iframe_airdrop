@@ -8,6 +8,13 @@ const timeout = require("connect-timeout");
 const { NlpManager } = require("node-nlp");
 const winston = require("winston");
 const fs = require("fs");
+const path = require("path");
+
+// ✅ Verifica ed eventuale creazione della cartella logs
+const logDir = "logs";
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
 
 // ✅ Import necessary modules
 const { initializeNLP, getIntent } = require("../modules/intent/intentRecognizer");
@@ -28,7 +35,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/server.log" }),
+    new winston.transports.File({ filename: path.join(logDir, "server.log") }),
   ],
 });
 
@@ -189,16 +196,5 @@ router.get("/health", async (req, res) => {
 });
 
 app.use("/.netlify/functions/server", router);
-
-// 🚫 **Prevent file system write operations**
-fs.writeFileSync = () => {
-  throw new Error("File system write disabled!");
-};
-fs.appendFileSync = () => {
-  throw new Error("File system write disabled!");
-};
-fs.createWriteStream = () => {
-  throw new Error("File system write disabled!");
-};
 
 module.exports = { app, handler: serverless(app) };
