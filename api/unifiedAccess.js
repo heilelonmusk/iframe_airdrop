@@ -5,6 +5,7 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const router = express.Router();
@@ -34,10 +35,10 @@ router.get('/fetch', async (req, res) => {
 
         if (source === "github") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for GitHub source." });
-            
+
             const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
             console.log("Fetching from GitHub URL:", repoUrl);
-            
+
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
@@ -46,20 +47,20 @@ router.get('/fetch', async (req, res) => {
                 return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
             }
 
-            // Fetch actual file content from raw GitHub URL
             const fileResponse = await axios.get(response.data.download_url);
             res.json({ file, content: fileResponse.data });
 
         } else if (source === "netlify") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
 
-            if (!process.env.NETLIFY_URL) {
-                return res.status(500).json({ error: "NETLIFY_URL is not defined in environment variables" });
+            // ✅ Evita il redirect, servendo direttamente il file locale
+            const filePath = path.join(__dirname, "..", file); // Cerca il file nella root del deploy
+            if (fs.existsSync(filePath)) {
+                console.log("🔹 Serving local Netlify file:", filePath);
+                return res.sendFile(filePath);
+            } else {
+                return res.status(404).json({ error: "File not found in Netlify deployment." });
             }
-            
-            const netlifyFileUrl = new URL(file, process.env.NETLIFY_URL).href;
-            console.log("🔹 Fetching from Netlify:", netlifyFileUrl);
-            res.redirect(netlifyFileUrl);
 
         } else if (source === "mongodb") {
             if (!query) return res.status(400).json({ error: "Missing query parameter for MongoDB source." });
@@ -116,7 +117,7 @@ router.get('/download', async (req, res) => {
     try {
         if (source === "github") {
             const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
-            
+
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
@@ -125,9 +126,8 @@ router.get('/download', async (req, res) => {
                 return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
             }
 
-            // Download file content
             const fileResponse = await axios.get(response.data.download_url, { responseType: 'arraybuffer' });
-            
+
             try {
                 const jsonResponse = JSON.parse(fileResponse.data.toString('utf-8'));
                 if (jsonResponse.error || jsonResponse.message) {
@@ -135,12 +135,20 @@ router.get('/download', async (req, res) => {
                     return res.status(500).json({ error: "GitHub returned an error instead of a file.", details: jsonResponse });
                 }
             } catch (err) {
-                const filePath = `./${file}`;
+                // Il file non è JSON, possiamo procedere con il download
+                const filePath = path.join(__dirname, file);
                 fs.writeFileSync(filePath, fileResponse.data);
                 res.download(filePath, () => fs.unlinkSync(filePath));
             }
         } else if (source === "netlify") {
-            res.redirect(`${process.env.NETLIFY_URL.replace(/\/$/, '')}/${file}`);
+            // ✅ Serve direttamente il file locale
+            const filePath = path.join(__dirname, "..", file);
+            if (fs.existsSync(filePath)) {
+                console.log("🔹 Serving Netlify file for download:", filePath);
+                res.download(filePath);
+            } else {
+                res.status(404).json({ error: "File not found in Netlify deployment." });
+            }
         } else {
             res.status(400).json({ error: "Invalid source for download" });
         }
