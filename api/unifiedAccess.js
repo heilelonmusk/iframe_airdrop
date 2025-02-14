@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
@@ -37,16 +37,16 @@ router.get('/fetch', async (req, res) => {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
 
-            if (response.data.encoding === 'base64') {
-                // Decode base64 content
-                const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
-                res.json({ file: file, content: decodedContent });
-            } else {
-                res.json(response.data);
+            if (!response.data.download_url) {
+                return res.status(404).json({ error: "Download URL not found in GitHub API response." });
             }
 
+            // Fetch actual file content from raw GitHub URL
+            const fileResponse = await axios.get(response.data.download_url);
+            res.json({ file: file, content: fileResponse.data });
+
         } else if (source === "netlify") {
-            res.redirect(`${process.env.NETLYFY_URL}/${file}`);
+            res.redirect(`${process.env.NETLIFY_URL}/${file}`);
         } else if (source === "mongodb") {
             const data = await Knowledge.findOne({ key: query });
             if (!data) return res.status(404).json({ error: "No data found" });
@@ -97,11 +97,18 @@ router.get('/download', async (req, res) => {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
 
+            if (!response.data.download_url) {
+                return res.status(404).json({ error: "Download URL not found in GitHub API response." });
+            }
+
+            // Download file content
+            const fileResponse = await axios.get(response.data.download_url);
             const filePath = `./${file}`;
-            fs.writeFileSync(filePath, Buffer.from(response.data.content, 'base64'));
+            fs.writeFileSync(filePath, fileResponse.data);
+
             res.download(filePath, () => fs.unlinkSync(filePath));
         } else if (source === "netlify") {
-            res.redirect(`${process.env.NETLYFY_URL}/${file}`);
+            res.redirect(`${process.env.NETLIFY_URL}/${file}`);
         } else {
             res.status(400).json({ error: "Invalid source for download" });
         }
