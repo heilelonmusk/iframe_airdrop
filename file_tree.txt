@@ -5,14 +5,12 @@
      📄 netlify.toml - Configuration file for Netlify deployments, routing, and API function definitions.
      📄 descriptions.yaml - YAML file containing metadata and structured descriptions for repository files.
      📄 TROUBLESHOOTING.md - Guide for debugging known issues, including API failures and deployment problems.
-     📄 xlsx-0.20.1.tgz - Possibly an obsolete third-party library archive for handling Excel files. Needs verification.
      📄 config.yaml - General configuration file, likely used for system-wide settings and automation workflows.
      📄 README.md - Main repository documentation, explaining the project’s purpose, structure, and contribution guidelines.
      📄 yarn.lock - Dependency lock file for yarn, ensuring consistent package versions across installations.
      📄 .gitignore - Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts).
      📄 package-lock.json - Lock file for npm dependencies, ensuring version consistency across different environments.
      📄 package.json - Defines project dependencies, scripts, and metadata for Node.js applications.
-     📄 download_mistral.py - Python script related to Mistral, potentially obsolete if no longer in use. Needs removal check.
      📄 file_tree.txt - Auto-generated file containing the repository’s directory structure (this document).
      📄 update_tree.py - Python script that updates the file tree dynamically, likely used for documentation.
      📄 checkQuestions.js - JavaScript script to validate or process stored questions in the knowledge base.
