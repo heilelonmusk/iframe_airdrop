@@ -1,11 +1,12 @@
 const request = require("supertest");
 const mongoose = require("mongoose");
 
-const app = require("../api/unifiedAccess"); // ✅ Usa direttamente Express
+// 🚀 Importa Express direttamente senza `serverless(app)`
+const { app } = require("../api/unifiedAccess");
 
-jest.setTimeout(30000); // ✅ Aumenta il timeout a 30 secondi
+jest.setTimeout(30000); // ✅ Timeout aumentato a 30 secondi
 
-// ✅ Configurazione MongoDB per i test
+// ✅ Connessione MongoDB per i test
 beforeAll(async () => {
     console.log("✅ Connecting to Test Database...");
     await mongoose.connect(process.env.MONGO_URI, {
