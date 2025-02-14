@@ -14,9 +14,17 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection - Ensure proper error handling
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("✅ MongoDB Connected Successfully"))
-    .catch(err => console.error("❌ MongoDB Connection Error:", err));
+mongoose.connect(process.env.MONGO_URI, { 
+    useNewUrlParser: true, 
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // 🔹 Timeout di 5s se il server non risponde
+    socketTimeoutMS: 45000 // 🔹 Chiude la connessione se non risponde per 45s
+})
+.then(() => console.log("✅ MongoDB Connected Successfully"))
+.catch(err => {
+    console.error("❌ MongoDB Connection Error:", err.message);
+    process.exit(1); // 🔥 Esce dall’applicazione se non può connettersi
+});
 
 const KnowledgeSchema = new mongoose.Schema({
     key: { type: String, required: true, unique: true },
