@@ -12,7 +12,7 @@ const router = express.Router();
 app.use(cors());
 app.use(express.json());
 
-// ✅ MongoDB Connection - Removed Deprecated Options
+// ✅ MongoDB Connection - Ensure proper error handling
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
@@ -31,7 +31,11 @@ router.get('/fetch', async (req, res) => {
     const { source, file, query } = req.query;
 
     try {
+        if (!source) return res.status(400).json({ error: "Missing source parameter." });
+
         if (source === "github") {
+            if (!file) return res.status(400).json({ error: "Missing file parameter for GitHub source." });
+
             const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
             
             const response = await axios.get(repoUrl, {
@@ -47,11 +51,17 @@ router.get('/fetch', async (req, res) => {
             res.json({ file: file, content: fileResponse.data });
 
         } else if (source === "netlify") {
+            if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
             res.redirect(`${process.env.NETLIFY_URL}/${file}`);
+
         } else if (source === "mongodb") {
+            if (!query) return res.status(400).json({ error: "Missing query parameter for MongoDB source." });
+
             const data = await Knowledge.findOne({ key: query });
             if (!data) return res.status(404).json({ error: "No data found in MongoDB" });
+
             res.json(data);
+
         } else {
             res.status(400).json({ error: "Invalid source parameter. Use 'github', 'netlify', or 'mongodb'." });
         }
@@ -68,8 +78,13 @@ router.get('/fetch', async (req, res) => {
 router.post('/store', async (req, res) => {
     const { key, value } = req.body;
 
+    if (!key || !value) {
+        return res.status(400).json({ error: "Missing key or value in request body." });
+    }
+
     try {
         let record = await Knowledge.findOne({ key });
+
         if (record) {
             record.value = value;
             await record.save();
@@ -78,6 +93,7 @@ router.post('/store', async (req, res) => {
             await record.save();
         }
         res.json({ message: "✅ Data stored successfully", data: record });
+
     } catch (error) {
         console.error("❌ Storage Error:", error.message);
         res.status(500).json({ error: "Error storing data", details: error.message });
@@ -90,6 +106,10 @@ router.post('/store', async (req, res) => {
  */
 router.get('/download', async (req, res) => {
     const { source, file } = req.query;
+
+    if (!source || !file) {
+        return res.status(400).json({ error: "Missing source or file parameter." });
+    }
 
     try {
         if (source === "github") {
