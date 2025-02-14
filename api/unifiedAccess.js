@@ -18,7 +18,7 @@ const KnowledgeSchema = new mongoose.Schema({
     key: { type: String, required: true, unique: true },
     value: mongoose.Schema.Types.Mixed
 });
-const Knowledge = mongoose.model('Knowledge', KnowledgeSchema);
+const Knowledge = mongoose.models.Knowledge || mongoose.model('Knowledge', KnowledgeSchema);
 
 /**
  * 📌 Route: GET /.netlify/functions/unified_access/fetch
