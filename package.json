@@ -10,10 +10,9 @@
     "start": "node api/server.js",
     "dev": "nodemon api/server.js",
     "deploy": "netlify deploy --prod",
-    "test": "node tests/test.js",
+    "test": "jest",
     "postinstall": "patch-package",
-    "build": "echo 'No build step required'",
-     "test": "jest"
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.33.0",
@@ -24,6 +23,7 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "fs": "^0.0.1-security",
+    "ioredis": "^5.5.0",
     "mongodb": "^6.13.0",
     "node-nlp": "^5.0.0-alpha.5",
     "openai": "^4.84.0",

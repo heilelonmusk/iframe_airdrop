@@ -13,7 +13,7 @@
 
 # ✅ Security & CORS Headers
 [[headers]]
-  for = "/.netlify/functions/*"
+  for = "/api/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS, PUT, DELETE"
@@ -23,25 +23,34 @@
     X-Content-Type-Options = "nosniff"
     Cache-Control = "no-store"
 
-# 🚀 Advanced Static File Handling
-[[redirects]]
-  from = "/static/*"
-  to = "/.netlify/functions/unifiedAccess/static/:splat"
-  status = 200
-  force = true
-
-# 🔒 API Rate Limiting to Prevent Abuse
-[[redirects]]
-  from = "/.netlify/functions/unifiedAccess/*"
-  to = "/.netlify/functions/unifiedAccess/:splat"
-  status = 200
-  headers = { X-RateLimit-Limit = "100", X-RateLimit-Remaining = "100", X-RateLimit-Reset = "60" }
-
-# 📦 Caching for Performance
+# 🚀 Static File Caching (Merged Headers)
 [[headers]]
   for = "/static/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# ✅ API Rate Limiting (Fixed Syntax)
+[[headers]]
+  for = "/api/unifiedAccess/*"
+  [headers.values]
+    X-RateLimit-Limit = "100"
+    X-RateLimit-Remaining = "100"
+    X-RateLimit-Reset = "60"
+
+# 🔒 Enforce HTTPS (Redirect all HTTP traffic to HTTPS)
+[[redirects]]
+  from = "http://*"
+  to = "https://:splat"
+  status = 301
+  force = true
+
+# 🔧 Redirect Static Assets Correctly
+[[redirects]]
+  from = "/static/*"
+  to = "/api/unifiedAccess/static/:splat"
+  status = 200
+  force = true
 
 # ✅ Redirect Root URL to the Documentation
 [[redirects]]
@@ -49,23 +58,16 @@
   to = "/docs/index.html"
   status = 302
 
-# 🔐 Enforce HTTPS (Redirect all HTTP traffic to HTTPS)
-[[redirects]]
-  from = "http://*"
-  to = "https://:splat"
-  status = 301
-  force = true
-
-# ⚠️ Custom Maintenance Mode Redirect
+# ⚠️ Custom Maintenance Mode Redirect (Blocks Certain Countries)
 [[redirects]]
   from = "/*"
   to = "/maintenance.html"
   status = 503
-  conditions = { country = ["CN", "RU"] } # Blocks access from specific countries
+  conditions = { country = ["CN", "RU"] }
 
 # 🛠 Debugging & Logging Headers
 [[headers]]
-  for = "/.netlify/functions/*"
+  for = "/api/*"
   [headers.values]
     X-Debug-Mode = "true"
     X-Powered-By = "Netlify"
