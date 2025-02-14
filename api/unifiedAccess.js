@@ -109,4 +109,4 @@ app.get('/download', async (req, res) => {
 });
 
 // ✅ Export for Netlify
-module.exports.handler = serverless(app);
+module.exports.handler = require('serverless-http')(app);
