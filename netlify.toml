@@ -1,7 +1,7 @@
 # 🚀 Netlify Build Settings
 [build]
   command = "npm install && npm run build"
-  functions = "api"
+  functionsDirectory = "api"
   publish = "public" # Ensures only static content is deployed
 
 # 🛠️ Local Development Settings
@@ -23,22 +23,22 @@
     X-Content-Type-Options = "nosniff"
     Cache-Control = "no-store"
 
-# 🚀 Static File Caching (Merged Headers)
+# 🚀 Static File Caching
 [[headers]]
   for = "/static/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, immutable"
     X-Content-Type-Options = "nosniff"
 
-# ✅ API Rate Limiting (Fixed Syntax)
+# ✅ API Rate Limiting (Global for `/api/*`)
 [[headers]]
-  for = "/api/unifiedAccess/*"
+  for = "/api/*"
   [headers.values]
     X-RateLimit-Limit = "100"
     X-RateLimit-Remaining = "100"
     X-RateLimit-Reset = "60"
 
-# 🔒 Enforce HTTPS (Redirect all HTTP traffic to HTTPS)
+# 🔒 Enforce HTTPS
 [[redirects]]
   from = "http://*"
   to = "https://:splat"
@@ -52,13 +52,13 @@
   status = 200
   force = true
 
-# ✅ Redirect Root URL to the Documentation
+# ✅ Redirect Root URL to Docs
 [[redirects]]
   from = "/"
   to = "/docs/index.html"
   status = 302
 
-# ⚠️ Custom Maintenance Mode Redirect (Blocks Certain Countries)
+# ⚠️ Maintenance Mode Redirect (Blocks Specific Countries)
 [[redirects]]
   from = "/*"
   to = "/maintenance.html"
