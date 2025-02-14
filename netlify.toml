@@ -1,13 +1,13 @@
 [build]
   command = "npm install"
   functions = "api"
-  publish = "."  # Prevent Netlify from assuming a Hugo static site
+  publish = "."  # Mantiene Netlify come ambiente API senza contenuti statici
 
 [dev]
-  command = "npm run dev"  # Ensures Netlify runs your API
-  framework = "#custom"  # Prevents Netlify from detecting Hugo
-  targetPort = 5000  # Ensures Express runs on the right port
-  autoLaunch = false  # Prevents Netlify from opening a browser
+  command = "npm run dev"
+  framework = "#custom"
+  targetPort = 5000
+  autoLaunch = false
 
 [[headers]]
   for = "/.netlify/functions/*"
@@ -16,7 +16,8 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS, PUT, DELETE"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
 
-    [[redirects]]
+[[redirects]]
   from = "/example.json"
   to = "/example.json"
   status = 200
+  force = true
