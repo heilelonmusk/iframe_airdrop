@@ -23,6 +23,7 @@
      📄 airdrop_checker.html - HTML page for UI rendering of the airdrop verification system.
   📁 tests/ - Contains all test scripts and debugging tools.
      📄 test_netlify.sh - 🚀 Add a description here
+     📄 redis_test.js - 🚀 Add a description here
      📄 test.js - Primary test script validating API endpoints, chatbot functionality, and system responses.
      📄 unifiedAccess.test.js - 🚀 Add a description here
      📄 .gitkeep - Placeholder file ensuring Git tracks the `tests/` directory.
