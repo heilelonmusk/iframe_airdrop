@@ -1,68 +1,69 @@
-  📁 ./node_modules/  [Hidden, 11709 files omitted]
-  📁 ./
-     📄 nodemon.json
-     📄 AI_DEVELOPER_NOTES.md
-     📄 netlify.toml
-     📄 TROUBLESHOOTING.md
-     📄 xlsx-0.20.1.tgz
-     📄 config.yaml
-     📄 README.md
-     📄 yarn.lock
-     📄 .gitignore
-     📄 package-lock.json
-     📄 package.json
-     📄 download_mistral.py
-     📄 file_tree.txt
-     📄 update_tree.py
-     📄 checkQuestions.js
-  📁 iframe/
-     📄 airdrop_checker.js
-     📄 airdrop_checker.html
-  📁 tests/
-     📄 test.js
-     📄 test_transformer.js
-  📁 script/
-     📄 update_csv_github.py
-     📄 update_whitelist.py
-     📄 assemble_public.sh
-     📄 unified_update.py
-     📄 update_noneligible.py
-     📄 trigger_dispatch.py
-  📁 netlify/
-  📁 netlify/functions/
-     📄 triggerWhitelistUpdate.js
-  📁 public/
-     📄 .gitkeep
-  📁 .github/
-  📁 .github/workflows/
-     📄 update_noneligible.yml
-     📄 update_whitelist.yml
-     📄 retry_pending_workflows.yml
-     📄 retry_cancelled.yml
-     📄 update_csv.yml
-  📁 api/
-     📄 seedKnowledge.js
-     📄 server.js
-     📄 externalTokenListingUpdate.js
-     📄 dymensionAPI.js
-     📄 knowledge.js
-  📁 ultron_chat/
-     📄 ultronChat.js
-     📄 ultronChat.css
-     📄 ultronChat.png
-  📁 modules/
-  📁 modules/learning/
-     📄 learningModule.js
-  📁 modules/intent/
-     📄 intentRecognizer.js
-  📁 modules/nlp/
-     📄 nlpModel.js
-     📄 transformer.js
-  📁 modules/logging/
-     📄 logger.js
-  📁 data/
-     📄 .gitkeep
-     📄 whitelist.csv
-     📄 non_eligible.csv
-     📄 iframe_setting.csv
-     📄 knowledge.json
+  📁 node_modules/  [Hidden, 11709 files omitted] - External dependencies
+  📁 ./ - 🚀 Add a description here
+     📄 nodemon.json - 🚀 Add a description here
+     📄 AI_DEVELOPER_NOTES.md - 🚀 Add a description here
+     📄 netlify.toml - 🚀 Add a description here
+     📄 descriptions.yaml - 🚀 Add a description here
+     📄 TROUBLESHOOTING.md - 🚀 Add a description here
+     📄 xlsx-0.20.1.tgz - 🚀 Add a description here
+     📄 config.yaml - 🚀 Add a description here
+     📄 README.md - 🚀 Add a description here
+     📄 yarn.lock - 🚀 Add a description here
+     📄 .gitignore - 🚀 Add a description here
+     📄 package-lock.json - 🚀 Add a description here
+     📄 package.json - 🚀 Add a description here
+     📄 download_mistral.py - 🚀 Add a description here
+     📄 file_tree.txt - 🚀 Add a description here
+     📄 update_tree.py - 🚀 Add a description here
+     📄 checkQuestions.js - 🚀 Add a description here
+  📁 iframe/ - Airdrop Verification module.
+     📄 airdrop_checker.js - Frontend logic for verifying airdrop eligibility via connected wallets.
+     📄 airdrop_checker.html - HTML page containing the UI for the airdrop verification tool.
+  📁 tests/ - Testing and Debugging module.
+     📄 test.js - Main test file for validating API endpoints and backend functionality.
+     📄 test_transformer.js - Test cases for AI-powered transformer.js, ensuring NLP processing works correctly.
+  📁 script/ - Automation & Updates module.
+     📄 update_csv_github.py - Script for updating CSV files in the GitHub repository automatically.
+     📄 update_whitelist.py - Python script to refresh the whitelist data for airdrop eligibility.
+     📄 assemble_public.sh - Shell script for consolidating public files before deployment.
+     📄 unified_update.py - Central script for orchestrating multiple update tasks in the repository.
+     📄 update_noneligible.py - Updates the non_eligible.csv list, managing disqualified wallets.
+     📄 trigger_dispatch.py - Python script that triggers external dispatch actions (probably via GitHub Actions).
+  📁 netlify/ - 🚀 Add a description here
+  📁 netlify/functions/ - Serverless API Functions.
+     📄 triggerWhitelistUpdate.js - Netlify function that automates the update of the airdrop whitelist.
+  📁 public/ - 🚀 Add a description here
+     📄 .gitkeep - 🚀 Add a description here
+  📁 .github/ - 🚀 Add a description here
+  📁 .github/workflows/ - GitHub Actions for CI/CD.
+     📄 update_noneligible.yml - GitHub Actions workflow for updating the non-eligible wallet list.
+     📄 update_whitelist.yml - CI/CD automation for updating the whitelist dataset on GitHub.
+     📄 retry_pending_workflows.yml - Auto-retries any pending workflows that were not completed.
+     📄 retry_cancelled.yml - Auto-restarts any canceled GitHub workflows to ensure task completion.
+     📄 update_csv.yml - Workflow automation for updating CSV data in the repository.
+  📁 api/ - Core Backend API module.
+     📄 seedKnowledge.js - Script that populates MongoDB with predefined knowledge base data.
+     📄 server.js - Main Express.js server handling API routes and backend logic.
+     📄 externalTokenListingUpdate.js - Fetches and updates token listing data from external sources.
+     📄 dymensionAPI.js - API module for integrating with Dymension RollApps (crypto-related functionality).
+     📄 knowledge.js - Core API file for handling chatbot knowledge base queries.
+  📁 ultron_chat/ - Ultron AI Chatbot module.
+     📄 ultronChat.js - Manages Ultron chatbot logic and frontend interactions.
+     📄 ultronChat.css - Styling for the Ultron chatbot UI.
+     📄 ultronChat.png - Icon/image used in Ultron chatbot’s interface.
+  📁 modules/ - AI & Utility Modules.
+  📁 modules/learning/ - Learning module for AI adaptation.
+     📄 learningModule.js - Manages AI-driven learning from user interactions to enhance chatbot responses.
+  📁 modules/intent/ - Intent recognition module.
+     📄 intentRecognizer.js - NLP-based classification module for recognizing user intent.
+  📁 modules/nlp/ - Natural Language Processing (NLP) module.
+     📄 nlpModel.js - Stores and manages AI models for natural language processing.
+     📄 transformer.js - AI-powered text processing module for refining chatbot responses.
+  📁 modules/logging/ - Logging and event tracking module.
+     📄 logger.js - Centralized logging module for system-wide event tracking.
+  📁 data/ - Data Storage.
+     📄 .gitkeep - 🚀 Add a description here
+     📄 whitelist.csv - List of wallet addresses eligible for airdrop rewards.
+     📄 non_eligible.csv - List of wallet addresses not eligible for airdrops.
+     📄 iframe_setting.csv - Configuration file for iframe-related settings.
+     📄 knowledge.json - JSON file storing static knowledge base data.
