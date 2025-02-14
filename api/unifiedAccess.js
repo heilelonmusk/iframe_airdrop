@@ -120,15 +120,27 @@ router.get('/download', async (req, res) => {
             });
 
             if (!response.data.download_url) {
+                console.error(`❌ GitHub Download Error: ${file} - Not Found or Permission Denied`);
                 return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
             }
 
             // Download file content
             const fileResponse = await axios.get(response.data.download_url, { responseType: 'arraybuffer' });
-            const filePath = `./${file}`;
-            fs.writeFileSync(filePath, fileResponse.data);
 
-            res.download(filePath, () => fs.unlinkSync(filePath));
+            // ✅ Evitiamo di sovrascrivere se il contenuto è un errore JSON
+            try {
+                const jsonResponse = JSON.parse(fileResponse.data.toString('utf-8'));
+                if (jsonResponse.error || jsonResponse.message) {
+                    console.error(`🚨 Prevented overwriting file ${file} with error content:`, jsonResponse);
+                    return res.status(500).json({ error: "GitHub returned an error instead of a file.", details: jsonResponse });
+                }
+            } catch (err) {
+                // Il file non è JSON (quindi è un file valido), possiamo salvarlo
+                const filePath = `./${file}`;
+                fs.writeFileSync(filePath, fileResponse.data);
+                res.download(filePath, () => fs.unlinkSync(filePath));
+            }
+
         } else if (source === "netlify") {
             res.redirect(`${process.env.NETLIFY_URL}/${file}`);
         } else {
