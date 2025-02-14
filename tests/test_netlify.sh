@@ -1,39 +1,36 @@
 #!/bin/bash
 
-# Load environment variables
-NETLIFY_API="https://superlative-empanada-0c1b37.netlify.app/api"  # Update this if needed
-GITHUB_FILE="README.md"  # Change to any file in your repo
-NETLIFY_FILE="index.html"  # Change to an actual file in Netlify
-MONGO_KEY="test_key"
-MONGO_VALUE="This is a test value"
+# 🚀 Netlify Function API Test Script
+# Runs API checks on a deployed Netlify function
 
-echo "🚀 Running Netlify API Tests..."
+NETLIFY_URL="https://your-netlify-app.netlify.app/.netlify/functions/unifiedAccess"
+LOG_FILE="netlify_test.log"
 
-# Test 1: Fetch a file from GitHub
-echo "🔹 Test 1: Fetching file from GitHub..."
-curl -X GET "$NETLIFY_API/fetch?source=github&file=$GITHUB_FILE"
+echo "🛠 Starting Netlify API Tests..." | tee $LOG_FILE
 
-# Test 2: Fetch a file from Netlify
-echo -e "\n🔹 Test 2: Fetching file from Netlify..."
-curl -X GET "$NETLIFY_API/fetch?source=netlify&file=$NETLIFY_FILE"
+# ✅ Test API Health Check
+echo "🔹 Checking API Health..." | tee -a $LOG_FILE
+curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL/health" | tee -a $LOG_FILE
 
-# Test 3: Fetch a record from MongoDB
-echo -e "\n🔹 Test 3: Fetching data from MongoDB..."
-curl -X GET "$NETLIFY_API/fetch?source=mongodb&query=$MONGO_KEY"
+# ✅ Test Fetch from GitHub
+echo "🔹 Testing GitHub Fetch..." | tee -a $LOG_FILE
+curl -s -X GET "$NETLIFY_URL/fetch?source=github&file=README.md" | tee -a $LOG_FILE
 
-# Test 4: Store a new record in MongoDB
-echo -e "\n🔹 Test 4: Storing data in MongoDB..."
-curl -X POST "$NETLIFY_API/store" -H "Content-Type: application/json" -d '{
-  "key": "'"$MONGO_KEY"'",
-  "value": "'"$MONGO_VALUE"'"
-}'
+# ✅ Test MongoDB Fetch
+echo "🔹 Testing MongoDB Fetch..." | tee -a $LOG_FILE
+curl -s -X GET "$NETLIFY_URL/fetch?source=mongodb&query=test_key" | tee -a $LOG_FILE
 
-# Test 5: Download a file from GitHub
-echo -e "\n🔹 Test 5: Downloading file from GitHub..."
-curl -X GET "$NETLIFY_API/download?source=github&file=$GITHUB_FILE" -o "downloaded_github_$GITHUB_FILE"
+# ✅ Test Store in MongoDB
+echo "🔹 Testing MongoDB Storage..." | tee -a $LOG_FILE
+curl -s -X POST "$NETLIFY_URL/store" -H "Content-Type: application/json" -d '{"key": "test_key", "value": "Hello MongoDB!"}' | tee -a $LOG_FILE
 
-# Test 6: Download a file from Netlify
-echo -e "\n🔹 Test 6: Downloading file from Netlify..."
-curl -X GET "$NETLIFY_API/download?source=netlify&file=$NETLIFY_FILE" -o "downloaded_netlify_$NETLIFY_FILE"
+# ✅ Test File Download from GitHub
+echo "🔹 Testing GitHub File Download..." | tee -a $LOG_FILE
+curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL/download?source=github&file=README.md" | tee -a $LOG_FILE
 
-echo -e "\n✅ Tests Completed!"
+# ✅ Test Non-Existing File Download (Should return 404)
+echo "🔹 Testing Non-Existing File on Netlify..." | tee -a $LOG_FILE
+curl -s -o /dev/null -w "%{http_code}" "$NETLIFY_URL/download?source=netlify&file=nonexistent.json" | tee -a $LOG_FILE
+
+# ✅ Log Completion
+echo "✅ Netlify API Tests Completed!" | tee -a $LOG_FILE

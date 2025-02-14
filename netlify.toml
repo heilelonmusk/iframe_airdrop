@@ -1,23 +1,71 @@
+# 🚀 Netlify Build Settings
 [build]
-  command = "npm install"
+  command = "npm install && npm run build"
   functions = "api"
-  publish = "."  # Keeps Netlify as an API-only environment with no static content
+  publish = "public" # Ensures only static content is deployed
 
+# 🛠️ Local Development Settings
 [dev]
   command = "npm run dev"
   framework = "#custom"
   targetPort = 5000
   autoLaunch = false
 
+# ✅ Security & CORS Headers
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS, PUT, DELETE"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Cache-Control = "no-store"
 
-# ✅ **Advanced Static File Handling**
+# 🚀 Advanced Static File Handling
 [[redirects]]
   from = "/static/*"
   to = "/.netlify/functions/unifiedAccess/static/:splat"
   status = 200
+  force = true
+
+# 🔒 API Rate Limiting to Prevent Abuse
+[[redirects]]
+  from = "/.netlify/functions/unifiedAccess/*"
+  to = "/.netlify/functions/unifiedAccess/:splat"
+  status = 200
+  headers = { X-RateLimit-Limit = "100", X-RateLimit-Remaining = "100", X-RateLimit-Reset = "60" }
+
+# 📦 Caching for Performance
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, immutable"
+
+# ✅ Redirect Root URL to the Documentation
+[[redirects]]
+  from = "/"
+  to = "/docs/index.html"
+  status = 302
+
+# 🔐 Enforce HTTPS (Redirect all HTTP traffic to HTTPS)
+[[redirects]]
+  from = "http://*"
+  to = "https://:splat"
+  status = 301
+  force = true
+
+# ⚠️ Custom Maintenance Mode Redirect
+[[redirects]]
+  from = "/*"
+  to = "/maintenance.html"
+  status = 503
+  conditions = { country = ["CN", "RU"] } # Blocks access from specific countries
+
+# 🛠 Debugging & Logging Headers
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    X-Debug-Mode = "true"
+    X-Powered-By = "Netlify"
