@@ -198,6 +198,58 @@ router.get("/health", async (req, res) => {
   }
 });
 
+// NEW ENDPOINT: /fetch
+router.get("/fetch", async (req, res) => {
+  const { source, file, query } = req.query;
+  if (source === "github") {
+    try {
+      // Simulazione: recupera contenuto da GitHub (sostituisci con la logica reale)
+      const fileContent = `Contenuto simulato da GitHub per il file ${file}`;
+      return res.json({ data: fileContent });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  } else if (source === "mongodb") {
+    try {
+      // Simulazione: esegui una query in MongoDB (sostituisci con la logica reale)
+      const result = { key: query, value: "Dati simulati da MongoDB" };
+      return res.json({ data: result });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  } else {
+    return res.status(400).json({ error: "Source non riconosciuto" });
+  }
+});
+
+// NEW ENDPOINT: /store
+router.post("/store", async (req, res) => {
+  try {
+    const { key, value } = req.body;
+    // Simulazione: salva dati (sostituisci con la logica reale per salvare in MongoDB)
+    return res.json({ message: "Dati salvati correttamente" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// NEW ENDPOINT: /download
+router.get("/download", async (req, res) => {
+  const { source, file } = req.query;
+  if (source === "github") {
+    try {
+      // Simulazione: recupera contenuto da GitHub (sostituisci con la logica reale)
+      const fileData = `Contenuto simulato del file ${file}`;
+      res.setHeader("Content-Disposition", `attachment; filename=${file}`);
+      return res.send(fileData);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  } else {
+    return res.status(404).json({ error: "File non trovato" });
+  }
+});
+
 app.use("/.netlify/functions/server", router);
 
 if (require.main === module) {
