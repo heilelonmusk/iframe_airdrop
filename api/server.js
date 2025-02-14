@@ -201,7 +201,7 @@ router.get("/health", async (req, res) => {
 app.use("/.netlify/functions/server", router);
 
 if (require.main === module) {
-  const port = process.env.PORT || 5000;
+  const port = process.env.PORT || 8888;
   app.listen(port, () => {
     logger.info(`Server is running on port ${port}`);
   });
