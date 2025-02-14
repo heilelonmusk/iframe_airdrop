@@ -1,84 +1,70 @@
-require("dotenv").config();
 const request = require("supertest");
 const mongoose = require("mongoose");
-const app = require("../unifiedAccess"); // Assicurati che il percorso sia corretto
+const app = require("../api/unifiedAccess"); // Assicurati che il percorso sia corretto
 
 // ✅ Connessione a MongoDB per i test
 beforeAll(async () => {
-  await mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+    jest.setTimeout(30000); // Evita timeout nei test
+    await mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    });
+    console.log("✅ Test Database Connected");
 });
 
-// ✅ Chiudi la connessione dopo i test
+// ✅ Test API /fetch (GitHub)
+test("GET /fetch (GitHub) - should fetch a file from GitHub", async () => {
+    const response = await request(app)
+        .get("/.netlify/functions/unifiedAccess/fetch?source=github&file=README.md")
+        .expect(200);
+    expect(response.body).toHaveProperty("file");
+    expect(response.body).toHaveProperty("content");
+});
+
+// ✅ Test API /fetch (MongoDB)
+test("GET /fetch (MongoDB) - should fetch data from MongoDB", async () => {
+    const response = await request(app)
+        .get("/.netlify/functions/unifiedAccess/fetch?source=mongodb&query=test_key")
+        .expect(200);
+    expect(response.body).toHaveProperty("key", "test_key");
+    expect(response.body).toHaveProperty("value");
+});
+
+// ✅ Test API /fetch (Netlify)
+test("GET /fetch (Netlify) - should return 404 if file not found", async () => {
+    const response = await request(app)
+        .get("/.netlify/functions/unifiedAccess/fetch?source=netlify&file=nonexistent.json")
+        .expect(404);
+    expect(response.body).toHaveProperty("error", "File not found in Netlify deployment.");
+});
+
+// ✅ Test API /store (MongoDB)
+test("POST /store - should store data in MongoDB", async () => {
+    const response = await request(app)
+        .post("/.netlify/functions/unifiedAccess/store")
+        .send({ key: "test_key", value: "Hello MongoDB!" })
+        .expect(200);
+    expect(response.body).toHaveProperty("message", "✅ Data stored successfully");
+});
+
+// ✅ Test API /download (GitHub)
+test("GET /download (GitHub) - should download a file", async () => {
+    const response = await request(app)
+        .get("/.netlify/functions/unifiedAccess/download?source=github&file=README.md")
+        .expect(200);
+    expect(response.headers["content-type"]).toMatch(/application\/octet-stream/);
+});
+
+// ✅ Test API /download (Netlify)
+test("GET /download (Netlify) - should return 404 if file not found", async () => {
+    const response = await request(app)
+        .get("/.netlify/functions/unifiedAccess/download?source=netlify&file=nonexistent.json")
+        .expect(404);
+    expect(response.body).toHaveProperty("error", "File not found in Netlify deployment.");
+});
+
+// ✅ Chiudi connessione MongoDB dopo i test
 afterAll(async () => {
-  await mongoose.connection.close();
-});
-
-// 📌 **Test MongoDB Connection**
-test("✅ MongoDB Connection", async () => {
-  expect(mongoose.connection.readyState).toBe(1);
-});
-
-// 📌 **Test API: Fetch File from GitHub**
-test("✅ Fetch GitHub File", async () => {
-  const response = await request(app)
-    .get("/.netlify/functions/unifiedAccess/fetch")
-    .query({ source: "github", file: "README.md" });
-
-  expect(response.status).toBe(200);
-  expect(response.body).toHaveProperty("file", "README.md");
-  expect(response.body).toHaveProperty("content");
-});
-
-// 📌 **Test API: Fetch File from Netlify**
-test("✅ Fetch Netlify Static File", async () => {
-  const response = await request(app)
-    .get("/.netlify/functions/unifiedAccess/fetch")
-    .query({ source: "netlify", file: "config.json" });
-
-  expect(response.status).toBe(200);
-  expect(response.body).toHaveProperty("file", "config.json");
-});
-
-// 📌 **Test API: Fetch Data from MongoDB**
-test("✅ Fetch MongoDB Record", async () => {
-  const response = await request(app)
-    .get("/.netlify/functions/unifiedAccess/fetch")
-    .query({ source: "mongodb", query: "test_key" });
-
-  expect(response.status).toBe(200);
-  expect(response.body).toHaveProperty("key", "test_key");
-  expect(response.body).toHaveProperty("value");
-});
-
-// 📌 **Test API: Store Data in MongoDB**
-test("✅ Store Data in MongoDB", async () => {
-  const testData = { key: "new_test_key", value: "Hello MongoDB!" };
-
-  const response = await request(app)
-    .post("/.netlify/functions/unifiedAccess/store")
-    .send(testData);
-
-  expect(response.status).toBe(200);
-  expect(response.body).toHaveProperty("message", "✅ Data stored successfully");
-});
-
-// 📌 **Test API: Download File from GitHub**
-test("✅ Download GitHub File", async () => {
-  const response = await request(app)
-    .get("/.netlify/functions/unifiedAccess/download")
-    .query({ source: "github", file: "README.md" });
-
-  expect(response.status).toBe(200);
-});
-
-// 📌 **Test API: Download File from Netlify**
-test("✅ Download Netlify File", async () => {
-  const response = await request(app)
-    .get("/.netlify/functions/unifiedAccess/download")
-    .query({ source: "netlify", file: "config.json" });
-
-  expect(response.status).toBe(200);
+    console.log("✅ Closing MongoDB connection...");
+    await mongoose.connection.close();
 });
