@@ -23,6 +23,7 @@
      📄 test.js - Main test file for validating API endpoints and backend functionality.
      📄 .gitkeep - Placeholder file ensuring Git tracks the tests/ directory.
      📄 test_transformer.js - Test cases for AI-powered transformer.js, ensuring NLP processing works correctly.
+     📄 test_auto_update.sh - 🚀 Add a description here
   📁 script/ - Automation & Updates module.
      📄 update_csv_github.py - Script for updating CSV files in the GitHub repository automatically.
      📄 update_whitelist.py - Python script to refresh the whitelist data for airdrop eligibility.
