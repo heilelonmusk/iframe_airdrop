@@ -6,6 +6,7 @@
      📄 descriptions.yaml - Metadata file storing structured descriptions for all repository files, keeping documentation updated.
      📄 TROUBLESHOOTING.md - In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
      📄 config.yaml - Global configuration file managing system-wide settings, service integrations, and environment variables.
+     📄 downloaded_netlify_index.html - 🚀 Add a description here
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
      📄 yarn.lock - Dependency lock file for Yarn, ensuring package versions remain consistent across installations.
      📄 .gitignore - Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts) to maintain repository cleanliness.
@@ -14,6 +15,7 @@
      📄 .env - 🚀 Add a description here
      📄 file_tree.txt - Auto-generated file tracking real-time repository structure, ensuring documentation of all directories and files.
      📄 update_tree.py - Python script dynamically updating `file_tree.txt`, ensuring the repository structure remains documented.
+     📄 downloaded_github_README.md - 🚀 Add a description here
      📄 checkQuestions.js - Script for validating and processing stored chatbot questions, ensuring consistency in AI-generated responses.
   📁 iframe/ - Module managing airdrop verification via blockchain wallet interactions.
      📄 airdrop_checker.js - JavaScript logic handling blockchain wallet verification and eligibility confirmation.

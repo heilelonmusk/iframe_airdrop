@@ -18,6 +18,8 @@ descriptions:
     files, keeping documentation updated.
   ./download_mistral.py: Python script related to the now-removed Mistral component.
     Requires verification for deprecation and potential removal.
+  ./downloaded_github_README.md: "\U0001F680 Add a description here"
+  ./downloaded_netlify_index.html: "\U0001F680 Add a description here"
   ./file_tree.txt: Auto-generated file tracking real-time repository structure, ensuring
     documentation of all directories and files.
   ./netlify.toml: Configuration file managing Netlify deployments, routing, API function
