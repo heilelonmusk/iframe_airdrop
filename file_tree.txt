@@ -1,4 +1,4 @@
-  📁 node_modules/  [Hidden, 11709 files omitted] - External dependencies
+  📁 node_modules/  [Hidden, 11734 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
      📄 AI_DEVELOPER_NOTES.md - Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
@@ -49,6 +49,7 @@
      📄 externalTokenListingUpdate.js - Fetches and updates token listing data from external cryptocurrency market sources.
      📄 dymensionAPI.js - API module responsible for fetching and processing data from Dymension RollApps, used for blockchain-related functions.
      📄 knowledge.js - Core API endpoint for managing chatbot knowledge base queries and AI responses.
+     📄 unifiedAccess.js - 🚀 Add a description here
   📁 ultron_chat/ - AI chatbot module handling interactive conversations.
      📄 ultronChat.js - Manages AI chatbot interactions, response generation, and user engagement.
      📄 ultronChat.css - Styling and animations for the Ultron chatbot UI.

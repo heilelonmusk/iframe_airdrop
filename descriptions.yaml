@@ -1,101 +1,141 @@
 descriptions:
-  ./: Root directory containing the main project files, configurations, and essential documentation.
-  ./.gitignore: Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts) to maintain repository cleanliness.
-  ./AI_DEVELOPER_NOTES.md: Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
-  ./README.md: Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
-  ./TROUBLESHOOTING.md: In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
-  ./checkQuestions.js: Script for validating and processing stored chatbot questions, ensuring consistency in AI-generated responses.
-  ./config.yaml: Global configuration file managing system-wide settings, service integrations, and environment variables.
-  ./descriptions.yaml: Metadata file storing structured descriptions for all repository files, keeping documentation updated.
-  ./download_mistral.py: Python script related to the now-removed Mistral component. Requires verification for deprecation and potential removal.
-  ./file_tree.txt: Auto-generated file tracking real-time repository structure, ensuring documentation of all directories and files.
-  ./netlify.toml: Configuration file managing Netlify deployments, routing, API function settings, and CORS policies.
-  ./nodemon.json: Configuration file for `nodemon`, enabling automatic server restarts during development.
-  ./package-lock.json: Lock file for npm dependencies, ensuring version consistency across different environments.
-  ./package.json: Defines project dependencies, scripts, and metadata for backend and frontend packages.
-  ./update_tree.py: Python script dynamically updating `file_tree.txt`, ensuring the repository structure remains documented.
-  ./xlsx-0.20.1.tgz: Legacy Excel processing library archive, possibly obsolete. Requires verification for continued necessity.
-  ./yarn.lock: Dependency lock file for Yarn, ensuring package versions remain consistent across installations.
-  
-  # GitHub Workflows & CI/CD
+  ./: Root directory containing the main project files, configurations, and essential
+    documentation.
+  ./.gitignore: Specifies files and folders ignored by Git (e.g., .env, logs, build
+    artifacts) to maintain repository cleanliness.
+  ./AI_DEVELOPER_NOTES.md: Comprehensive technical documentation for AI development,
+    covering model integrations, architecture, and debugging strategies.
+  ./README.md: Primary repository documentation, detailing project purpose, architecture,
+    functionality, and contribution guidelines.
+  ./TROUBLESHOOTING.md: In-depth guide for debugging known issues, resolving API failures,
+    database connectivity, and deployment problems.
+  ./checkQuestions.js: Script for validating and processing stored chatbot questions,
+    ensuring consistency in AI-generated responses.
+  ./config.yaml: Global configuration file managing system-wide settings, service
+    integrations, and environment variables.
+  ./descriptions.yaml: Metadata file storing structured descriptions for all repository
+    files, keeping documentation updated.
+  ./download_mistral.py: Python script related to the now-removed Mistral component.
+    Requires verification for deprecation and potential removal.
+  ./file_tree.txt: Auto-generated file tracking real-time repository structure, ensuring
+    documentation of all directories and files.
+  ./netlify.toml: Configuration file managing Netlify deployments, routing, API function
+    settings, and CORS policies.
+  ./nodemon.json: Configuration file for `nodemon`, enabling automatic server restarts
+    during development.
+  ./package-lock.json: Lock file for npm dependencies, ensuring version consistency
+    across different environments.
+  ./package.json: Defines project dependencies, scripts, and metadata for backend
+    and frontend packages.
+  ./update_tree.py: Python script dynamically updating `file_tree.txt`, ensuring the
+    repository structure remains documented.
+  ./xlsx-0.20.1.tgz: Legacy Excel processing library archive, possibly obsolete. Requires
+    verification for continued necessity.
+  ./yarn.lock: Dependency lock file for Yarn, ensuring package versions remain consistent
+    across installations.
   .github/: Contains automation workflows for CI/CD processes, including GitHub Actions.
-  .github/workflows/: Houses GitHub Actions used for deployment automation, repository maintenance, and data synchronization.
-  .github/workflows/retry_cancelled.yml: GitHub workflow to automatically restart any canceled workflows, ensuring task completion.
-  .github/workflows/retry_pending_workflows.yml: Auto-retries any pending GitHub Actions workflows that may have stalled or failed.
-  .github/workflows/update_csv.yml: Automates updating CSV-based data files within the repository.
-  .github/workflows/update_noneligible.yml: Handles periodic updates for the `non_eligible.csv` dataset tracking disqualified wallet addresses.
-  .github/workflows/update_whitelist.yml: CI/CD workflow responsible for updating the whitelist dataset (`whitelist.csv`).
-
-  # API - Core Backend
-  api/: Backend API module managing chatbot logic, data retrieval, and integrations with external systems.
-  api/dymensionAPI.js: API module responsible for fetching and processing data from Dymension RollApps, used for blockchain-related functions.
-  api/externalTokenListingUpdate.js: Fetches and updates token listing data from external cryptocurrency market sources.
-  api/knowledge.js: Core API endpoint for managing chatbot knowledge base queries and AI responses.
-  api/seedKnowledge.js: Initial population script that seeds MongoDB with structured knowledge base data for the chatbot.
-  api/server.js: The central Express.js server file handling API requests, routing, and middleware execution.
-
-  # Data Storage & Management
-  data/: Stores persistent data files, including whitelist and AI-related knowledge bases.
+  .github/workflows/: Houses GitHub Actions used for deployment automation, repository
+    maintenance, and data synchronization.
+  .github/workflows/retry_cancelled.yml: GitHub workflow to automatically restart
+    any canceled workflows, ensuring task completion.
+  .github/workflows/retry_pending_workflows.yml: Auto-retries any pending GitHub Actions
+    workflows that may have stalled or failed.
+  .github/workflows/update_csv.yml: Automates updating CSV-based data files within
+    the repository.
+  .github/workflows/update_noneligible.yml: Handles periodic updates for the `non_eligible.csv`
+    dataset tracking disqualified wallet addresses.
+  .github/workflows/update_whitelist.yml: CI/CD workflow responsible for updating
+    the whitelist dataset (`whitelist.csv`).
+  api/: Backend API module managing chatbot logic, data retrieval, and integrations
+    with external systems.
+  api/dymensionAPI.js: API module responsible for fetching and processing data from
+    Dymension RollApps, used for blockchain-related functions.
+  api/externalTokenListingUpdate.js: Fetches and updates token listing data from external
+    cryptocurrency market sources.
+  api/knowledge.js: Core API endpoint for managing chatbot knowledge base queries
+    and AI responses.
+  api/seedKnowledge.js: Initial population script that seeds MongoDB with structured
+    knowledge base data for the chatbot.
+  api/server.js: The central Express.js server file handling API requests, routing,
+    and middleware execution.
+  api/unifiedAccess.js: "\U0001F680 Add a description here"
+  data/: Stores persistent data files, including whitelist and AI-related knowledge
+    bases.
   data/.gitkeep: Placeholder file ensuring Git tracks the `data/` directory structure.
-  data/iframe_setting.csv: CSV configuration file containing iframe-related settings for UI rendering.
-  data/knowledge.json: JSON file storing static chatbot responses and predefined knowledge base data.
-  data/non_eligible.csv: Dataset tracking wallet addresses that are not eligible for airdrop rewards.
-  data/whitelist.csv: Maintains a list of wallet addresses eligible for airdrop rewards, cross-referenced in API checks.
-
-  # Example & Testing Files
-  example_folder/: Placeholder directory, possibly used for testing or documentation. Needs verification if still required.
-  example_folder/example.py: Sample Python script demonstrating API calls, chatbot interactions, or data processing logic.
-
-  # Iframe Airdrop Verification
+  data/iframe_setting.csv: CSV configuration file containing iframe-related settings
+    for UI rendering.
+  data/knowledge.json: JSON file storing static chatbot responses and predefined knowledge
+    base data.
+  data/non_eligible.csv: Dataset tracking wallet addresses that are not eligible for
+    airdrop rewards.
+  data/whitelist.csv: Maintains a list of wallet addresses eligible for airdrop rewards,
+    cross-referenced in API checks.
+  example_folder/: Placeholder directory, possibly used for testing or documentation.
+    Needs verification if still required.
+  example_folder/example.py: Sample Python script demonstrating API calls, chatbot
+    interactions, or data processing logic.
   iframe/: Module managing airdrop verification via blockchain wallet interactions.
-  iframe/airdrop_checker.html: HTML page for UI rendering of the airdrop verification system.
-  iframe/airdrop_checker.js: JavaScript logic handling blockchain wallet verification and eligibility confirmation.
-
-  # AI & Utility Modules
-  modules/: Collection of AI and utility scripts, including NLP, learning, and logging functionalities.
+  iframe/airdrop_checker.html: HTML page for UI rendering of the airdrop verification
+    system.
+  iframe/airdrop_checker.js: JavaScript logic handling blockchain wallet verification
+    and eligibility confirmation.
+  modules/: Collection of AI and utility scripts, including NLP, learning, and logging
+    functionalities.
   modules/intent/: Handles AI intent recognition and NLP-based classification.
-  modules/intent/intentRecognizer.js: AI-powered module for recognizing user intent within chatbot interactions.
-  modules/learning/: Machine learning adaptation module enabling chatbot response refinement.
-  modules/learning/learningModule.js: Implements AI-driven learning mechanisms based on user interactions and feedback.
-  modules/logging/: Centralized logging and event tracking system for monitoring AI behavior.
-  modules/logging/logger.js: Manages structured logging of chatbot interactions, debugging events, and system performance metrics.
-  modules/nlp/: Core Natural Language Processing (NLP) modules managing chatbot text generation and understanding.
-  modules/nlp/nlpModel.js: Stores and handles AI language models used for natural language processing tasks.
-  modules/nlp/transformer.js: AI-driven transformer model responsible for text refinement and chatbot response enhancement.
-
-  # Netlify & Deployment Configuration
-  netlify.toml: Netlify deployment configuration, handling API routing, serverless functions, and access permissions.
+  modules/intent/intentRecognizer.js: AI-powered module for recognizing user intent
+    within chatbot interactions.
+  modules/learning/: Machine learning adaptation module enabling chatbot response
+    refinement.
+  modules/learning/learningModule.js: Implements AI-driven learning mechanisms based
+    on user interactions and feedback.
+  modules/logging/: Centralized logging and event tracking system for monitoring AI
+    behavior.
+  modules/logging/logger.js: Manages structured logging of chatbot interactions, debugging
+    events, and system performance metrics.
+  modules/nlp/: Core Natural Language Processing (NLP) modules managing chatbot text
+    generation and understanding.
+  modules/nlp/nlpModel.js: Stores and handles AI language models used for natural
+    language processing tasks.
+  modules/nlp/transformer.js: AI-driven transformer model responsible for text refinement
+    and chatbot response enhancement.
+  netlify.toml: Netlify deployment configuration, handling API routing, serverless
+    functions, and access permissions.
   netlify/: Contains Netlify-specific functions and deployment settings.
-  netlify/functions/: Houses serverless API functions executed on Netlify’s infrastructure.
-  netlify/functions/triggerWhitelistUpdate.js: Netlify function responsible for automatically updating the airdrop whitelist dataset.
-
-  # Public & Static Assets
+  netlify/functions/: "Houses serverless API functions executed on Netlify\u2019s\
+    \ infrastructure."
+  netlify/functions/triggerWhitelistUpdate.js: Netlify function responsible for automatically
+    updating the airdrop whitelist dataset.
   public/: Contains static assets, including UI resources.
   public/.gitkeep: Placeholder file ensuring Git tracks the `public/` directory.
-
-  # Automation & Scripts
-  script/: Houses scripts for data updates, repository maintenance, and automation tasks.
-  script/assemble_public.sh: Shell script that consolidates all required public files before deployment.
-  script/trigger_dispatch.py: Python script triggering external GitHub Actions for repository synchronization.
-  script/unified_update.py: Master script coordinating multiple update operations across the repository.
+  script/: Houses scripts for data updates, repository maintenance, and automation
+    tasks.
+  script/assemble_public.sh: Shell script that consolidates all required public files
+    before deployment.
+  script/trigger_dispatch.py: Python script triggering external GitHub Actions for
+    repository synchronization.
+  script/unified_update.py: Master script coordinating multiple update operations
+    across the repository.
   script/update_csv_github.py: Automates updating CSV datasets in the GitHub repository.
-  script/update_noneligible.py: Updates the `non_eligible.csv` dataset, managing disqualified airdrop wallets.
-  script/update_whitelist.py: Script responsible for refreshing and maintaining the airdrop whitelist dataset.
-
-  # Testing & Debugging
+  script/update_noneligible.py: Updates the `non_eligible.csv` dataset, managing disqualified
+    airdrop wallets.
+  script/update_whitelist.py: Script responsible for refreshing and maintaining the
+    airdrop whitelist dataset.
   tests/: Contains all test scripts and debugging tools.
   tests/.gitkeep: Placeholder file ensuring Git tracks the `tests/` directory.
-  tests/test.js: Primary test script validating API endpoints, chatbot functionality, and system responses.
-  tests/test_auto_update.sh: Shell script automating testing for `update_tree.py`, ensuring the repository structure remains updated.
-  tests/test_transformer.js: Test suite validating AI-powered `transformer.js`, ensuring accurate NLP processing and text refinement.
-
-  # Ultron AI Chatbot System
+  tests/test.js: Primary test script validating API endpoints, chatbot functionality,
+    and system responses.
+  tests/test_auto_update.sh: Shell script automating testing for `update_tree.py`,
+    ensuring the repository structure remains updated.
+  tests/test_transformer.js: Test suite validating AI-powered `transformer.js`, ensuring
+    accurate NLP processing and text refinement.
   ultron_chat/: AI chatbot module handling interactive conversations.
   ultron_chat/ultronChat.css: Styling and animations for the Ultron chatbot UI.
-  ultron_chat/ultronChat.js: Manages AI chatbot interactions, response generation, and user engagement.
-  ultron_chat/ultronChat.png: Icon image used in the Ultron chatbot’s UI interface.
-
-  # Utility & Dependency Management
-  update_tree.py: Python script dynamically updating `file_tree.txt`, maintaining repository structure documentation.
-  xlsx-0.20.1.tgz: Potentially obsolete third-party library for Excel file handling, requiring verification.
-  yarn.lock: Dependency lock file for Yarn, ensuring package version consistency across different environments.
+  ultron_chat/ultronChat.js: Manages AI chatbot interactions, response generation,
+    and user engagement.
+  ultron_chat/ultronChat.png: "Icon image used in the Ultron chatbot\u2019s UI interface."
+  update_tree.py: Python script dynamically updating `file_tree.txt`, maintaining
+    repository structure documentation.
+  xlsx-0.20.1.tgz: Potentially obsolete third-party library for Excel file handling,
+    requiring verification.
+  yarn.lock: Dependency lock file for Yarn, ensuring package version consistency across
+    different environments.
