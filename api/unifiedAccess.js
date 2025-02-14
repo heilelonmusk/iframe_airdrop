@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const serverless = require('serverless-http');
+console.log("Fetching from GitHub URL:", repoUrl);
 const axios = require('axios');
 const mongoose = require('mongoose');
 const cors = require('cors');
