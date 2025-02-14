@@ -14,17 +14,20 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ Optimized MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000, // Prevent infinite attempts
-    socketTimeoutMS: 45000 // Close inactive connections after 45s
-})
+// ✅ Connessione MongoDB ottimizzata
+mongoose
+    .connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 5000, // ⏳ Previene tentativi infiniti
+        socketTimeoutMS: 45000 // ⏳ Chiude connessioni inattive
+    })
     .then(() => console.log("✅ MongoDB Connected Successfully"))
-    .catch(err => {
+    .catch((err) => {
         console.error("❌ MongoDB Connection Error:", err.message);
         process.exit(1);
     });
+
+// ✅ Esporta sia `app` che `handler` per i test
+module.exports = { app, handler: serverless(app) };
 
 const KnowledgeSchema = new mongoose.Schema({
     key: { type: String, required: true, unique: true },
