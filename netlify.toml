@@ -1,6 +1,13 @@
 [build]
   command = "npm install"
   functions = "api"
+  publish = "."  # Prevent Netlify from assuming a Hugo static site
+
+[dev]
+  command = "npm run dev"  # Ensures Netlify runs your API
+  framework = "#custom"  # Prevents Netlify from detecting Hugo
+  targetPort = 5000  # Ensures Express runs on the right port
+  autoLaunch = false  # Prevents Netlify from opening a browser
 
 [[headers]]
   for = "/.netlify/functions/*"
