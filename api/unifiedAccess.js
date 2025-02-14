@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const serverless = require('serverless-http');
-console.log("Fetching from GitHub URL:", repoUrl);
 const axios = require('axios');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -14,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ MongoDB Connection - Ensure proper error handling
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
@@ -30,14 +29,14 @@ const Knowledge = mongoose.models.Knowledge || mongoose.model('Knowledge', Knowl
  */
 router.get('/fetch', async (req, res) => {
     const { source, file, query } = req.query;
-
     try {
         if (!source) return res.status(400).json({ error: "Missing source parameter." });
 
         if (source === "github") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for GitHub source." });
-
+            
             const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
+            console.log("Fetching from GitHub URL:", repoUrl);
             
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
@@ -49,7 +48,7 @@ router.get('/fetch', async (req, res) => {
 
             // Fetch actual file content from raw GitHub URL
             const fileResponse = await axios.get(response.data.download_url);
-            res.json({ file: file, content: fileResponse.data });
+            res.json({ file, content: fileResponse.data });
 
         } else if (source === "netlify") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
@@ -57,10 +56,8 @@ router.get('/fetch', async (req, res) => {
 
         } else if (source === "mongodb") {
             if (!query) return res.status(400).json({ error: "Missing query parameter for MongoDB source." });
-
             const data = await Knowledge.findOne({ key: query });
             if (!data) return res.status(404).json({ error: "No data found in MongoDB" });
-
             res.json(data);
 
         } else {
@@ -78,14 +75,12 @@ router.get('/fetch', async (req, res) => {
  */
 router.post('/store', async (req, res) => {
     const { key, value } = req.body;
-
     if (!key || !value) {
         return res.status(400).json({ error: "Missing key or value in request body." });
     }
 
     try {
         let record = await Knowledge.findOne({ key });
-
         if (record) {
             record.value = value;
             await record.save();
@@ -107,7 +102,6 @@ router.post('/store', async (req, res) => {
  */
 router.get('/download', async (req, res) => {
     const { source, file } = req.query;
-
     if (!source || !file) {
         return res.status(400).json({ error: "Missing source or file parameter." });
     }
@@ -121,13 +115,12 @@ router.get('/download', async (req, res) => {
             });
 
             if (!response.data.download_url) {
-                console.error(`❌ GitHub Download Error: ${file} - Not Found or Permission Denied`);
                 return res.status(404).json({ error: "GitHub API Error: File not found or permission denied." });
             }
 
             // Download file content
             const fileResponse = await axios.get(response.data.download_url, { responseType: 'arraybuffer' });
-
+            
             // ✅ Evitiamo di sovrascrivere se il contenuto è un errore JSON
             try {
                 const jsonResponse = JSON.parse(fileResponse.data.toString('utf-8'));
@@ -141,7 +134,6 @@ router.get('/download', async (req, res) => {
                 fs.writeFileSync(filePath, fileResponse.data);
                 res.download(filePath, () => fs.unlinkSync(filePath));
             }
-
         } else if (source === "netlify") {
             res.redirect(`${process.env.NETLIFY_URL}/${file}`);
         } else {
