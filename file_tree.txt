@@ -1,4 +1,4 @@
-  📁 node_modules/  [Hidden, 11734 files omitted] - External dependencies
+  📁 node_modules/  [Hidden, 15584 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
      📄 AI_DEVELOPER_NOTES.md - Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
@@ -25,6 +25,7 @@
   📁 tests/ - Contains all test scripts and debugging tools.
      📄 test_netlify.sh - 🚀 Add a description here
      📄 test.js - Primary test script validating API endpoints, chatbot functionality, and system responses.
+     📄 unifiedAccess.test.js - 🚀 Add a description here
      📄 .gitkeep - Placeholder file ensuring Git tracks the `tests/` directory.
      📄 test_transformer.js - Test suite validating AI-powered `transformer.js`, ensuring accurate NLP processing and text refinement.
      📄 test_auto_update.sh - Shell script automating testing for `update_tree.py`, ensuring the repository structure remains updated.
