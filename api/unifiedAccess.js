@@ -9,9 +9,9 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("✅ Connected to MongoDB"))
+    .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 const KnowledgeSchema = new mongoose.Schema({
@@ -26,9 +26,13 @@ app.use(express.json());
 /**
  * 📌 Route: GET /api/fetch
  * Fetches a file or dataset from GitHub, Netlify, or MongoDB
+ * Query Parameters:
+ * - source: github | netlify | mongodb
+ * - file: the file path (GitHub/Netlify)
+ * - query: MongoDB key
  */
 app.get('/api/fetch', async (req, res) => {
-    const { source, file, query } = req.query; // source = github | netlify | mongodb
+    const { source, file, query } = req.query;
 
     try {
         if (source === "github") {
@@ -46,6 +50,7 @@ app.get('/api/fetch', async (req, res) => {
             res.status(400).json({ error: "Invalid source parameter. Use 'github', 'netlify', or 'mongodb'." });
         }
     } catch (error) {
+        console.error("❌ Fetch Error:", error.message);
         res.status(500).json({ error: "Error fetching data", details: error.message });
     }
 });
@@ -53,6 +58,9 @@ app.get('/api/fetch', async (req, res) => {
 /**
  * 📌 Route: POST /api/store
  * Stores new information into the MongoDB knowledge base
+ * Request Body:
+ * - key: The unique key for the knowledge entry
+ * - value: The data to be stored
  */
 app.post('/api/store', async (req, res) => {
     const { key, value } = req.body;
@@ -68,6 +76,7 @@ app.post('/api/store', async (req, res) => {
         }
         res.json({ message: "✅ Data stored successfully", data: record });
     } catch (error) {
+        console.error("❌ Storage Error:", error.message);
         res.status(500).json({ error: "Error storing data", details: error.message });
     }
 });
@@ -75,6 +84,9 @@ app.post('/api/store', async (req, res) => {
 /**
  * 📌 Route: GET /api/download
  * Allows downloading a file from GitHub or Netlify
+ * Query Parameters:
+ * - source: github | netlify
+ * - file: the file path
  */
 app.get('/api/download', async (req, res) => {
     const { source, file } = req.query;
@@ -94,9 +106,10 @@ app.get('/api/download', async (req, res) => {
             res.status(400).json({ error: "Invalid source for download" });
         }
     } catch (error) {
+        console.error("❌ Download Error:", error.message);
         res.status(500).json({ error: "Error downloading file", details: error.message });
     }
 });
 
 // Start the API server
-app.listen(PORT, () => console.log(`🚀 Unified API running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Unified API Gateway running on port ${PORT}`));
