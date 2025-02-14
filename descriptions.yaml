@@ -81,6 +81,7 @@ descriptions:
   data/: Stores persistent data files, including whitelist and AI-related knowledge
     bases.
   data/.gitkeep: Placeholder file ensuring Git tracks the `data/` directory structure.
+  data/_redirects: "\U0001F680 Add a description here"
   data/iframe_setting.csv: CSV configuration file containing iframe-related settings
     for UI rendering.
   data/knowledge.json: JSON file storing static chatbot responses and predefined knowledge

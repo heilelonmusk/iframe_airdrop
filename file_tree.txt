@@ -41,7 +41,6 @@
      📄 triggerWhitelistUpdate.js - Netlify function responsible for automatically updating the airdrop whitelist dataset.
   📁 public/ - Contains static assets, including UI resources.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `public/` directory.
-     📄 _redirects - 🚀 Add a description here
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
   📁 .netlify/v1/ - 🚀 Add a description here
@@ -86,6 +85,7 @@
      📄 logger.js - Manages structured logging of chatbot interactions, debugging events, and system performance metrics.
   📁 data/ - Stores persistent data files, including whitelist and AI-related knowledge bases.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `data/` directory structure.
+     📄 _redirects - 🚀 Add a description here
      📄 whitelist.csv - Maintains a list of wallet addresses eligible for airdrop rewards, cross-referenced in API checks.
      📄 non_eligible.csv - Dataset tracking wallet addresses that are not eligible for airdrop rewards.
      📄 iframe_setting.csv - CSV configuration file containing iframe-related settings for UI rendering.
