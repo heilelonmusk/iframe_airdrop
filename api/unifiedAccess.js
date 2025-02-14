@@ -13,12 +13,12 @@ const router = express.Router();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Connessione MongoDB ottimizzata
+// ✅ Optimized MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000
+    serverSelectionTimeoutMS: 5000, // Prevent infinite attempts
+    socketTimeoutMS: 45000 // Close inactive connections after 45s
 })
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => {
@@ -32,12 +32,12 @@ const KnowledgeSchema = new mongoose.Schema({
 });
 const Knowledge = mongoose.models.Knowledge || mongoose.model('Knowledge', KnowledgeSchema);
 
-// ✅ Cache in memoria per velocizzare MongoDB
+// ✅ In-memory Cache for MongoDB Performance Boost
 const memoryCache = new Map();
 
 /**
  * 📌 Route: GET /.netlify/functions/unifiedAccess/fetch
- * Fetch di dati da GitHub, Netlify o MongoDB
+ * Fetch data from GitHub, Netlify, or MongoDB
  */
 router.get('/fetch', async (req, res) => {
     const { source, file, query } = req.query;
@@ -108,7 +108,7 @@ router.get('/fetch', async (req, res) => {
 
 /**
  * 📌 Route: POST /.netlify/functions/unifiedAccess/store
- * Salvataggio dati in MongoDB
+ * Store data in MongoDB
  */
 router.post('/store', async (req, res) => {
     const { key, value } = req.body;
@@ -136,7 +136,7 @@ router.post('/store', async (req, res) => {
 
 /**
  * 📌 Route: GET /.netlify/functions/unifiedAccess/download
- * Download file da GitHub o Netlify
+ * Download file from GitHub or Netlify
  */
 router.get('/download', async (req, res) => {
     const { source, file } = req.query;
@@ -180,5 +180,5 @@ router.get('/download', async (req, res) => {
 // ✅ Attach Router to App
 app.use('/.netlify/functions/unifiedAccess', router);
 
-// ✅ Export per Netlify
+// ✅ Export for Netlify
 module.exports.handler = serverless(app);
