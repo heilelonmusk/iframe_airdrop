@@ -19,6 +19,7 @@
      📄 airdrop_checker.js - JavaScript logic handling blockchain wallet verification and eligibility confirmation.
      📄 airdrop_checker.html - HTML page for UI rendering of the airdrop verification system.
   📁 tests/ - Contains all test scripts and debugging tools.
+     📄 test_netlify.sh - 🚀 Add a description here
      📄 test.js - Primary test script validating API endpoints, chatbot functionality, and system responses.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `tests/` directory.
      📄 test_transformer.js - Test suite validating AI-powered `transformer.js`, ensuring accurate NLP processing and text refinement.
