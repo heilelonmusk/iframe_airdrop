@@ -36,7 +36,15 @@ router.get('/fetch', async (req, res) => {
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
-            res.json(response.data);
+
+            if (response.data.encoding === 'base64') {
+                // Decode base64 content
+                const decodedContent = Buffer.from(response.data.content, 'base64').toString('utf-8');
+                res.json({ file: file, content: decodedContent });
+            } else {
+                res.json(response.data);
+            }
+
         } else if (source === "netlify") {
             res.redirect(`${process.env.NETLYFY_URL}/${file}`);
         } else if (source === "mongodb") {
