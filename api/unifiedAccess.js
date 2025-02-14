@@ -1,15 +1,15 @@
 require('dotenv').config();
 const express = require('express');
+const serverless = require('serverless-http');
 const axios = require('axios');
 const mongoose = require('mongoose');
-const fs = require('fs');
-const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+app.use(cors());
+app.use(express.json());
 
-// MongoDB Connection
+// ✅ Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
@@ -20,18 +20,15 @@ const KnowledgeSchema = new mongoose.Schema({
 });
 const Knowledge = mongoose.model('Knowledge', KnowledgeSchema);
 
-app.use(cors());
-app.use(express.json());
-
 /**
- * 📌 Route: GET /api/fetch
+ * 📌 Route: GET /.netlify/functions/unified_access/fetch
  * Fetches a file or dataset from GitHub, Netlify, or MongoDB
  * Query Parameters:
  * - source: github | netlify | mongodb
  * - file: the file path (GitHub/Netlify)
  * - query: MongoDB key
  */
-app.get('/api/fetch', async (req, res) => {
+app.get('/fetch', async (req, res) => {
     const { source, file, query } = req.query;
 
     try {
@@ -56,13 +53,13 @@ app.get('/api/fetch', async (req, res) => {
 });
 
 /**
- * 📌 Route: POST /api/store
+ * 📌 Route: POST /.netlify/functions/unified_access/store
  * Stores new information into the MongoDB knowledge base
  * Request Body:
  * - key: The unique key for the knowledge entry
  * - value: The data to be stored
  */
-app.post('/api/store', async (req, res) => {
+app.post('/store', async (req, res) => {
     const { key, value } = req.body;
 
     try {
@@ -82,13 +79,13 @@ app.post('/api/store', async (req, res) => {
 });
 
 /**
- * 📌 Route: GET /api/download
+ * 📌 Route: GET /.netlify/functions/unified_access/download
  * Allows downloading a file from GitHub or Netlify
  * Query Parameters:
  * - source: github | netlify
  * - file: the file path
  */
-app.get('/api/download', async (req, res) => {
+app.get('/download', async (req, res) => {
     const { source, file } = req.query;
 
     try {
@@ -97,9 +94,9 @@ app.get('/api/download', async (req, res) => {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
 
-            const filePath = path.join(__dirname, file);
-            fs.writeFileSync(filePath, Buffer.from(response.data.content, 'base64'));
-            res.download(filePath, () => fs.unlinkSync(filePath));
+            const filePath = `./${file}`;
+            require('fs').writeFileSync(filePath, Buffer.from(response.data.content, 'base64'));
+            res.download(filePath, () => require('fs').unlinkSync(filePath));
         } else if (source === "netlify") {
             res.redirect(`${process.env.NETLYFY_URL}/${file}`);
         } else {
@@ -111,5 +108,5 @@ app.get('/api/download', async (req, res) => {
     }
 });
 
-// Start the API server
-app.listen(PORT, () => console.log(`🚀 Unified API Gateway running on port ${PORT}`));
+// ✅ Export for Netlify
+module.exports.handler = serverless(app);
