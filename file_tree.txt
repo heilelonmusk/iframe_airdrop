@@ -42,11 +42,10 @@
      📄 triggerWhitelistUpdate.js - Netlify function responsible for automatically updating the airdrop whitelist dataset.
   📁 public/ - Contains static assets, including UI resources.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `public/` directory.
+     📄 _redirects - 🚀 Add a description here
   📁 logs/ - 🚀 Add a description here
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
-  📁 .netlify/v1/ - 🚀 Add a description here
-  📁 .netlify/v1/functions/ - 🚀 Add a description here
   📁 .netlify/blobs-serve/ - 🚀 Add a description here
   📁 .netlify/functions-internal/ - 🚀 Add a description here
   📁 .netlify/functions/ - 🚀 Add a description here
