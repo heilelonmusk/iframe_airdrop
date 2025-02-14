@@ -1,7 +1,7 @@
 # 🚀 Netlify Build Settings
 [build]
   command = "npm install && npm run build"
-  functions = "api"
+  functionsDirectory = "api"
   publish = "public" # Ensures only static content is deployed
 
 # 🛠️ Local Development Settings
@@ -10,6 +10,14 @@
   framework = "#custom"
   targetPort = 5000
   autoLaunch = false
+
+# ✅ Pass Environment Variables to Build
+[context.production.environment]
+  MONGO_URI = "your-mongodb-connection-string"
+  REDIS_URL = "your-redis-url"
+  MY_GITHUB_OWNER = "your-github-owner"
+  MY_GITHUB_REPO = "your-repo-name"
+  MY_GITHUB_TOKEN = "your-github-token"
 
 # ✅ Security & CORS Headers
 [[headers]]
@@ -21,16 +29,23 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Cache-Control = "no-store"
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
 
-# 🚀 Static File Caching
+# 🚀 Static File Caching (Optimized)
 [[headers]]
   for = "/static/*"
   [headers.values]
-    Cache-Control = "public, max-age=604800, immutable"
+    Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
 
-# ✅ API Rate Limiting (Global for `/api/*`)
+# ✅ API Rate Limiting (Granular per Endpoint)
+[[headers]]
+  for = "/api/unifiedAccess/*"
+  [headers.values]
+    X-RateLimit-Limit = "50"
+    X-RateLimit-Remaining = "50"
+    X-RateLimit-Reset = "60"
+
 [[headers]]
   for = "/api/*"
   [headers.values]
@@ -71,3 +86,4 @@
   [headers.values]
     X-Debug-Mode = "true"
     X-Powered-By = "Netlify"
+    Server-Timing = "total;desc=\"Total API Response Time\""

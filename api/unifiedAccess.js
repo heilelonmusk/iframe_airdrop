@@ -12,7 +12,12 @@ const winston = require("winston");
 
 const app = express();
 const router = express.Router();
-const redis = new Redis(process.env.REDIS_URL);
+
+const redis = new Redis(process.env.REDIS_URL, {
+  retryStrategy: (times) => Math.min(times * 50, 2000), 
+  enableOfflineQueue: false,
+  connectTimeout: 5000, // Timeout Redis connection
+});
 
 // 🚀 Winston Logger
 const logger = winston.createLogger({
@@ -27,7 +32,7 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ Ensure environment variables exist
+// ✅ Ensure required environment variables exist
 const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
 requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
@@ -67,15 +72,24 @@ const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", Knowl
 // 🚀 Redis Cache Wrapper
 const cacheMiddleware = async (req, res, next) => {
   const key = req.originalUrl;
-  const cachedData = await redis.get(key);
-  if (cachedData) {
-    logger.info(`🔹 Serving from Redis cache: ${key}`);
-    return res.json(JSON.parse(cachedData));
+  try {
+    const cachedData = await redis.get(key);
+    if (cachedData) {
+      logger.info(`🔹 Serving from Redis cache: ${key}`);
+      return res.json(JSON.parse(cachedData));
+    }
+  } catch (error) {
+    logger.warn("⚠️ Redis error, proceeding without cache:", error.message);
   }
+
   res.sendResponse = res.json;
   res.json = (body) => {
-    redis.setex(key, 60, JSON.stringify(body));
-    res.sendResponse(body);
+    if (!res.headersSent) {
+      redis.setex(key, 60, JSON.stringify(body)).catch((err) => {
+        logger.warn("⚠️ Failed to store response in Redis cache:", err.message);
+      });
+      res.sendResponse(body);
+    }
   };
   next();
 };
@@ -83,11 +97,8 @@ const cacheMiddleware = async (req, res, next) => {
 // 📌 API Health Check
 router.get("/health", async (req, res) => {
   try {
-    // MongoDB Check
-    await mongoose.connection.db.admin().ping();
-    // Redis Check
-    await redis.ping();
-
+    await mongoose.connection.db.admin().ping(); // MongoDB Check
+    await redis.ping(); // Redis Check
     res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);
@@ -95,10 +106,7 @@ router.get("/health", async (req, res) => {
   }
 });
 
-/**
- * 📌 Route: GET /.netlify/functions/unifiedAccess/fetch
- * Fetch data from GitHub, Netlify, or MongoDB
- */
+// 📌 Fetch data from GitHub, Netlify, or MongoDB
 router.get("/fetch", cacheMiddleware, async (req, res) => {
   const { source, file, query } = req.query;
   try {
@@ -106,17 +114,10 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
 
     if (source === "github") {
       if (!file) return res.status(400).json({ error: "Missing file parameter." });
-
       const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/${file}`;
       logger.info(`🔹 Fetching from GitHub: ${repoUrl}`);
-
-      const response = await axios.get(repoUrl, {
-        headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` },
-      });
-
-      if (!response.data.download_url) {
-        return res.status(404).json({ error: "GitHub API Error: File not found." });
-      }
+      const response = await axios.get(repoUrl, { headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` } });
+      if (!response.data.download_url) return res.status(404).json({ error: "GitHub API Error: File not found." });
       const fileResponse = await axios.get(response.data.download_url);
       return res.json({ file, content: fileResponse.data });
     }
@@ -124,9 +125,7 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
     if (source === "netlify") {
       if (!file) return res.status(400).json({ error: "Missing file parameter." });
       const filePath = path.join(process.cwd(), "public", file);
-      if (fs.existsSync(filePath)) {
-        return res.sendFile(filePath);
-      }
+      if (fs.existsSync(filePath)) return res.sendFile(filePath);
       return res.status(404).json({ error: "File not found in Netlify deployment." });
     }
 
@@ -144,14 +143,10 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
   }
 });
 
-/**
- * 📌 Route: POST /.netlify/functions/unifiedAccess/store
- * Store data in MongoDB
- */
+// 📌 Store data in MongoDB
 router.post("/store", async (req, res) => {
   const { key, value } = req.body;
   if (!key || !value) return res.status(400).json({ error: "Missing key or value." });
-
   try {
     let record = await Knowledge.findOne({ key });
     if (record) {
@@ -161,7 +156,9 @@ router.post("/store", async (req, res) => {
       record = new Knowledge({ key, value });
       await record.save();
     }
-    redis.del("/fetch?source=mongodb&query=" + key);
+    redis.del(`/fetch?source=mongodb&query=${key}`).catch((err) => {
+      logger.warn(`⚠️ Redis cache deletion failed for key: ${key}`, err.message);
+    });
     res.json({ message: "✅ Data stored successfully", data: record });
   } catch (error) {
     logger.error("❌ Storage Error:", error.message);
