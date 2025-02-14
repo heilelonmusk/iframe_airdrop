@@ -46,6 +46,7 @@
      📄 _redirects - 🚀 Add a description here
   📁 logs/ - 🚀 Add a description here
      📄 app.log - 🚀 Add a description here
+     📄 server.log - 🚀 Add a description here
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
   📁 .netlify/v1/ - 🚀 Add a description here
