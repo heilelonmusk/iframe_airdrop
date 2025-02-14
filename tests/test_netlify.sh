@@ -3,12 +3,13 @@
 # 🚀 Netlify Function API Test Script
 # Runs API checks on a deployed Netlify function
 
-NETLIFY_URL="https://your-netlify-app.netlify.app/.netlify/functions/unifiedAccess"
+# Imposta la variabile per puntare all'endpoint online del server Netlify
+NETLIFY_URL="https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/server"
 LOG_FILE="netlify_test.log"
 
 echo "🛠 Starting Netlify API Tests..." | tee $LOG_FILE
 
-# ✅ Function to handle API requests and log errors
+# ✅ Funzione per gestire le richieste API e loggare eventuali errori
 api_test() {
   local description=$1
   local url=$2
