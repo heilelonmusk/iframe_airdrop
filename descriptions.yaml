@@ -51,6 +51,16 @@ descriptions:
     the whitelist dataset (`whitelist.csv`).
   .netlify/: "\U0001F680 Add a description here"
   .netlify/functions-internal/: "\U0001F680 Add a description here"
+  .netlify/functions/: "\U0001F680 Add a description here"
+  .netlify/functions/dymensionAPI.zip: "\U0001F680 Add a description here"
+  .netlify/functions/externalTokenListingUpdate.zip: "\U0001F680 Add a description\
+    \ here"
+  .netlify/functions/knowledge.zip: "\U0001F680 Add a description here"
+  .netlify/functions/manifest.json: "\U0001F680 Add a description here"
+  .netlify/functions/seedKnowledge.zip: "\U0001F680 Add a description here"
+  .netlify/functions/server.zip: "\U0001F680 Add a description here"
+  .netlify/functions/unifiedAccess.zip: "\U0001F680 Add a description here"
+  .netlify/netlify.toml: "\U0001F680 Add a description here"
   .netlify/v1/: "\U0001F680 Add a description here"
   .netlify/v1/functions/: "\U0001F680 Add a description here"
   api/: Backend API module managing chatbot logic, data retrieval, and integrations

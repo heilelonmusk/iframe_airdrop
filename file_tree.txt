@@ -41,9 +41,18 @@
   📁 public/ - Contains static assets, including UI resources.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `public/` directory.
   📁 .netlify/ - 🚀 Add a description here
+     📄 netlify.toml - 🚀 Add a description here
   📁 .netlify/v1/ - 🚀 Add a description here
   📁 .netlify/v1/functions/ - 🚀 Add a description here
   📁 .netlify/functions-internal/ - 🚀 Add a description here
+  📁 .netlify/functions/ - 🚀 Add a description here
+     📄 externalTokenListingUpdate.zip - 🚀 Add a description here
+     📄 seedKnowledge.zip - 🚀 Add a description here
+     📄 manifest.json - 🚀 Add a description here
+     📄 server.zip - 🚀 Add a description here
+     📄 knowledge.zip - 🚀 Add a description here
+     📄 unifiedAccess.zip - 🚀 Add a description here
+     📄 dymensionAPI.zip - 🚀 Add a description here
   📁 .github/ - Contains automation workflows for CI/CD processes, including GitHub Actions.
   📁 .github/workflows/ - Houses GitHub Actions used for deployment automation, repository maintenance, and data synchronization.
      📄 update_noneligible.yml - Handles periodic updates for the `non_eligible.csv` dataset tracking disqualified wallet addresses.
