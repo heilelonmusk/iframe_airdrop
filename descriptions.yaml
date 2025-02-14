@@ -103,6 +103,7 @@ descriptions:
   script/update_whitelist.py: Python script to refresh the whitelist data for airdrop
     eligibility.
   tests/: Testing and Debugging module.
+  tests/.gitkeep: "\U0001F680 Add a description here"
   tests/test.js: Main test file for validating API endpoints and backend functionality.
   tests/test_transformer.js: Test cases for AI-powered transformer.js, ensuring NLP
     processing works correctly.

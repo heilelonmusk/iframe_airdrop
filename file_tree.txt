@@ -21,6 +21,7 @@
      📄 airdrop_checker.html - HTML page containing the UI for the airdrop verification tool.
   📁 tests/ - Testing and Debugging module.
      📄 test.js - Main test file for validating API endpoints and backend functionality.
+     📄 .gitkeep - 🚀 Add a description here
      📄 test_transformer.js - Test cases for AI-powered transformer.js, ensuring NLP processing works correctly.
   📁 script/ - Automation & Updates module.
      📄 update_csv_github.py - Script for updating CSV files in the GitHub repository automatically.
