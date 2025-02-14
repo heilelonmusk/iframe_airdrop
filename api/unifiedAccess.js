@@ -32,7 +32,7 @@ router.get('/fetch', async (req, res) => {
 
     try {
         if (source === "github") {
-            const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
+            const repoUrl = `${process.env.GITHUB_REPO_ULR}/contents/${file}`;
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
@@ -84,7 +84,7 @@ router.get('/download', async (req, res) => {
 
     try {
         if (source === "github") {
-            const repoUrl = `https://api.github.com/repos/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/contents/${file}`;
+            const repoUrl = `${process.env.GITHUB_REPO_ULR}/contents/${file}`;
             const response = await axios.get(repoUrl, {
                 headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` }
             });
