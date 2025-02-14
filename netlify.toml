@@ -1,7 +1,7 @@
 [build]
   command = "npm install"
   functions = "api"
-  publish = "." 
+  publish = "."  # Mantiene Netlify come ambiente API senza contenuti statici
 
 [dev]
   command = "npm run dev"
@@ -16,6 +16,7 @@
     Access-Control-Allow-Methods = "GET, POST, OPTIONS, PUT, DELETE"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
 
+# ✅ **Gestione avanzata dei file statici**
 [[redirects]]
   from = "/static/*"
   to = "/.netlify/functions/unifiedAccess/static/:splat"
