@@ -4,12 +4,15 @@ const serverless = require('serverless-http');
 const axios = require('axios');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
+const router = express.Router();
+
 app.use(cors());
 app.use(express.json());
 
-// ✅ Connect to MongoDB
+// ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Connected Successfully"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
@@ -21,14 +24,10 @@ const KnowledgeSchema = new mongoose.Schema({
 const Knowledge = mongoose.models.Knowledge || mongoose.model('Knowledge', KnowledgeSchema);
 
 /**
- * 📌 Route: GET /.netlify/functions/unified_access/fetch
- * Fetches a file or dataset from GitHub, Netlify, or MongoDB
- * Query Parameters:
- * - source: github | netlify | mongodb
- * - file: the file path (GitHub/Netlify)
- * - query: MongoDB key
+ * 📌 Route: GET /.netlify/functions/unifiedAccess/fetch
+ * Fetch a file or dataset from GitHub, Netlify, or MongoDB
  */
-app.get('/fetch', async (req, res) => {
+router.get('/fetch', async (req, res) => {
     const { source, file, query } = req.query;
 
     try {
@@ -53,13 +52,10 @@ app.get('/fetch', async (req, res) => {
 });
 
 /**
- * 📌 Route: POST /.netlify/functions/unified_access/store
+ * 📌 Route: POST /.netlify/functions/unifiedAccess/store
  * Stores new information into the MongoDB knowledge base
- * Request Body:
- * - key: The unique key for the knowledge entry
- * - value: The data to be stored
  */
-app.post('/store', async (req, res) => {
+router.post('/store', async (req, res) => {
     const { key, value } = req.body;
 
     try {
@@ -79,13 +75,10 @@ app.post('/store', async (req, res) => {
 });
 
 /**
- * 📌 Route: GET /.netlify/functions/unified_access/download
+ * 📌 Route: GET /.netlify/functions/unifiedAccess/download
  * Allows downloading a file from GitHub or Netlify
- * Query Parameters:
- * - source: github | netlify
- * - file: the file path
  */
-app.get('/download', async (req, res) => {
+router.get('/download', async (req, res) => {
     const { source, file } = req.query;
 
     try {
@@ -95,8 +88,8 @@ app.get('/download', async (req, res) => {
             });
 
             const filePath = `./${file}`;
-            require('fs').writeFileSync(filePath, Buffer.from(response.data.content, 'base64'));
-            res.download(filePath, () => require('fs').unlinkSync(filePath));
+            fs.writeFileSync(filePath, Buffer.from(response.data.content, 'base64'));
+            res.download(filePath, () => fs.unlinkSync(filePath));
         } else if (source === "netlify") {
             res.redirect(`${process.env.NETLYFY_URL}/${file}`);
         } else {
@@ -108,5 +101,8 @@ app.get('/download', async (req, res) => {
     }
 });
 
+// ✅ Attach Router to App
+app.use('/.netlify/functions/unifiedAccess', router);
+
 // ✅ Export for Netlify
-module.exports.handler = require('serverless-http')(app);
+module.exports.handler = serverless(app);
