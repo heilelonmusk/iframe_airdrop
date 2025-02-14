@@ -52,7 +52,9 @@ router.get('/fetch', async (req, res) => {
 
         } else if (source === "netlify") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
-            res.redirect(`${process.env.NETLIFY_URL}/${file}`);
+
+            // ✅ Fix per evitare il doppio slash nella URL di reindirizzamento
+            res.redirect(`${process.env.NETLIFY_URL.replace(/\/$/, '')}/${file}`);
 
         } else if (source === "mongodb") {
             if (!query) return res.status(400).json({ error: "Missing query parameter for MongoDB source." });
@@ -135,7 +137,7 @@ router.get('/download', async (req, res) => {
                 res.download(filePath, () => fs.unlinkSync(filePath));
             }
         } else if (source === "netlify") {
-            res.redirect(`${process.env.NETLIFY_URL}/${file}`);
+            res.redirect(`${process.env.NETLIFY_URL.replace(/\/$/, '')}/${file}`);
         } else {
             res.status(400).json({ error: "Invalid source for download" });
         }
