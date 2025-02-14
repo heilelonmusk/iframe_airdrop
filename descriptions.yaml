@@ -102,6 +102,7 @@ descriptions:
   iframe/airdrop_checker.js: JavaScript logic handling blockchain wallet verification
     and eligibility confirmation.
   logs/: "\U0001F680 Add a description here"
+  logs/app.log: "\U0001F680 Add a description here"
   modules/: Collection of AI and utility scripts, including NLP, learning, and logging
     functionalities.
   modules/intent/: Handles AI intent recognition and NLP-based classification.
