@@ -126,6 +126,7 @@ descriptions:
     updating the airdrop whitelist dataset.
   public/: Contains static assets, including UI resources.
   public/.gitkeep: Placeholder file ensuring Git tracks the `public/` directory.
+  public/_redirects: "\U0001F680 Add a description here"
   script/: Houses scripts for data updates, repository maintenance, and automation
     tasks.
   script/assemble_public.sh: Shell script that consolidates all required public files
