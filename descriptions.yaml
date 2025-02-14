@@ -62,6 +62,7 @@ descriptions:
   .netlify/functions/manifest.json: "\U0001F680 Add a description here"
   .netlify/functions/seedKnowledge.zip: "\U0001F680 Add a description here"
   .netlify/functions/server.zip: "\U0001F680 Add a description here"
+  .netlify/functions/triggerWhitelistUpdate.zip: "\U0001F680 Add a description here"
   .netlify/functions/unifiedAccess.zip: "\U0001F680 Add a description here"
   .netlify/netlify.toml: "\U0001F680 Add a description here"
   .netlify/v1/: "\U0001F680 Add a description here"
@@ -100,6 +101,7 @@ descriptions:
     system.
   iframe/airdrop_checker.js: JavaScript logic handling blockchain wallet verification
     and eligibility confirmation.
+  logs/: "\U0001F680 Add a description here"
   modules/: Collection of AI and utility scripts, including NLP, learning, and logging
     functionalities.
   modules/intent/: Handles AI intent recognition and NLP-based classification.

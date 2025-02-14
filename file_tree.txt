@@ -42,8 +42,11 @@
      📄 triggerWhitelistUpdate.js - Netlify function responsible for automatically updating the airdrop whitelist dataset.
   📁 public/ - Contains static assets, including UI resources.
      📄 .gitkeep - Placeholder file ensuring Git tracks the `public/` directory.
+  📁 logs/ - 🚀 Add a description here
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
+  📁 .netlify/v1/ - 🚀 Add a description here
+  📁 .netlify/v1/functions/ - 🚀 Add a description here
   📁 .netlify/blobs-serve/ - 🚀 Add a description here
   📁 .netlify/functions-internal/ - 🚀 Add a description here
   📁 .netlify/functions/ - 🚀 Add a description here
@@ -54,6 +57,7 @@
      📄 knowledge.zip - 🚀 Add a description here
      📄 unifiedAccess.zip - 🚀 Add a description here
      📄 dymensionAPI.zip - 🚀 Add a description here
+     📄 triggerWhitelistUpdate.zip - 🚀 Add a description here
   📁 .github/ - Contains automation workflows for CI/CD processes, including GitHub Actions.
   📁 .github/workflows/ - Houses GitHub Actions used for deployment automation, repository maintenance, and data synchronization.
      📄 update_noneligible.yml - Handles periodic updates for the `non_eligible.csv` dataset tracking disqualified wallet addresses.
