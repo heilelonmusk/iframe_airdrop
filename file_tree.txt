@@ -6,6 +6,7 @@
      📄 descriptions.yaml - Metadata file storing structured descriptions for all repository files, keeping documentation updated.
      📄 TROUBLESHOOTING.md - In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
      📄 config.yaml - Global configuration file managing system-wide settings, service integrations, and environment variables.
+     📄 example.json - 🚀 Add a description here
      📄 downloaded_netlify_index.html - 🚀 Add a description here
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
      📄 yarn.lock - Dependency lock file for Yarn, ensuring package versions remain consistent across installations.
