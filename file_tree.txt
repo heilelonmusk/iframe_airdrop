@@ -7,7 +7,6 @@
      📄 TROUBLESHOOTING.md - In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
      📄 config.yaml - Global configuration file managing system-wide settings, service integrations, and environment variables.
      📄 example.json - 🚀 Add a description here
-     📄 _redirects - 🚀 Add a description here
      📄 downloaded_netlify_index.html - 🚀 Add a description here
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
      📄 yarn.lock - Dependency lock file for Yarn, ensuring package versions remain consistent across installations.
@@ -45,8 +44,6 @@
      📄 .gitkeep - Placeholder file ensuring Git tracks the `public/` directory.
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
-  📁 .netlify/v1/ - 🚀 Add a description here
-  📁 .netlify/v1/functions/ - 🚀 Add a description here
   📁 .netlify/blobs-serve/ - 🚀 Add a description here
   📁 .netlify/functions-internal/ - 🚀 Add a description here
   📁 .netlify/functions/ - 🚀 Add a description here
