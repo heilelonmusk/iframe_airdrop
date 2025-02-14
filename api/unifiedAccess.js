@@ -70,7 +70,7 @@ router.get('/fetch', async (req, res) => {
         } else if (source === "netlify") {
             if (!file) return res.status(400).json({ error: "Missing file parameter for Netlify source." });
 
-            const filePath = path.join(__dirname, "..", file);
+            const filePath = path.join(process.cwd(), "public", file);
             if (fs.existsSync(filePath)) {
                 console.log("🔹 Serving local Netlify file:", filePath);
                 return res.sendFile(filePath);
@@ -164,12 +164,12 @@ router.get('/download', async (req, res) => {
                     return res.status(500).json({ error: "GitHub returned an error instead of a file.", details: jsonResponse });
                 }
             } catch (err) {
-                const filePath = path.join(__dirname, file);
+                const filePath = path.join(process.cwd(), "public", file);
                 fs.writeFileSync(filePath, fileResponse.data);
                 res.download(filePath, () => fs.unlinkSync(filePath));
             }
         } else if (source === "netlify") {
-            const filePath = path.join(__dirname, "..", file);
+            const filePath = path.join(process.cwd(), "public", file);
             if (fs.existsSync(filePath)) {
                 res.download(filePath);
             } else {

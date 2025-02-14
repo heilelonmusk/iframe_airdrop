@@ -1,12 +1,13 @@
 [build]
-  command = "npm install"
+  command = "npm install && npm run build" # Se non hai una build, lascia solo "npm install"
   functions = "api"
-  publish = "." 
+  publish = "."  # Mantiene Netlify solo come API senza statici
 
 [dev]
   command = "npm run dev"
   framework = "#custom"
   targetPort = 5000
+  port = 8888  # Specifica una porta chiara per il dev server
   autoLaunch = false
 
 [[headers]]
@@ -15,9 +16,12 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS, PUT, DELETE"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Credentials = "true"
+    Cache-Control = "public, max-age=3600"
 
+# ✅ Redirect corretto per servire il file example.json da Netlify
 [[redirects]]
   from = "/example.json"
-  to = "/example.json"
+  to = "/.netlify/functions/unifiedAccess/fetch?source=netlify&file=example.json"
   status = 200
   force = true
