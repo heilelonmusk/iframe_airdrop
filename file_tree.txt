@@ -1,4 +1,4 @@
-  📁 node_modules/  [Hidden, 20139 files omitted] - External dependencies
+  📁 node_modules/  [Hidden, 12234 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
      📄 AI_DEVELOPER_NOTES.md - Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
