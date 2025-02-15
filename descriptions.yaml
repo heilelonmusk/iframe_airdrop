@@ -4,6 +4,7 @@ descriptions:
   ./.env: "\U0001F680 Add a description here"
   ./.gitignore: Specifies files and folders ignored by Git (e.g., .env, logs, build
     artifacts) to maintain repository cleanliness.
+  ./.netlifyignore: "\U0001F680 Add a description here"
   ./AI_DEVELOPER_NOTES.md: Comprehensive technical documentation for AI development,
     covering model integrations, architecture, and debugging strategies.
   ./README.md: Primary repository documentation, detailing project purpose, architecture,
