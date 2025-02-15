@@ -52,7 +52,7 @@ requiredEnvVars.forEach((envVar) => {
 });
 
 // 🛡️ Rate Limiting
-app.set("trust proxy", 1); // ➜ Dice a Express di fidarsi del proxy di Netlify
+app.set("trust proxy", 1); // Imposta Express per fidarsi del proxy di Netlify
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, 
@@ -136,7 +136,7 @@ router.get("/health", async (req, res) => {
   }
 });
 
-// 📌 Recupero dati da GitHub, Netlify o MongoDB
+// 📌 Recupero dati da GitHub o MongoDB
 router.get("/fetch", cacheMiddleware, async (req, res) => {
   const { source, file, query } = req.query;
   try {
