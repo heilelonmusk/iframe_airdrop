@@ -10,8 +10,13 @@ const winston = require("winston");
 const fs = require("fs");
 const path = require("path");
 
-// Determina la directory dei log: se __dirname inizia con "/var/task" (Netlify) usa /tmp/logs, altrimenti usa la cartella logs nella root
-const logDir = (__dirname.startsWith('/var/task')) ? "/tmp/logs" : path.join(__dirname, "../logs");
+// Usa "/tmp/logs" in produzione, altrimenti "../logs"
+const logDir = (process.env.NODE_ENV === "production") ? "/tmp/logs" : path.join(__dirname, "../logs");
+
+// Log di debug (opzionale)
+// console.log("NODE_ENV =", process.env.NODE_ENV);
+// console.log("logDir =", logDir);
+
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
@@ -39,12 +44,12 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ **CORS Configuration**
+// ✅ CORS e middleware
 app.use(cors({ origin: "https://helon.space", credentials: true }));
 app.use(express.json());
 app.use(timeout("10s")); // Prevents long-running requests
 
-// ✅ **Rate Limiting**
+// ✅ Rate Limiting
 app.set("trust proxy", 1);
 app.use(
   rateLimit({
@@ -55,7 +60,7 @@ app.use(
   })
 );
 
-// ✅ **MongoDB Connection**
+// ✅ MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
   logger.error("❌ ERROR: MONGO_URI is missing! API will not function.");
@@ -72,7 +77,7 @@ if (!MONGO_URI) {
   }
 })();
 
-// ✅ **Schema & Model for Knowledge Base**
+// ✅ Schema & Model for Knowledge Base
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Accepts both strings and objects
@@ -81,13 +86,13 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model("Question", questionSchema);
 
-// ✅ **Schema for Storing NLP Model in MongoDB**
+// ✅ Schema for Storing NLP Model in MongoDB
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true },
 });
 const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
-// ✅ **Initialize NLP Model**
+// ✅ Initialize NLP Model
 (async () => {
   try {
     const savedModel = await loadNLPModel();
@@ -103,7 +108,7 @@ const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModel
   }
 })();
 
-// ✅ **Train NLP Model & Save to MongoDB**
+// ✅ Train NLP Model & Save to MongoDB
 async function trainAndSaveNLP() {
   manager.addDocument("en", "hello", "greeting");
   manager.addDocument("en", "hi there", "greeting");
@@ -120,7 +125,7 @@ async function trainAndSaveNLP() {
   logger.info("✅ New NLP Model trained and saved!");
 }
 
-// ✅ **API Endpoint: Handle User Questions**
+// ✅ API Endpoint: Handle User Questions
 router.post("/logQuestion", async (req, res) => {
   try {
     const { question, userId } = req.body;
@@ -130,7 +135,7 @@ router.post("/logQuestion", async (req, res) => {
 
     const anonymousUser = userId || "anonymous";
 
-    // 🔍 **Step 1: Check if answer exists in DB**
+    // Step 1: Check if answer exists in DB
     let storedAnswer = await Question.findOne({ question });
 
     if (storedAnswer) {
@@ -150,12 +155,12 @@ router.post("/logQuestion", async (req, res) => {
       });
     }
 
-    // 🔍 **Step 2: Process request with NLP**
+    // Step 2: Process request with NLP
     const intentResult = await manager.process("en", question);
     let finalAnswer =
       intentResult.answer || (await generateResponse(question)) || "I'm not sure how to answer that yet.";
 
-    // 📌 **Log conversation**
+    // Log conversation
     await logConversation({
       userId: anonymousUser,
       question,
@@ -165,7 +170,7 @@ router.post("/logQuestion", async (req, res) => {
       timestamp: new Date(),
     });
 
-    // ✅ **Save answer for future use**
+    // Save answer for future use
     const newEntry = new Question({
       question,
       answer: typeof finalAnswer === "string" ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
@@ -184,7 +189,7 @@ router.post("/logQuestion", async (req, res) => {
   }
 });
 
-// ✅ **Health Check Endpoint**
+// ✅ Health Check Endpoint
 router.get("/health", async (req, res) => {
   try {
     await mongoose.connection.db.admin().ping();
