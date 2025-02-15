@@ -52,6 +52,8 @@
      📄 server.log - 🚀 Add a description here
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
+  📁 .netlify/v1/ - 🚀 Add a description here
+  📁 .netlify/v1/functions/ - 🚀 Add a description here
   📁 .netlify/blobs-serve/ - 🚀 Add a description here
   📁 .netlify/functions-internal/ - 🚀 Add a description here
   📁 .netlify/functions/ - 🚀 Add a description here
