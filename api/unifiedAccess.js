@@ -19,8 +19,8 @@ const redis = new Redis(process.env.REDIS_URL, {
   connectTimeout: 5000,
 });
 
-// 📁 Assicurarsi che la cartella dei log esista
-const logsDir = path.join(__dirname, "logs");
+// 📁 Assicurarsi che la cartella dei log esista (Usiamo /tmp/logs per Netlify)
+const logsDir = "/tmp/logs";
 if (!fs.existsSync(logsDir)) {
   try {
     fs.mkdirSync(logsDir, { recursive: true });
@@ -132,13 +132,6 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
       return res.json({ file, content: fileResponse.data });
     }
 
-    if (source === "netlify") {
-      if (!file) return res.status(400).json({ error: "Missing file parameter." });
-      const filePath = path.join(process.cwd(), "public", file);
-      if (fs.existsSync(filePath)) return res.sendFile(filePath);
-      return res.status(404).json({ error: "File not found in Netlify deployment." });
-    }
-
     if (source === "mongodb") {
       if (!query) return res.status(400).json({ error: "Missing query parameter." });
       const data = await Knowledge.findOne({ key: query });
@@ -150,29 +143,6 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
   } catch (error) {
     logger.error("❌ Fetch Error:", error.message);
     res.status(500).json({ error: "Unexpected error fetching data", details: error.message });
-  }
-});
-
-// 📌 Salvataggio dati in MongoDB
-router.post("/store", async (req, res) => {
-  const { key, value } = req.body;
-  if (!key || !value) return res.status(400).json({ error: "Missing key or value." });
-  try {
-    let record = await Knowledge.findOne({ key });
-    if (record) {
-      record.value = value;
-      await record.save();
-    } else {
-      record = new Knowledge({ key, value });
-      await record.save();
-    }
-    redis.del(`/fetch?source=mongodb&query=${key}`).catch((err) => {
-      logger.warn(`⚠️ Redis cache deletion failed for key: ${key}`, err.message);
-    });
-    res.json({ message: "✅ Data stored successfully", data: record });
-  } catch (error) {
-    logger.error("❌ Storage Error:", error.message);
-    res.status(500).json({ error: "Error storing data", details: error.message });
   }
 });
 
