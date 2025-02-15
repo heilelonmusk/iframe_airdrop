@@ -1,4 +1,4 @@
-  📁 node_modules/  [Hidden, 21521 files omitted] - External dependencies
+  📁 node_modules/  [Hidden, 12250 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 .netlifyignore - 🚀 Add a description here
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
