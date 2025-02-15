@@ -11,29 +11,13 @@ const fs = require("fs");
 const path = require("path");
 
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
-const logDir = (process.env.NODE_ENV === "production")
-  ? "/tmp/logs"
-  : path.join(__dirname, "../logs");
-
-// Log di debug (opzionale)
-// console.log("NODE_ENV =", process.env.NODE_ENV);
-// console.log("logDir =", logDir);
+const logDir = (process.env.NODE_ENV === "production") ? "/tmp/logs" : path.join(__dirname, "../logs");
 
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
 
-// ✅ Import necessary modules
-const { initializeNLP, getIntent } = require("../modules/intent/intentRecognizer");
-const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
-const { generateResponse } = require("../modules/nlp/transformer");
-const { logConversation } = require("../modules/logging/logger");
-
-const app = express();
-const router = express.Router();
-const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
-
-// ✅ Winston Logger Configuration
+// Configurazione del logger con Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -46,17 +30,29 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ CORS e middleware
+logger.info(`NODE_ENV = ${process.env.NODE_ENV}`);
+logger.info(`Log directory: ${logDir}`);
+
+const { initializeNLP, getIntent } = require("../modules/intent/intentRecognizer");
+const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
+const { generateResponse } = require("../modules/nlp/transformer");
+const { logConversation } = require("../modules/logging/logger");
+
+const app = express();
+const router = express.Router();
+const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
+
+// Middleware
 app.use(cors({ origin: "https://helon.space", credentials: true }));
 app.use(express.json());
-app.use(timeout("10s")); // Previene richieste troppo lunghe
+app.use(timeout("10s"));
 
-// ✅ Rate Limiting
+// Rate Limiting
 app.set("trust proxy", 1);
 app.use(
   rateLimit({
-    windowMs: 60 * 1000, // 1-minute window
-    max: 10, // Max 10 requests per minute
+    windowMs: 60 * 1000, // 1 minuto
+    max: 10,
     message: "Too many requests. Please try again later.",
     keyGenerator: (req) => req.headers["x-forwarded-for"]?.split(",")[0] || req.ip || "unknown-ip",
   })
@@ -69,17 +65,23 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose
-  .connect(MONGO_URI, { serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000 })
-  .then(() => {
+(async () => {
+  try {
+    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000 });
     logger.info("📚 Connected to MongoDB");
-  })
-  .catch((err) => {
+    logger.info(`Mongoose readyState: ${mongoose.connection.readyState}`);
+  } catch (err) {
     logger.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
-  });
+  }
+})();
 
-// ✅ Schema & Model for Knowledge Base
+// Ascolta eventuali errori nella connessione
+mongoose.connection.on("error", (err) => {
+  logger.error("❌ Mongoose connection error:", err.message);
+});
+
+// Schema & Model per Knowledge Base
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
   answer: { type: mongoose.Schema.Types.Mixed, required: true },
@@ -88,13 +90,13 @@ const questionSchema = new mongoose.Schema({
 });
 const Question = mongoose.models.Question || mongoose.model("Question", questionSchema);
 
-// ✅ Schema for Storing NLP Model in MongoDB
+// Schema per NLP Model
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true },
 });
 const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
-// ✅ Initialize NLP Model
+// Inizializza il modello NLP
 (async () => {
   try {
     const savedModel = await loadNLPModel();
@@ -110,7 +112,7 @@ const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModel
   }
 })();
 
-// ✅ Train NLP Model & Save to MongoDB
+// Funzione per allenare e salvare il modello NLP
 async function trainAndSaveNLP() {
   manager.addDocument("en", "hello", "greeting");
   manager.addDocument("en", "hi there", "greeting");
@@ -127,19 +129,17 @@ async function trainAndSaveNLP() {
   logger.info("✅ New NLP Model trained and saved!");
 }
 
-// ✅ API Endpoint: Handle User Questions
+// Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", async (req, res) => {
   try {
     const { question, userId } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
 
     logger.info(`📩 Received question: "${question}"`);
-
     const anonymousUser = userId || "anonymous";
 
-    // Step 1: Check if answer exists in DB
+    // Cerca la risposta nel DB
     let storedAnswer = await Question.findOne({ question });
-
     if (storedAnswer) {
       logger.info(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
 
@@ -157,12 +157,12 @@ router.post("/logQuestion", async (req, res) => {
       });
     }
 
-    // Step 2: Process request with NLP
+    // Processa la richiesta con NLP
     const intentResult = await manager.process("en", question);
     let finalAnswer =
       intentResult.answer || (await generateResponse(question)) || "I'm not sure how to answer that yet.";
 
-    // Log conversation
+    // Log della conversazione
     await logConversation({
       userId: anonymousUser,
       question,
@@ -172,13 +172,12 @@ router.post("/logQuestion", async (req, res) => {
       timestamp: new Date(),
     });
 
-    // Save answer for future use
+    // Salva la nuova risposta nel DB
     const newEntry = new Question({
       question,
       answer: typeof finalAnswer === "string" ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
       source: "Ultron AI",
     });
-
     await newEntry.save();
 
     res.json({
@@ -191,17 +190,20 @@ router.post("/logQuestion", async (req, res) => {
   }
 });
 
-// ✅ Health Check Endpoint con debug migliorato
+// Endpoint Health Check con maggiori log
 router.get("/health", async (req, res) => {
   try {
-    // Verifica se la connessione a MongoDB è pronta
+    // Verifica lo stato della connessione a MongoDB
     if (mongoose.connection.readyState !== 1) {
-      logger.error("❌ MongoDB is not connected. readyState =", mongoose.connection.readyState);
-      return res.status(500).json({ error: "MongoDB not connected" });
+      logger.error(`❌ Health check: MongoDB not connected (readyState: ${mongoose.connection.readyState})`);
+      return res.status(500).json({ error: "Service is unhealthy", mongoReadyState: mongoose.connection.readyState });
     }
+
+    // Esegue un ping sul database
     const admin = mongoose.connection.db.admin();
     const pingResult = await admin.ping();
-    logger.info("✅ Health check ping result: " + JSON.stringify(pingResult));
+    logger.info("Ping result: " + JSON.stringify(pingResult));
+
     res.json({ status: "✅ Healthy", mongo: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);
@@ -209,12 +211,11 @@ router.get("/health", async (req, res) => {
   }
 });
 
-// NEW ENDPOINT: /fetch
+// Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", async (req, res) => {
   const { source, file, query } = req.query;
   if (source === "github") {
     try {
-      // Simulazione: recupera contenuto da GitHub (sostituisci con la logica reale)
       const fileContent = `Contenuto simulato da GitHub per il file ${file}`;
       return res.json({ data: fileContent });
     } catch (error) {
@@ -222,7 +223,6 @@ router.get("/fetch", async (req, res) => {
     }
   } else if (source === "mongodb") {
     try {
-      // Simulazione: esegui una query in MongoDB (sostituisci con la logica reale)
       const result = { key: query, value: "Dati simulati da MongoDB" };
       return res.json({ data: result });
     } catch (error) {
@@ -233,23 +233,19 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-// NEW ENDPOINT: /store
 router.post("/store", async (req, res) => {
   try {
     const { key, value } = req.body;
-    // Simulazione: salva dati (sostituisci con la logica reale per salvare in MongoDB)
     return res.json({ message: "Dati salvati correttamente" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 });
 
-// NEW ENDPOINT: /download
 router.get("/download", async (req, res) => {
   const { source, file } = req.query;
   if (source === "github") {
     try {
-      // Simulazione: recupera contenuto da GitHub (sostituisci con la logica reale)
       const fileData = `Contenuto simulato del file ${file}`;
       res.setHeader("Content-Disposition", `attachment; filename=${file}`);
       return res.send(fileData);
@@ -263,6 +259,7 @@ router.get("/download", async (req, res) => {
 
 app.use("/.netlify/functions/server", router);
 
+// In modalità sviluppo, avvia il server in locale
 if (require.main === module) {
   const port = process.env.PORT || 8888;
   app.listen(port, () => {
