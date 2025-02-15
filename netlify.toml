@@ -3,7 +3,7 @@ NODE_VERSION = "23.7.0"
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm install && npx webpack --config webpack.config.js"
+  command = "npm install --include=dev && npm run build"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
