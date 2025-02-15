@@ -1,5 +1,5 @@
 [build.environment]
-NODE_VERSION = "18.0.0"
+NODE_VERSION = "23.7.0"
 
 # 🚀 Netlify Build Settings
 [build]
