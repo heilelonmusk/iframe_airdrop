@@ -12,3 +12,9 @@
 [2025-02-14T23:56:08.972Z] INFO: Server is running on port 8888
 [2025-02-14T23:56:08.979Z] INFO: 📚 Connected to MongoDB
 [2025-02-14T23:56:09.927Z] INFO: 🧠 NLP Model Loaded from DB
+[2025-02-15T00:01:41.962Z] INFO: Server is running on port 8888
+[2025-02-15T00:01:41.966Z] INFO: 📚 Connected to MongoDB
+[2025-02-15T00:01:42.799Z] INFO: 🧠 NLP Model Loaded from DB
+[2025-02-15T00:01:59.550Z] INFO: Server is running on port 8888
+[2025-02-15T00:01:59.554Z] INFO: 📚 Connected to MongoDB
+[2025-02-15T00:02:00.217Z] INFO: 🧠 NLP Model Loaded from DB

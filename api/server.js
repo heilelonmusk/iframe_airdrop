@@ -10,11 +10,8 @@ const winston = require("winston");
 const fs = require("fs");
 const path = require("path");
 
-// Determina se siamo in ambiente di produzione/Netlify
-const isProduction = process.env.NODE_ENV === "production" || process.env.NETLIFY === "true";
-
-// Imposta la directory dei log: in produzione, usa /tmp (scrivibile in ambiente serverless), altrimenti usa la cartella logs nella root
-const logDir = isProduction ? "/tmp/logs" : path.join(__dirname, "../logs");
+// Determina la directory dei log: se __dirname inizia con "/var/task" (Netlify) usa /tmp/logs, altrimenti usa la cartella logs nella root
+const logDir = (__dirname.startsWith('/var/task')) ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
