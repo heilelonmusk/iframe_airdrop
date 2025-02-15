@@ -2,7 +2,7 @@
 [build]
   command = "npm install && npm run build"
   functions = "api"
-  publish = "public" # Ensures only static content is deployed
+  publish = "./" #
 
 # 🛠️ Local Development Settings
 [dev]
