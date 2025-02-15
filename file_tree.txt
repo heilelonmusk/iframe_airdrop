@@ -1,3 +1,4 @@
+  📁 node_modules/  [Hidden, 21515 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 .netlifyignore - 🚀 Add a description here
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
@@ -12,6 +13,7 @@
      📄 downloaded_netlify_index.html - 🚀 Add a description here
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
      📄 .gitignore - Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts) to maintain repository cleanliness.
+     📄 package-lock.json - Lock file for npm dependencies, ensuring version consistency across different environments.
      📄 package.json - Defines project dependencies, scripts, and metadata for backend and frontend packages.
      📄 .env - 🚀 Add a description here
      📄 file_tree.txt - Auto-generated file tracking real-time repository structure, ensuring documentation of all directories and files.
