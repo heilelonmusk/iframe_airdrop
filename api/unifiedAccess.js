@@ -16,10 +16,14 @@ const router = express.Router();
 const redis = new Redis(process.env.REDIS_URL, {
   retryStrategy: (times) => Math.min(times * 50, 2000), 
   enableOfflineQueue: false,
-  connectTimeout: 5000, // Timeout Redis connection
+  connectTimeout: 5000,
 });
 
-// 🚀 Winston Logger
+const logsDir = path.join(__dirname, "logs");
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -28,11 +32,10 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/app.log" }),
+    new winston.transports.File({ filename: path.join(logsDir, "app.log") }),
   ],
 });
 
-// ✅ Ensure required environment variables exist
 const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
 requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
@@ -41,7 +44,6 @@ requiredEnvVars.forEach((envVar) => {
   }
 });
 
-// 🛡️ Rate Limiting
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 100,
@@ -51,17 +53,14 @@ app.use(limiter);
 app.use(cors());
 app.use(express.json());
 
-// 📌 Optimized MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  })
-  .then(() => logger.info("✅ MongoDB Connected Successfully"))
-  .catch((err) => {
-    logger.error("❌ MongoDB Connection Error:", err.message);
-    process.exit(1);
-  });
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+}).then(() => logger.info("✅ MongoDB Connected Successfully"))
+.catch((err) => {
+  logger.error("❌ MongoDB Connection Error:", err.message);
+  process.exit(1);
+});
 
 const KnowledgeSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true },
@@ -69,7 +68,6 @@ const KnowledgeSchema = new mongoose.Schema({
 });
 const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
 
-// 🚀 Redis Cache Wrapper
 const cacheMiddleware = async (req, res, next) => {
   const key = req.originalUrl;
   try {
@@ -94,11 +92,10 @@ const cacheMiddleware = async (req, res, next) => {
   next();
 };
 
-// 📌 API Health Check
 router.get("/health", async (req, res) => {
   try {
-    await mongoose.connection.db.admin().ping(); // MongoDB Check
-    await redis.ping(); // Redis Check
+    await mongoose.connection.db.admin().ping();
+    await redis.ping();
     res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);
@@ -106,7 +103,6 @@ router.get("/health", async (req, res) => {
   }
 });
 
-// 📌 Fetch data from GitHub, Netlify, or MongoDB
 router.get("/fetch", cacheMiddleware, async (req, res) => {
   const { source, file, query } = req.query;
   try {
@@ -143,7 +139,6 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
   }
 });
 
-// 📌 Store data in MongoDB
 router.post("/store", async (req, res) => {
   const { key, value } = req.body;
   if (!key || !value) return res.status(400).json({ error: "Missing key or value." });
