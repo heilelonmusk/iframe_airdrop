@@ -13,4 +13,19 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: 'server.bundle.js'
   },
+  // Esclude i moduli di Node (come express, mongoose, etc.) dal bundle
+  externals: [nodeExternals()],
+  // Configurazione per evitare errori su moduli binari
+  module: {
+    exprContextCritical: false,
+    rules: [
+      {
+        test: /\.node$/,
+        loader: 'node-loader'
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.js', '.json', '.node']
+  }
 };
