@@ -100,3 +100,5 @@
      📄 non_eligible.csv - Dataset tracking wallet addresses that are not eligible for airdrop rewards.
      📄 iframe_setting.csv - CSV configuration file containing iframe-related settings for UI rendering.
      📄 knowledge.json - JSON file storing static chatbot responses and predefined knowledge base data.
+  📁 tmp/ - 🚀 Add a description here
+  📁 tmp/logs/ - 🚀 Add a description here
