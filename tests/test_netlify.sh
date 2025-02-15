@@ -5,7 +5,7 @@
 
 # Imposta la variabile per puntare all'endpoint online del server Netlify
 NETLIFY_URL="https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/server"
-LOG_FILE="netlify_test.log"
+LOG_FILE="tmp/logs/netlify_test.log"
 
 echo "🛠 Starting Netlify API Tests..." | tee $LOG_FILE
 

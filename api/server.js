@@ -11,7 +11,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
-const logDir = (process.env.NODE_ENV === "production") ? "/tmp/logs" : path.join(__dirname, "../logs");
+const logDir = (process.env.NODE_ENV === "development") ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
