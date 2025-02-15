@@ -36,6 +36,7 @@ descriptions:
   ./status.txt: "\U0001F680 Add a description here"
   ./update_tree.py: Python script dynamically updating `file_tree.txt`, ensuring the
     repository structure remains documented.
+  ./webpack.config.js: "\U0001F680 Add a description here"
   ./xlsx-0.20.1.tgz: Legacy Excel processing library archive, possibly obsolete. Requires
     verification for continued necessity.
   ./yarn.lock: Dependency lock file for Yarn, ensuring package versions remain consistent
@@ -82,6 +83,9 @@ descriptions:
   api/server.js: The central Express.js server file handling API requests, routing,
     and middleware execution.
   api/unifiedAccess.js: "\U0001F680 Add a description here"
+  build/: "\U0001F680 Add a description here"
+  build/server.bundle.js: "\U0001F680 Add a description here"
+  build/server.bundle.js.LICENSE.txt: "\U0001F680 Add a description here"
   data/: Stores persistent data files, including whitelist and AI-related knowledge
     bases.
   data/.gitkeep: Placeholder file ensuring Git tracks the `data/` directory structure.
