@@ -1,4 +1,16 @@
+# Ignora la cartella node_modules
 node_modules/
+
+# Ignora il controllo di versione
+.git/
+.gitignore
+
+# Cartelle di build e cache
+build/
 .cache/
+
+# File di log
 *.log
-.env
+
+# File di sistema (Mac)
+.DS_Store
