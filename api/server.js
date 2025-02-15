@@ -11,7 +11,9 @@ const fs = require("fs");
 const path = require("path");
 
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
-const logDir = (process.env.NODE_ENV === "production") ? "/tmp/logs" : path.join(__dirname, "../logs");
+const logDir = (process.env.NODE_ENV === "production")
+  ? "/tmp/logs"
+  : path.join(__dirname, "../logs");
 
 // Log di debug (opzionale)
 // console.log("NODE_ENV =", process.env.NODE_ENV);
@@ -47,7 +49,7 @@ const logger = winston.createLogger({
 // ✅ CORS e middleware
 app.use(cors({ origin: "https://helon.space", credentials: true }));
 app.use(express.json());
-app.use(timeout("10s")); // Prevents long-running requests
+app.use(timeout("10s")); // Previene richieste troppo lunghe
 
 // ✅ Rate Limiting
 app.set("trust proxy", 1);
@@ -67,20 +69,20 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-(async () => {
-  try {
-    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000 });
+mongoose
+  .connect(MONGO_URI, { serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000 })
+  .then(() => {
     logger.info("📚 Connected to MongoDB");
-  } catch (err) {
+  })
+  .catch((err) => {
     logger.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
-  }
-})();
+  });
 
 // ✅ Schema & Model for Knowledge Base
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true, unique: true },
-  answer: { type: mongoose.Schema.Types.Mixed, required: true }, // Accepts both strings and objects
+  answer: { type: mongoose.Schema.Types.Mixed, required: true },
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now },
 });
@@ -189,10 +191,17 @@ router.post("/logQuestion", async (req, res) => {
   }
 });
 
-// ✅ Health Check Endpoint
+// ✅ Health Check Endpoint con debug migliorato
 router.get("/health", async (req, res) => {
   try {
-    await mongoose.connection.db.admin().ping();
+    // Verifica se la connessione a MongoDB è pronta
+    if (mongoose.connection.readyState !== 1) {
+      logger.error("❌ MongoDB is not connected. readyState =", mongoose.connection.readyState);
+      return res.status(500).json({ error: "MongoDB not connected" });
+    }
+    const admin = mongoose.connection.db.admin();
+    const pingResult = await admin.ping();
+    logger.info("✅ Health check ping result: " + JSON.stringify(pingResult));
     res.json({ status: "✅ Healthy", mongo: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);
