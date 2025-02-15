@@ -21,10 +21,12 @@ const redis = new Redis(process.env.REDIS_URL, {
 
 // 📁 Assicurarsi che la cartella dei log esista
 const logsDir = path.join(__dirname, "logs");
-try {
-  fs.mkdirSync(logsDir, { recursive: true });
-} catch (err) {
-  console.error("❌ Error creating logs directory:", err.message);
+if (!fs.existsSync(logsDir)) {
+  try {
+    fs.mkdirSync(logsDir, { recursive: true });
+  } catch (err) {
+    console.error("❌ Error creating logs directory:", err.message);
+  }
 }
 
 // 🚀 Logger Winston
@@ -105,8 +107,8 @@ const cacheMiddleware = async (req, res, next) => {
 // 📌 API Health Check
 router.get("/health", async (req, res) => {
   try {
-    await mongoose.connection.db.admin().ping(); // Controllo MongoDB
-    await redis.ping(); // Controllo Redis
+    await mongoose.connection.db.admin().ping();
+    await redis.ping();
     res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);
