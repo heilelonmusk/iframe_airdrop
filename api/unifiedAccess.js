@@ -19,17 +19,17 @@ const redis = new Redis(process.env.REDIS_URL, {
   connectTimeout: 5000,
 });
 
-// \ud83d\udcc1 Assicurarsi che la cartella dei log esista (Usiamo /tmp/logs per Netlify)
+// 📁 Assicurarsi che la cartella dei log esista (Usiamo /tmp/logs per Netlify)
 const logsDir = "/tmp/logs";
 if (!fs.existsSync(logsDir)) {
   try {
     fs.mkdirSync(logsDir, { recursive: true });
   } catch (err) {
-    console.error("\u274c Error creating logs directory:", err.message);
+    console.error("❌ Error creating logs directory:", err.message);
   }
 }
 
-// \ud83d\ude80 Logger Winston
+// 🚀 Logger Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -42,16 +42,16 @@ const logger = winston.createLogger({
   ],
 });
 
-// \u2705 Verifica delle variabili d'ambiente richieste
+// ✅ Verifica delle variabili d'ambiente richieste
 const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
 requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
-    logger.error(`\u274c Missing required environment variable: ${envVar}`);
+    logger.error(`❌ Missing required environment variable: ${envVar}`);
     process.exit(1);
   }
 });
 
-// \ud83d\udee1\ufe0f Rate Limiting
+// 🛡️ Rate Limiting
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 100,
@@ -61,15 +61,15 @@ app.use(limiter);
 app.use(cors());
 app.use(express.json());
 
-// \ud83d\udcc8 Connessione a MongoDB
+// 📌 Connessione a MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
   })
-  .then(() => logger.info("\u2705 MongoDB Connected Successfully"))
+  .then(() => logger.info("✅ MongoDB Connected Successfully"))
   .catch((err) => {
-    logger.error("\u274c MongoDB Connection Error:", err.message);
+    logger.error("❌ MongoDB Connection Error:", err.message);
     process.exit(1);
   });
 
@@ -79,24 +79,24 @@ const KnowledgeSchema = new mongoose.Schema({
 });
 const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
 
-// \ud83d\ude80 Middleware cache Redis
+// 🚀 Middleware cache Redis
 const cacheMiddleware = async (req, res, next) => {
   const key = req.originalUrl;
   try {
     const cachedData = await redis.get(key);
     if (cachedData) {
-      logger.info(`\ud83d\udd39 Serving from Redis cache: ${key}`);
+      logger.info(`🔹 Serving from Redis cache: ${key}`);
       return res.json(JSON.parse(cachedData));
     }
   } catch (error) {
-    logger.warn("\u26a0\ufe0f Redis error, proceeding without cache:", error.message);
+    logger.warn("⚠️ Redis error, proceeding without cache:", error.message);
   }
 
   res.sendResponse = res.json;
   res.json = (body) => {
     if (!res.headersSent) {
       redis.setex(key, 60, JSON.stringify(body)).catch((err) => {
-        logger.warn("\u26a0\ufe0f Failed to store response in Redis cache:", err.message);
+        logger.warn("⚠️ Failed to store response in Redis cache:", err.message);
       });
       res.sendResponse(body);
     }
@@ -104,19 +104,19 @@ const cacheMiddleware = async (req, res, next) => {
   next();
 };
 
-// \ud83d\udcc9 API Health Check
+// 📌 API Health Check
 router.get("/health", async (req, res) => {
   try {
     await mongoose.connection.db.admin().ping();
     await redis.ping();
-    res.json({ status: "\u2705 Healthy", mongo: "Connected", redis: "Connected" });
+    res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
   } catch (error) {
-    logger.error("\u274c Health check failed:", error.message);
+    logger.error("❌ Health check failed:", error.message);
     res.status(500).json({ error: "Service is unhealthy" });
   }
 });
 
-// \ud83d\udcc9 Recupero dati da GitHub o MongoDB
+// 📌 Recupero dati da GitHub, Netlify o MongoDB
 router.get("/fetch", cacheMiddleware, async (req, res) => {
   const { source, file, query } = req.query;
   try {
@@ -125,7 +125,7 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
     if (source === "github") {
       if (!file) return res.status(400).json({ error: "Missing file parameter." });
       const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/${file}`;
-      logger.info(`\ud83d\udd39 Fetching from GitHub: ${repoUrl}`);
+      logger.info(`🔹 Fetching from GitHub: ${repoUrl}`);
       const response = await axios.get(repoUrl, { headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` } });
       if (!response.data.download_url) return res.status(404).json({ error: "GitHub API Error: File not found." });
       const fileResponse = await axios.get(response.data.download_url);
@@ -141,7 +141,7 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
 
     return res.status(400).json({ error: "Invalid source parameter." });
   } catch (error) {
-    logger.error("\u274c Fetch Error:", error.message);
+    logger.error("❌ Fetch Error:", error.message);
     res.status(500).json({ error: "Unexpected error fetching data", details: error.message });
   }
 });
