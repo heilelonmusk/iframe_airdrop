@@ -23,7 +23,9 @@ if (!process.env.REDIS_URL) {
 
 // 🚀 Connect to Redis with Retry Strategy
 const redis = new Redis(process.env.REDIS_URL, {
+  password: process.env.REDIS_PASSWORD,
   enableOfflineQueue: false, // Ensures stability in testing
+  connectTimeout: 5000,
   retryStrategy: (times) => {
     const delay = Math.min(times * 100, 2000); // Exponential backoff up to 2s
     logger.warn(`⚠️ Redis reconnect attempt #${times}, retrying in ${delay}ms...`);
