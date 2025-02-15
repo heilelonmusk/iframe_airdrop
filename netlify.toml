@@ -3,7 +3,7 @@ NODE_VERSION = "18.0.0"
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm run build"
+  command = "npm install && npm run build"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"

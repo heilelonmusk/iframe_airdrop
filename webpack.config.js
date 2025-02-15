@@ -13,6 +13,4 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: 'server.bundle.js'
   },
-  // Esclude i moduli di Node (come express, mongoose, etc.) dal bundle
-  externals: [nodeExternals()]
 };
