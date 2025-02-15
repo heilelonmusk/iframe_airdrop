@@ -104,3 +104,4 @@
      📄 knowledge.json - JSON file storing static chatbot responses and predefined knowledge base data.
   📁 tmp/ - 🚀 Add a description here
   📁 tmp/logs/ - 🚀 Add a description here
+     📄 netlify_test.log - 🚀 Add a description here
