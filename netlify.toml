@@ -6,7 +6,7 @@ NODE_VERSION = "18.0.0"
   command = "npm run build"
   functions = "api"
   publish = "./"
-  ignore = "git diff --quiet HEAD^ HEAD ./src/"
+  ignore = "git diff --quiet HEAD^ HEAD"
 
 # 🛠️ Local Development Settings
 [dev]
