@@ -9,9 +9,16 @@ const Redis = require("ioredis");
 jest.setTimeout(30000); // Increase timeout for async operations
 
 let server;
+// 🚀 Connect to Redis with Retry Strategy
 const redis = new Redis(process.env.REDIS_URL, {
+  password: process.env.REDIS_PASSWORD,
   enableOfflineQueue: false, // Ensures stability in testing
-  retryStrategy: (times) => Math.min(times * 50, 2000),
+  connectTimeout: 5000,
+  retryStrategy: (times) => {
+    const delay = Math.min(times * 100, 2000); // Exponential backoff up to 2s
+    logger.warn(`⚠️ Redis reconnect attempt #${times}, retrying in ${delay}ms...`);
+    return delay;
+  },
 });
 
 // 🚀 Winston Logger for Tests
