@@ -110,12 +110,29 @@ const cacheMiddleware = async (req, res, next) => {
 // 📌 API Health Check
 router.get("/health", async (req, res) => {
   try {
-    await mongoose.connection.db.admin().ping();
-    await redis.ping();
-    res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
+    logger.info("🔹 Health check started...");
+
+    // Test MongoDB
+    let mongoStatus = "Disconnected";
+    if (mongoose.connection.readyState === 1) {
+      mongoStatus = "Connected";
+    } else {
+      throw new Error("MongoDB not connected");
+    }
+
+    // Test Redis
+    let redisStatus = "Disconnected";
+    await redis.ping().then(() => {
+      redisStatus = "Connected";
+    }).catch(err => {
+      throw new Error("Redis not connected: " + err.message);
+    });
+
+    logger.info(`✅ MongoDB: ${mongoStatus}, Redis: ${redisStatus}`);
+    res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
   } catch (error) {
-    logger.error("❌ Health check failed:", error.message);
-    res.status(500).json({ error: "Service is unhealthy" });
+    logger.error(`❌ Health check failed: ${error.message}`);
+    res.status(500).json({ error: "Service is unhealthy", details: error.message });
   }
 });
 
