@@ -52,6 +52,11 @@ async function getFrequentQuestions(limit = 5) {
       { $sort: { count: -1 } },
       { $limit: limit }
     ]);
+    // Verifica che 'results' sia un array prima di chiamare map
+    if (!Array.isArray(results)) {
+      console.error("❌ Expected aggregation results to be an array, got:", results);
+      return [];
+    }
     return results.map(q => ({ question: q._id, count: q.count }));
   } catch (error) {
     console.error("❌ Error retrieving frequent questions:", error);
