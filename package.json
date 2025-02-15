@@ -12,8 +12,8 @@
     "deploy": "netlify deploy --prod",
     "test": "jest --runInBand --detectOpenHandles",
     "test:watch": "jest --watch",
-    "postinstall": "echo 'patch-package disattivato'",
-    "build": "echo 'No build step required'",
+    "postinstall": "patch-package",
+    "build": "webpack --config webpack.config.js",
     "lint": "eslint . --ext .js"
   },
   "dependencies": {
