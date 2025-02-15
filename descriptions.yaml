@@ -31,6 +31,7 @@ descriptions:
   ./netlify_test.log: "\U0001F680 Add a description here"
   ./nodemon.json: Configuration file for `nodemon`, enabling automatic server restarts
     during development.
+  ./nonexistent.json: "\U0001F680 Add a description here"
   ./package-lock.json: Lock file for npm dependencies, ensuring version consistency
     across different environments.
   ./package.json: Defines project dependencies, scripts, and metadata for backend
