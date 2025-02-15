@@ -17,7 +17,6 @@
      📄 .env - 🚀 Add a description here
      📄 file_tree.txt - Auto-generated file tracking real-time repository structure, ensuring documentation of all directories and files.
      📄 update_tree.py - Python script dynamically updating `file_tree.txt`, ensuring the repository structure remains documented.
-     📄 status.txt - 🚀 Add a description here
      📄 downloaded_github_README.md - 🚀 Add a description here
      📄 checkQuestions.js - Script for validating and processing stored chatbot questions, ensuring consistency in AI-generated responses.
   📁 iframe/ - Module managing airdrop verification via blockchain wallet interactions.
