@@ -53,9 +53,10 @@ requiredEnvVars.forEach((envVar) => {
 
 // 🛡️ Rate Limiting
 const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 100,
+  windowMs: 60 * 1000, 
+  max: 100, 
   message: "Too many requests, please try again later.",
+  keyGenerator: (req) => req.headers["x-forwarded-for"] || req.ip || "unknown-ip",
 });
 app.use(limiter);
 app.use(cors());
