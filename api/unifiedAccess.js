@@ -70,9 +70,12 @@ mongoose
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
   })
-  .then(() => logger.info("✅ MongoDB Connected Successfully"))
+  .then(() => {
+    logger.info("✅ MongoDB Connected Successfully");
+  })
   .catch((err) => {
-    logger.error("❌ MongoDB Connection Error:", err.message);
+    logger.error(`❌ MongoDB Connection Error: ${err.message}`);
+    logger.error("🔹 Connection String Used:", process.env.MONGO_URI);
     process.exit(1);
   });
 
