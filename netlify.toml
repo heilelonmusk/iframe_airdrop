@@ -1,6 +1,6 @@
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm ci && npm run build"
+  command = "npm run build"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD ./src/"
