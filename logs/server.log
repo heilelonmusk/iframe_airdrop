@@ -36,3 +36,9 @@
 [2025-02-15T00:30:44.804Z] INFO: Server is running on port 8888
 [2025-02-15T00:30:44.808Z] INFO: 📚 Connected to MongoDB
 [2025-02-15T00:30:45.511Z] INFO: 🧠 NLP Model Loaded from DB
+[2025-02-15T08:09:11.076Z] INFO: NODE_ENV = development
+[2025-02-15T08:09:11.077Z] INFO: Log directory: /Users/francescopezzini/Documents/iframe_airdrop/logs
+[2025-02-15T08:09:11.160Z] INFO: Server is running on port 8888
+[2025-02-15T08:09:11.160Z] INFO: 📚 Connected to MongoDB
+[2025-02-15T08:09:11.160Z] INFO: Mongoose readyState: 2
+[2025-02-15T08:09:14.022Z] INFO: 🧠 NLP Model Loaded from DB
