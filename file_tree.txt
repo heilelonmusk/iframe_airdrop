@@ -1,4 +1,3 @@
-  📁 node_modules/  [Hidden, 17411 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
      📄 AI_DEVELOPER_NOTES.md - Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
@@ -12,7 +11,6 @@
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
      📄 yarn.lock - Dependency lock file for Yarn, ensuring package versions remain consistent across installations.
      📄 .gitignore - Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts) to maintain repository cleanliness.
-     📄 package-lock.json - Lock file for npm dependencies, ensuring version consistency across different environments.
      📄 package.json - Defines project dependencies, scripts, and metadata for backend and frontend packages.
      📄 .env - 🚀 Add a description here
      📄 file_tree.txt - Auto-generated file tracking real-time repository structure, ensuring documentation of all directories and files.
