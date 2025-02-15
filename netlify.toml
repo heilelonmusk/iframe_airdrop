@@ -11,7 +11,7 @@
   targetPort = 5000
   autoLaunch = false
 
-# ✅ Pass Environment Variables to Build (sostituite con riferimenti alle variabili d'ambiente)
+# ✅ Pass Environment Variables to Build (imposta i valori in Netlify senza virgolette)
 [context.production.environment]
   MONGO_URI = "$MONGO_URI"
   REDIS_URL = "$REDIS_URL"
@@ -31,7 +31,6 @@
     X-Content-Type-Options = "nosniff"
     Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
 
-# 🚀 Static File Caching (Optimized)
 [[headers]]
   for = "/static/*"
   [headers.values]

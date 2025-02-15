@@ -12,7 +12,6 @@ const path = require("path");
 
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
 const logDir = (process.env.NODE_ENV === "production") ? "/tmp/logs" : path.join(__dirname, "../logs");
-
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
@@ -190,11 +189,22 @@ router.post("/logQuestion", async (req, res) => {
   }
 });
 
-// Endpoint Health Check con maggiori log
+// Endpoint Health Check con attesa per la connessione MongoDB
 router.get("/health", async (req, res) => {
   try {
-    // Verifica lo stato della connessione a MongoDB
-    if (mongoose.connection.readyState !== 1) {
+    // Funzione per attendere che la connessione sia stabilita
+    const waitForConnection = async (retries = 5, delay = 1000) => {
+      for (let i = 0; i < retries; i++) {
+        if (mongoose.connection.readyState === 1) {
+          return true;
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+      return false;
+    };
+
+    const connected = await waitForConnection();
+    if (!connected) {
       logger.error(`❌ Health check: MongoDB not connected (readyState: ${mongoose.connection.readyState})`);
       return res.status(500).json({ error: "Service is unhealthy", mongoReadyState: mongoose.connection.readyState });
     }
@@ -203,7 +213,6 @@ router.get("/health", async (req, res) => {
     const admin = mongoose.connection.db.admin();
     const pingResult = await admin.ping();
     logger.info("Ping result: " + JSON.stringify(pingResult));
-
     res.json({ status: "✅ Healthy", mongo: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);

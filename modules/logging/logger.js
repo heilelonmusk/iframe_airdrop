@@ -9,24 +9,31 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose.connect(MONGO_URI)
+// Connessione a MongoDB per il logging
+mongoose.connect(MONGO_URI, { 
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => console.log("📜 Connected to MongoDB for logging"))
-  .catch(err => console.error("❌ MongoDB connection error:", err));
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
 
-// ✅ **Schema Definition for Conversation Logging**
+// Schema per il logging delle conversazioni
 const logSchema = new mongoose.Schema({
   userId: { type: String, default: "anonymous" },
   question: { type: String, required: true },
-  answer: { type: String, required: true }, // Ora sempre salvato come stringa JSON
+  answer: { type: String, required: true }, // Salvato sempre come stringa (JSON)
   detectedIntent: { type: String },
   confidence: { type: Number },
   timestamp: { type: Date, default: Date.now }
 });
 
-// ✅ **Crea il modello**
+// Creazione del modello ConversationLog
 const ConversationLog = mongoose.models.ConversationLog || mongoose.model('ConversationLog', logSchema);
 
-// ✅ **Log a Conversation**
+// Funzione per loggare una conversazione
 async function logConversation({ userId, question, answer, detectedIntent, confidence }) {
   try {
     const logEntry = new ConversationLog({
@@ -44,7 +51,7 @@ async function logConversation({ userId, question, answer, detectedIntent, confi
   }
 }
 
-// ✅ **Retrieve Most Frequent Questions (for improvements)**
+// Funzione per recuperare le domande più frequenti
 async function getFrequentQuestions(limit = 5) {
   try {
     const results = await ConversationLog.aggregate([
@@ -53,7 +60,6 @@ async function getFrequentQuestions(limit = 5) {
       { $limit: limit }
     ]);
 
-    // Se results non è un array, logga un errore e usa un array vuoto
     if (!Array.isArray(results)) {
       console.error("❌ Expected aggregation results to be an array, got:", results);
       return [];
@@ -66,7 +72,7 @@ async function getFrequentQuestions(limit = 5) {
   }
 }
 
-// ✅ **Auto-Delete Old Logs (Retention Policy)**
+// Funzione per eliminare automaticamente i log vecchi (Retention Policy)
 async function cleanupOldLogs() {
   try {
     const cutoff = new Date();
@@ -78,7 +84,7 @@ async function cleanupOldLogs() {
   }
 }
 
-// Schedule log cleanup every 24 hours
+// Pianifica la pulizia dei log ogni 24 ore
 setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
 
 module.exports = { logConversation, getFrequentQuestions };
