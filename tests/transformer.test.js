@@ -2,7 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const { NLPModel } = require("../modules/nlp/nlpModel");
 const { execSync } = require("child_process");
-const { logger } = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 const redis = require("../config/redis")
 
 jest.setTimeout(30000); // Evita blocchi nei test lunghi

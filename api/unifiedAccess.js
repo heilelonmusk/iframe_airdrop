@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const redis = require("../config/redis");
-//const logger = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 const app = express();
 const router = express.Router();

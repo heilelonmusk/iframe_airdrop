@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const redis = require("../config/redis");
 //const winston = require("winston");
 const { execSync } = require("child_process");
-const { logger } = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
