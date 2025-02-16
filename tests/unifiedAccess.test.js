@@ -102,18 +102,24 @@ afterAll(async () => {
   logger.info("✅ MongoDB connection closed.");
   
   logger.info("✅ Chiusura connessioni a Redis...");
-  await redis.quit();
-  logger.info("✅ Redis connection closed.");
-
+  try {
+    await redis.quit();
+    logger.info("✅ Redis connection closed with quit().");
+  } catch (quitError) {
+    logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
+  }
+  // Forza la disconnessione se necessario
+  redis.disconnect();
+  logger.info("✅ Redis disconnected via disconnect().");
+  
   // Attendi brevemente per consentire la chiusura dei socket residui
   await new Promise(resolve => setTimeout(resolve, 1000));
 
+  // Log degli handle attivi (per debug) e forzatura dell'uscita
   setTimeout(() => {
     console.log("Active handles:", process._getActiveHandles());
     process.exit(0);
   }, 2000);
-
-
 });
 
 // Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
