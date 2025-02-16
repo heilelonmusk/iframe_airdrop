@@ -15,7 +15,7 @@ const serverless = __webpack_require__(/*! serverless-http */ "serverless-http")
 const rateLimit = __webpack_require__(/*! express-rate-limit */ "express-rate-limit");
 const cors = __webpack_require__(/*! cors */ "cors");
 const timeout = __webpack_require__(/*! connect-timeout */ "connect-timeout");
-const { loadNLPModel, saveNLPModel, NLPModel } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '../nlp/nlpModel'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+const { loadNLPModel, saveNLPModel, NLPModel } = __webpack_require__(/*! ../modules/nlp/nlpModel */ "./modules/nlp/nlpModel.js");
 //const winston = require("winston");
 const redis = __webpack_require__(/*! ../config/redis */ "./config/redis.js");
 const fs = __webpack_require__(/*! fs */ "fs");
@@ -410,6 +410,53 @@ async function initializeNLP() {
 }
 
 module.exports = { getIntent, initializeNLP, trainModel };
+
+/***/ }),
+
+/***/ "./modules/nlp/nlpModel.js":
+/*!*********************************!*\
+  !*** ./modules/nlp/nlpModel.js ***!
+  \*********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const mongoose = __webpack_require__(/*! mongoose */ "mongoose");
+const { logger, logConversation, getFrequentQuestions } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '../modules/logging/logger'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+
+const NLPModelSchema = new mongoose.Schema({
+  modelData: { type: Object, required: true }
+});
+
+const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
+
+// ✅ Carica il modello NLP dal database
+async function loadNLPModel() {
+  try {
+    const savedModel = await NLPModel.findOne({});
+    if (savedModel) {
+      logger.info("✅ NLP Model loaded from MongoDB");
+      return savedModel.modelData;
+    }
+    logger.warn("⚠️ No NLP Model found in database. Training required.");
+    return null;
+  } catch (error) {
+    logger.error("❌ Error loading NLP model:", error.message);
+    throw error;
+  }
+}
+
+// ✅ Salva il modello NLP nel database
+async function saveNLPModel(modelData) {
+  try {
+    const result = await NLPModel.updateOne({}, { modelData }, { upsert: true });
+    logger.info("✅ NLP Model saved in MongoDB");
+    return result;
+  } catch (error) {
+    logger.error("❌ Error saving NLP model:", error.message);
+    throw error;
+  }
+}
+
+module.exports = { loadNLPModel, saveNLPModel, NLPModel };
 
 /***/ }),
 
