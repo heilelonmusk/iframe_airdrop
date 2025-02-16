@@ -7,13 +7,13 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "scripts": {
-    "start": "node api/server.js",
+    "start": "node -r @babel/register api/server.js",
     "dev": "nodemon api/server.js",
-    "deploy": "netlify deploy --prod",
+    "deploy": "npm run build && netlify deploy",
     "test": "jest --runInBand --detectOpenHandles",
     "test:watch": "jest --watch",
     "postinstall": "patch-package",
-    "build": "echo 'Skipping build, using Netlify Functions'",
+    "build": "babel api --out-dir dist",
     "lint": "eslint . --ext .js"
   },
   "dependencies": {
@@ -48,6 +48,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.9",
     "@babel/preset-env": "^7.26.9",
+    "@babel/register": "^7.25.9",
     "babel-loader": "^9.2.1",
     "eslint": "^8.55.0",
     "jest": "^29.7.0",
@@ -63,5 +64,10 @@
     "node": "23.7.0"
   },
   "author": "Helon.Space Dev Team",
-  "license": "MIT"
+  "license": "MIT",
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "@babel/jest"
+    }
+  }
 }
