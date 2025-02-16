@@ -1,5 +1,5 @@
 require("dotenv").config();
-const connectMongoDB = require("./connectMongoDB");
+const connectMongoDB = require("../connectMongoDB"); // Corretto il percorso
 
 (async () => {
     try {
