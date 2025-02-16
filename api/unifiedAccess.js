@@ -27,7 +27,7 @@ const redis = new Redis({
   host: REDIS_HOST,
   port: REDIS_PORT,
   password: REDIS_PASSWORD,
-  tls: {}, // NECESSARIO per Upstash Redis
+  tls: { rejectUnauthorized: false }, // Miglioramento per Upstash
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
