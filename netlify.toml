@@ -78,3 +78,18 @@ NODE_VERSION = "23.7.0"
   from = "/"
   to = "/docs/index.html"
   status = 302
+
+  [[redirects]]
+  from = "/*"
+  to = "/maintenance.html"
+  status = 503
+  conditions = { country = ["CN", "RU"] }
+  force = false
+
+  # 🛠 Debugging & Logging Headers
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    X-Debug-Mode = "true"
+    X-Powered-By = "Netlify"
+    Server-Timing = "total;desc=\"Total API Response Time\""
