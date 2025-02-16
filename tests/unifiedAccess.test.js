@@ -102,6 +102,13 @@ afterAll(async () => {
 
   // Attendi brevemente per consentire la chiusura dei socket residui
   await new Promise(resolve => setTimeout(resolve, 1000));
+
+  setTimeout(() => {
+    console.log("Active handles:", process._getActiveHandles());
+    process.exit(0);
+  }, 2000);
+
+
 });
 
 // Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
