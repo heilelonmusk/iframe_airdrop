@@ -1,14 +1,14 @@
 require("dotenv").config();
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { app } = require("../api/unifiedAccess"); // Importa l'app Express da unifiedAccess.js
+const { app } = require("../api/unifiedAccess"); // Assicurati che unifiedAccess.js esporti { app, handler }
 const winston = require("winston");
 const Redis = require("ioredis");
 const { execSync } = require("child_process");
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
-// 🚀 Logger Setup
+// 🚀 Logger Setup con Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -20,7 +20,7 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-// 🚀 Controllo processi attivi sulla porta 5000 (solo log, non interrompe l'esecuzione)
+// 🚀 Verifica processi attivi sulla porta 5000 (solo log, senza terminare l'esecuzione)
 const checkActiveProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :5000").toString();
@@ -51,7 +51,7 @@ const checkEnvVariables = () => {
   });
 };
 
-// 🚀 Configurazione di Redis (con TLS e rejectUnauthorized impostato a false per Upstash)
+// 🚀 Configurazione di Redis (con TLS per Upstash)
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: Number(process.env.REDIS_PORT),
@@ -67,7 +67,6 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
 checkActiveProcesses();
 checkEnvVariables();
 
-let server;
 beforeAll(async () => {
   logger.info("✅ Connessione al database di test...");
   try {
@@ -80,30 +79,19 @@ beforeAll(async () => {
     logger.error("❌ Errore di connessione a MongoDB:", error.message);
     process.exit(1);
   }
-
+  
   try {
     await redis.ping();
     logger.info("✅ Redis connesso con successo.");
   } catch (error) {
     logger.warn("⚠️ Connessione Redis fallita:", error.message);
   }
-
-  // Avvio del server di test sulla porta 5000 usando l'app Express esportata da unifiedAccess.js
-  server = app.listen(5000, () =>
-    logger.info("🔹 Server di test avviato sulla porta 5000")
-  );
 });
 
 afterAll(async () => {
   logger.info("✅ Chiusura connessioni a MongoDB e Redis...");
   await mongoose.connection.close();
   await redis.quit();
-  if (server && server.address()) {
-    await new Promise((resolve, reject) => {
-      server.close((err) => (err ? reject(err) : resolve()));
-    });
-    logger.info("🔹 Server di test chiuso.");
-  }
 });
 
 afterEach(async () => {
