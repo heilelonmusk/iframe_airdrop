@@ -11,7 +11,7 @@ const redis = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
 const port = process.env.PORT || 8889;
-const { logger, logConversation, getFrequentQuestions } = require("..modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 //logger.error("This is an error message");
 
 // Import dei moduli
