@@ -84,27 +84,14 @@ describe("🔍 API Tests", () => {
   });
 
   afterAll(async () => {
-    logger.info("✅ Chiusura connessioni a MongoDB...");
-    await mongoose.connection.close();
-    logger.info("✅ MongoDB connection closed.");
-    
-    logger.info("✅ Chiusura connessioni a Redis...");
-    try {
-      await redis.quit();
-      logger.info("✅ Redis connection closed with quit().");
-    } catch (quitError) {
-      logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
-    }
-    // Forza la disconnessione dei socket residui, se necessario
-    redis.disconnect();
-    logger.info("✅ Redis disconnected via disconnect().");
-    
-    // Attendi brevemente per consentire la chiusura dei socket residui
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Rimuovi la chiamata a process.exit, in modo che Jest termini naturalmente
-    // Se vuoi ancora loggare gli active handles, puoi farlo qui senza forzare l'uscita:
-    console.log("Active handles:", process._getActiveHandles());
+   // Chiude la connessione a MongoDB
+  await mongoose.connection.close();
+  // Chiude la connessione Redis
+  await redis.quit();
+  // Se necessario, forza la disconnessione
+  redis.disconnect();
+  // (Opzionale) Attendi brevemente per consentire la chiusura dei socket residui
+  await new Promise(resolve => setTimeout(resolve, 1000));
   });
 
   // Health Check Test

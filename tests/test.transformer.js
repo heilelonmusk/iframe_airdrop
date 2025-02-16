@@ -66,13 +66,14 @@ beforeAll(async () => {
 
 // Teardown dopo tutti i test
 afterAll(async () => {
-  logger.info("✅ Closing MongoDB connection...");
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
-    logger.info("✅ MongoDB connection closed.");
-  } else {
-    logger.warn("⚠️ MongoDB was already disconnected.");
-  }
+  // Chiude la connessione a MongoDB
+  await mongoose.connection.close();
+  // Chiude la connessione Redis
+  await redis.quit();
+  // Se necessario, forza la disconnessione
+  redis.disconnect();
+  // (Opzionale) Attendi brevemente per consentire la chiusura dei socket residui
+  await new Promise(resolve => setTimeout(resolve, 1000));
 });
 
 // Test: Verifica che il modello NLP venga caricato da MongoDB

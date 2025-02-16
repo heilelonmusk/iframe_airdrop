@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const logger = require("../logging/logger");
-logger.error("This is an error message");
 
 //
 const NLPModelSchema = new mongoose.Schema({

@@ -155,5 +155,6 @@ afterAll(async () => {
   } catch (quitError) {
     logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
     redis.disconnect();
+    
   }
 });
