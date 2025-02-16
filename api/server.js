@@ -304,10 +304,19 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-if (process.env.NETLIFY) {
-  module.exports.handler = serverless(app);
-} else {
-  app.listen(port, () => logger.info(`🚀 Server running on port ${port}`));
+if (!process.env.NETLIFY) {
+  const server = app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${port}`);
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      logger.error(`❌ Port ${port} is already in use!`);
+      process.exit(1);
+    } else {
+      throw err;
+    }
+  });
 }
 
 module.exports = { app, handler: serverless(app), redis, connectMongoDB };

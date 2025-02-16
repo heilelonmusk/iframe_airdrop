@@ -1,6 +1,5 @@
 [build.environment]
 NODE_VERSION = "23.7.0"
-PORT = "8890"  # ⬅️ Aggiunto per la configurazione globale
 
 # 🚀 Netlify Build Settings
 [build]
