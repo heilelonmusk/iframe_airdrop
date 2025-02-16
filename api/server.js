@@ -172,7 +172,7 @@ router.get("/fetch", async (req, res) => {
 });
 
 if (require.main === module) {
-  app.listen(8888, () => logger.info("Server running on port 8888"));
+  app.listen(8889, () => logger.info("Server running on port 8889"));
 }
 
 module.exports = { app, handler: serverless(app) };
