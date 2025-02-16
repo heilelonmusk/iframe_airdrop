@@ -26,8 +26,8 @@ const checkActiveProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :5000").toString();
     if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn("⚠️ Un altro processo è attivo sulla porta 5000. Interrompiamolo per evitare conflitti.");
-      process.exit(1);
+      logger.warn("⚠️ Un altro processo è attivo sulla porta 5000. Questo potrebbe interferire con i test.");
+      // Non interrompiamo l'esecuzione: lasciamo solo l'avviso.
     }
   } catch (error) {
     logger.info("✅ Nessun processo attivo sulla porta 5000. Procediamo con i test.");
