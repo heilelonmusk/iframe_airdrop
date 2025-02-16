@@ -23,10 +23,10 @@ const { generateResponse } = require("../modules/nlp/transformer");
 //const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
 // Configurazione del logger con Winston
-const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
+//const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
+//if (!fs.existsSync(logDir)) {
+//  fs.mkdirSync(logDir, { recursive: true });
+//}
 //const logger = winston.createLogger({
 //  level: "info",
 //  format: winston.format.combine(

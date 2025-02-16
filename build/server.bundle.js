@@ -21,7 +21,7 @@ const redis = __webpack_require__(/*! ../config/redis */ "./config/redis.js");
 const fs = __webpack_require__(/*! fs */ "fs");
 const path = __webpack_require__(/*! path */ "path");
 const port = process.env.PORT || 8889;
-const { logger, logConversation, getFrequentQuestions } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '..modules/logging/logger'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+const { logger, logConversation, getFrequentQuestions } = __webpack_require__(/*! ../modules/logging/logger */ "./modules/logging/logger.js");
 //logger.error("This is an error message");
 
 // Import dei moduli
@@ -584,7 +584,7 @@ module.exports = { loadNLPModel, saveNLPModel, NLPModel };
 (__webpack_require__(/*! dotenv */ "dotenv").config)();
 const OpenAI = __webpack_require__(/*! openai */ "openai");
 const mongoose = __webpack_require__(/*! mongoose */ "mongoose");
-const { logger, logConversation, getFrequentQuestions } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '../modules/logging/logger'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+const { logger, logConversation, getFrequentQuestions } = __webpack_require__(/*! ../logging/logger */ "./modules/logging/logger.js");
 
 // ✅ Load OpenAI API key
 const openai = new OpenAI({
