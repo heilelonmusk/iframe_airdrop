@@ -110,7 +110,7 @@ if (mongoose.connection.readyState === 2) {
         } else if (Date.now() - start > 5000) {
           reject(new Error("Timeout waiting for mongoose to disconnect."));
         } else {
-          setTimeout(checkState, 100);
+          setTimeout(checkState, 500); // Ritardo aumentato a 500ms
         }
       };
       checkState();
