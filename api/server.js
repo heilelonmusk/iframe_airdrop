@@ -11,8 +11,8 @@ const redis = require("../lib/redis");
 const fs = require("fs");
 const path = require("path");
 const port = process.env.PORT || 8889;
-const { logger } = require("../modules/logging/logger");
-logger.error("This is an error message");
+//const { logger } = require("../modules/logging/logger");
+//logger.error("This is an error message");
 
 // Import dei moduli
 const { getIntent } = require("../modules/intent/intentRecognizer");
