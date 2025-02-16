@@ -95,19 +95,120 @@ app.use(cors());
 app.use(express.json());
 
 // === Connessione a MongoDB ===
-mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  })
-  .then(() => {
-    logger.info("✅ MongoDB Connected Successfully");
-  })
-  .catch((err) => {
-    logger.error(`❌ MongoDB Connection Error: ${err.message}`);
-    logger.error("🔹 Connection String Used:", process.env.MONGO_URI);
-    process.exit(1);
+// Funzione per connettersi a MongoDB con gestione forzata se rimane in stato "connecting"
+const connectMongoDB = async () => {
+  // Se già connesso (stato 1), restituisci la connessione attiva
+  if (mongoose.connection.readyState === 1) {
+    logger.info("🔄 MongoDB already connected, reusing existing connection.");
+    return mongoose.connection;
+  }
+  
+  // Se rimane in "connecting" (stato 2), forziamo la disconnessione e attendiamo che lo stato diventi 0 (disconnesso)
+if (mongoose.connection.readyState === 2) {
+  logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
+  try {
+    await mongoose.disconnect();
+    // Attende finché lo stato non diventa 0, con un timeout massimo di 5000ms
+    await new Promise((resolve, reject) => {
+      const start = Date.now();
+      const checkState = () => {
+        if (mongoose.connection.readyState === 0) {
+          resolve();
+        } else if (Date.now() - start > 5000) {
+          reject(new Error("Timeout waiting for mongoose to disconnect."));
+        } else {
+          setTimeout(checkState, 500); // Ritardo aumentato a 500ms
+        }
+      };
+      checkState();
+    });
+    logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
+  } catch (err) {
+    logger.error("Error during forced disconnect: " + err.message);
+  }
+}
+  
+  // Ora tenta di connettersi
+try {
+  await mongoose.connect(process.env.MONGO_URI, {
+    // Le opzioni deprecate possono essere omesse con il driver 4.x
   });
+  logger.info("📚 Connected to MongoDB");
+
+  // Aggiungi i listener di connessione
+  mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
+  mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
+  mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
+} catch (err) {
+  logger.error(`❌ MongoDB connection error: ${err.message}`);
+}
+
+// Attende un po' per permettere l'aggiornamento dello stato
+await new Promise((resolve) => setTimeout(resolve, 1000));
+logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
+return mongoose.connection;
+};
+
+// Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
+router.get("/health", async (req, res) => {
+  try {
+    logger.info("🔹 Health check started...");
+
+    // Log dello stato iniziale della connessione
+    let currentState = mongoose.connection.readyState;
+    logger.info(`Current mongoose.connection.readyState: ${currentState}`);
+    
+    // Se non è 1, tentiamo la riconnessione
+    if (currentState !== 1) {
+      logger.warn(`⚠️ MongoDB not connected (state ${currentState}), attempting to reconnect...`);
+      await connectMongoDB();
+      currentState = mongoose.connection.readyState;
+      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${currentState}`);
+    }
+
+    let mongoStatus = "Disconnected";
+    try {
+      if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+        logger.info("Performing MongoDB ping command...");
+        const pingResult = await mongoose.connection.db.command({ ping: 1 });
+        logger.info("MongoDB ping result: " + JSON.stringify(pingResult));
+        if (pingResult && pingResult.ok === 1) {
+          mongoStatus = "Connected";
+        } else {
+          logger.warn("MongoDB ping did not return an ok result");
+        }
+      } else {
+        logger.warn("mongoose.connection.readyState is not 1 or mongoose.connection.db is not available");
+      }
+    } catch (pingError) {
+      logger.error("MongoDB ping error: " + pingError.message);
+      mongoStatus = "Disconnected";
+    }
+    logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
+
+    let redisStatus = "Disconnected";
+    try {
+      if (redis.status === "ready") {
+        logger.info("Performing Redis ping...");
+        const redisPing = await redis.ping();
+        logger.info("Redis ping result: " + redisPing);
+        redisStatus = redisPing === "PONG" ? "Connected" : "Disconnected";
+      } else {
+        logger.warn(`Redis status not ready: ${redis.status}`);
+      }
+    } catch (redisError) {
+      logger.error("Redis ping error: " + redisError.message);
+      redisStatus = "Disconnected";
+    }
+
+    res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
+  } catch (error) {
+    logger.error(`❌ Health check failed: ${error.message}`);
+    res.status(500).json({ error: "Service is unhealthy", details: error.message });
+  }
+});
+
+app.use("/.netlify/functions/server", router);
 
 // === Schema e Modello per la Knowledge Base ===
 const KnowledgeSchema = new mongoose.Schema({
