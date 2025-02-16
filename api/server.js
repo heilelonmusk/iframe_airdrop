@@ -214,10 +214,10 @@ const questionSchema = new mongoose.Schema({
 const Question = mongoose.models.Question || mongoose.model("Question", questionSchema);
 
 // Schema per NLP Model
-const NLPModelSchema = new mongoose.Schema({
-  modelData: { type: Object, required: true },
-});
-const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
+//const NLPModelSchema = new mongoose.Schema({
+//  modelData: { type: Object, required: true },
+//});
+//const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
 // Inizializza il modello NLP (aggiornato per attendere la connessione a MongoDB)
 (async () => {
