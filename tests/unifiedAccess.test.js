@@ -3,7 +3,6 @@ const request = require("supertest");
 const mongoose = require("mongoose");
 const { app, redis } = require("../api/unifiedAccess"); // Importa l'istanza Redis dal modulo
 const winston = require("winston");
-const { redis } = require("../api/unifiedAccess");
 const { execSync } = require("child_process");
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
@@ -96,14 +95,13 @@ afterAll(async () => {
   } catch (quitError) {
     logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
   }
-  // Forza la disconnessione se necessario
+  // Forza la disconnessione completa dei socket Redis
   redis.disconnect();
   logger.info("✅ Redis disconnected via disconnect().");
   
   // Attendi brevemente per consentire la chiusura dei socket residui
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Log degli handle attivi (per debug) e forzatura dell'uscita
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
   setTimeout(() => {
     console.log("Active handles:", process._getActiveHandles());
     process.exit(0);
