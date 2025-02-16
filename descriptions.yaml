@@ -36,6 +36,7 @@ descriptions:
     across different environments.
   ./package.json: Defines project dependencies, scripts, and metadata for backend
     and frontend packages.
+  ./server.log: "\U0001F680 Add a description here"
   ./status.txt: "\U0001F680 Add a description here"
   ./update_tree.py: Python script dynamically updating `file_tree.txt`, ensuring the
     repository structure remains documented.
