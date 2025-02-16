@@ -12,7 +12,7 @@ NODE_VERSION = "23.7.0"
 [dev]
   command = "npm run dev"
   framework = "#custom"
-  targetPort = 5000
+  targetPort = 8889
   autoLaunch = false
 
 # ✅ Pass Environment Variables to Build (imposta i valori in Netlify senza virgolette)
