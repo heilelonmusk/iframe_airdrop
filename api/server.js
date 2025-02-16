@@ -121,11 +121,10 @@ const connectMongoDB = async () => {
     try {
       logger.info(`🔌 Attempting to connect to MongoDB (Attempt ${attempts + 1}/${MAX_RETRIES})...`);
       await mongoose.connect(process.env.MONGO_URI, {
-        serverSelectionTimeoutMS: 3000, // Timeout per evitare lunghe attese
-        connectTimeoutMS: 10000, // Tempo massimo per connettersi
-        socketTimeoutMS: 45000, // Tempo massimo per operazioni aperte
-        directConnection: true, // Evita errori con replica set su Netlify
-      });
+        serverSelectionTimeoutMS: 3000,
+        connectTimeoutMS: 10000,
+        socketTimeoutMS: 45000
+    });
 
       await mongoose.connection.asPromise(); // Attende il completamento della connessione
 
