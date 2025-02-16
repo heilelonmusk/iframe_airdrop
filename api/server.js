@@ -147,6 +147,12 @@ router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
 
+    // Se la connessione non è pronta, tentiamo di riconnetterci
+    if (mongoose.connection.readyState !== 1) {
+      logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
+      await connectMongoDB();
+    }
+
     let mongoStatus = "Disconnected";
     try {
       if (mongoose.connection.readyState === 1) {
@@ -161,7 +167,10 @@ router.get("/health", async (req, res) => {
 
     let redisStatus = "Disconnected";
     if (redis.status === "ready") {
-      redisStatus = await redis.ping().then((res) => (res === "PONG" ? "Connected" : "Disconnected")).catch(() => "Disconnected");
+      redisStatus = await redis
+        .ping()
+        .then((res) => (res === "PONG" ? "Connected" : "Disconnected"))
+        .catch(() => "Disconnected");
     }
 
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
