@@ -63,6 +63,11 @@ async function initializeNLP() {
     console.log("🚀 Training new NLP Model...");
     await trainNLP();
   }
+  async function trainModel(manager) {
+    await manager.train();
+    manager.save();
+    console.log("✅ NLP Model trained and saved!");
+}
 }
 
 module.exports = { getIntent, initializeNLP, trainModel };
