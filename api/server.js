@@ -11,6 +11,14 @@ const Redis = require("ioredis");
 const fs = require("fs");
 const path = require("path");
 
+const { initializeNLP, getIntent } = require("../modules/intent/intentRecognizer");
+const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
+const { generateResponse } = require("../modules/nlp/transformer");
+const { logConversation } = require("../modules/logging/logger");
+
+const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
+initializeNLP();
+
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
 const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
@@ -115,6 +123,16 @@ const waitForMongoDB = async (retries = 10, delay = 2000) => {
 mongoose.connection.on("error", (err) => {
   logger.error("❌ Mongoose connection error:", err.message);
 });
+
+app.use("/.netlify/functions/server", router);
+
+// In modalità sviluppo, avvia il server in locale
+if (require.main === module) {
+  const port = process.env.PORT || 8888;
+  app.listen(port, () => {
+    logger.info(`Server is running on port ${port}`);
+  });
+}
 
 // ✅ Health Check
 router.get("/health", async (req, res) => {
