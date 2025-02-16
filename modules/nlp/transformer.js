@@ -1,7 +1,7 @@
 require('dotenv').config();
 const OpenAI = require("openai");
 const mongoose = require("mongoose");
-const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../logging/logger");
 
 // ✅ Load OpenAI API key
 const openai = new OpenAI({
