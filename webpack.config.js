@@ -26,6 +26,11 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.json', '.node']
+    extensions: ['.js', '.json', '.node'],
+    alias: {
+      // Ad esempio, per usare "redis" come alias per "config/redis.js" nella root:
+      redis: path.resolve(__dirname, 'config/redis.js'),
+      // Puoi aggiungere altri alias se necessario
+    }  
   }
 };
