@@ -4,20 +4,20 @@ const redis = require("../config/redis");
 const winston = require("winston");
 const { execSync } = require("child_process");
 const mongoose = require("mongoose");
-const { logger } = require("../modules/logging/logger");
-logger.error("This is an error message");
+//const { logger } = require("../modules/logging/logger");
+//logger.error("This is an error message");
 
 jest.setTimeout(20000); // Evita blocchi nei test lunghi
 
-// Configurazione del Logger con un formato leggermente più conciso
-//const logger = winston.createLogger({
-//  level: "info",
-//  format: winston.format.combine(
-//    winston.format.timestamp({ format: "HH:mm:ss" }),
-//    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
-//  ),
-//  transports: [new winston.transports.Console()],
-//});
+//Configurazione del Logger con un formato leggermente più conciso
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "HH:mm:ss" }),
+    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+  ),
+  transports: [new winston.transports.Console()],
+});
 
 // Verifica processi attivi sulle porte 5000 o 8889
 const checkActiveProcesses = () => {
