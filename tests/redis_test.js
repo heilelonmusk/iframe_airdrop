@@ -58,25 +58,27 @@ checkEnvVariables();
 checkRedisProcess();
 
 // ✅ Connessione a Redis con TLS (necessario per Upstash)
+// Convertiamo REDIS_PORT in numero e impostiamo family: 4 e rejectUnauthorized: false
 const redis = new Redis({
   host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  port: Number(process.env.REDIS_PORT),
   password: process.env.REDIS_PASSWORD,
-  tls: { rejectUnauthorized: false }, // Aggiunto rejectUnauthorized: false
+  tls: { rejectUnauthorized: false },
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
+  family: 4,
 });
 
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
-redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
+redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err));
 
 // ✅ Test per Redis
 (async () => {
   try {
     logger.info("🔹 Controllo connessione Redis...");
     const isConnected = await redis.ping().catch((err) => {
-      logger.error("Ping error:", err.message);
+      logger.error("Ping error:", err);
       return null;
     });
     if (isConnected !== "PONG") {
