@@ -11,13 +11,13 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// 🚀 Configurazione del logger con Winston
+// 🚀 Winston Logger Setup
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(
-      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+    winston.format.printf(({ timestamp, level, message }) =>
+      `[${timestamp}] ${level.toUpperCase()}: ${message}`
     )
   ),
   transports: [
@@ -26,7 +26,7 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ Funzione per verificare eventuali processi Redis attivi
+// ✅ Verifica processi attivi su Redis
 const checkRedisProcess = () => {
   try {
     const runningProcesses = execSync("ps aux | grep redis-server | grep -v grep").toString();
@@ -38,7 +38,7 @@ const checkRedisProcess = () => {
   }
 };
 
-// ✅ Funzione per verificare le variabili d'ambiente necessarie
+// ✅ Verifica delle Variabili d'Ambiente
 const checkEnvVariables = () => {
   const requiredEnvVars = ["REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD"];
   requiredEnvVars.forEach((envVar) => {
@@ -118,6 +118,7 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
     } else {
       logger.error("❌ Errore nell'eliminazione della chiave.");
     }
+
   } catch (error) {
     logger.error("❌ Test Redis fallito:", error.message);
   } finally {
@@ -129,7 +130,11 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
     } catch (cleanupError) {
       logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
     }
-    await redis.quit();
-    logger.info("🔹 Connessione Redis chiusa.");
+    try {
+      await redis.quit();
+      logger.info("🔹 Connessione Redis chiusa.");
+    } catch (quitError) {
+      logger.warn("⚠️ Errore durante la chiusura della connessione Redis:", quitError.message);
+    }
   }
 })();
