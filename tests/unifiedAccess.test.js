@@ -8,7 +8,7 @@ const { execSync } = require("child_process");
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
-// 🚀 Logger Setup con Winston
+// 🚀 Configurazione del Logger con Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -51,6 +51,9 @@ const checkEnvVariables = () => {
   });
 };
 
+checkActiveProcesses();
+checkEnvVariables();
+
 // 🚀 Configurazione di Redis (con TLS per Upstash)
 const redis = new Redis({
   host: process.env.REDIS_HOST,
@@ -64,9 +67,7 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-checkActiveProcesses();
-checkEnvVariables();
-
+// Setup prima di tutti i test
 beforeAll(async () => {
   logger.info("✅ Connessione al database di test...");
   try {
@@ -79,7 +80,7 @@ beforeAll(async () => {
     logger.error("❌ Errore di connessione a MongoDB:", error.message);
     process.exit(1);
   }
-  
+
   try {
     await redis.ping();
     logger.info("✅ Redis connesso con successo.");
@@ -88,12 +89,14 @@ beforeAll(async () => {
   }
 });
 
+// Teardown dopo tutti i test
 afterAll(async () => {
   logger.info("✅ Chiusura connessioni a MongoDB e Redis...");
   await mongoose.connection.close();
   await redis.quit();
 });
 
+// Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
 afterEach(async () => {
   logger.info("🗑️ Pulizia del database di test...");
   try {
@@ -109,6 +112,7 @@ afterEach(async () => {
 });
 
 describe("Unified Access API Tests", () => {
+  // Test di base (Sanity Check): Health Check
   test("GET /health - Controllo stato servizio", async () => {
     const response = await request(app).get("/.netlify/functions/unifiedAccess/health");
     expect(response.statusCode).toBe(200);
@@ -119,11 +123,13 @@ describe("Unified Access API Tests", () => {
     });
   });
 
+  // Test: Redis deve rispondere al PING
   test("Redis deve essere connesso", async () => {
     const redisPing = await redis.ping();
     expect(redisPing).toBe("PONG");
   });
 
+  // Test principali API: Fetch da GitHub
   test("GET /fetch (GitHub) - Recupero file da GitHub", async () => {
     const response = await request(app).get("/.netlify/functions/unifiedAccess/fetch?source=github&file=README.md");
     expect(response.statusCode).toBe(200);
@@ -131,6 +137,7 @@ describe("Unified Access API Tests", () => {
     expect(response.body).toHaveProperty("content");
   });
 
+  // Test principali API: Fetch da MongoDB
   test("GET /fetch (MongoDB) - Recupero dati da MongoDB", async () => {
     const Knowledge = mongoose.models.Knowledge || mongoose.model(
       "Knowledge",
