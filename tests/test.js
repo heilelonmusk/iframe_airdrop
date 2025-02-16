@@ -91,18 +91,15 @@ describe("🔍 API Tests", () => {
     } catch (quitError) {
       logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
     }
-    // Forza la disconnessione completa dei socket Redis
+    // Forza la disconnessione completa dei socket Redis, se necessario
     redis.disconnect();
     logger.info("✅ Redis disconnected via disconnect().");
     
     // Attendi brevemente per consentire la chiusura dei socket residui
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // (Opzionale) Log degli active handles per debug
-    setTimeout(() => {
-      console.log("Active handles:", process._getActiveHandles());
-      process.exit(0);
-    }, 2000);
+    // (Opzionale) Log degli active handles per debug, ma senza forzare process.exit
+    console.log("Active handles:", process._getActiveHandles());
   });
 
   // Health Check Test

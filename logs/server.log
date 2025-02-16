@@ -234,3 +234,29 @@
 [2025-02-16T12:04:48.384Z] INFO: Forced disconnect successful. ReadyState is now: 0
 [2025-02-16T12:04:48.390Z] INFO: Forced disconnect successful. ReadyState is now: 2
 [2025-02-16T12:04:48.391Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T12:10:47.094Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T12:10:47.128Z] INFO: 🔹 Health check started...
+[2025-02-16T12:10:47.129Z] INFO: Current mongoose.connection.readyState: 2
+[2025-02-16T12:10:47.132Z] WARN: ⚠️ MongoDB not connected (state 2), attempting to reconnect...
+[2025-02-16T12:10:47.133Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T12:10:47.247Z] INFO: ✅ Connected to Redis successfully!
+[2025-02-16T12:10:47.745Z] INFO: Forced disconnect successful. ReadyState is now: 0
+[2025-02-16T12:10:47.752Z] INFO: Forced disconnect successful. ReadyState is now: 2
+[2025-02-16T12:10:47.754Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T12:10:48.440Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T12:10:48.756Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T12:10:48.759Z] INFO: After reconnect attempt, mongoose.connection.readyState: 1
+[2025-02-16T12:10:48.761Z] INFO: Performing MongoDB ping command...
+[2025-02-16T12:10:48.818Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T12:10:48.821Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T12:10:48.822Z] INFO: Performing Redis ping...
+[2025-02-16T12:10:48.869Z] INFO: Redis ping result: PONG
+[2025-02-16T12:10:48.879Z] INFO: 🔹 Health check started...
+[2025-02-16T12:10:48.882Z] INFO: Current mongoose.connection.readyState: 1
+[2025-02-16T12:10:48.886Z] INFO: Performing MongoDB ping command...
+[2025-02-16T12:10:48.963Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T12:10:48.966Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T12:10:48.969Z] INFO: Performing Redis ping...
+[2025-02-16T12:10:49.008Z] INFO: Redis ping result: PONG
+[2025-02-16T12:10:49.446Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T12:10:49.452Z] ERROR: ❌ Error initializing NLP model: logger is not defined
