@@ -91,7 +91,10 @@ const connectMongoDB = async () => {
 connectMongoDB();
 
 mongoose.connection.on("error", (err) => logger.error(`❌ Mongoose connection error: ${err.message}`));
-mongoose.connection.on("disconnected", connectMongoDB);
+mongoose.connection.on("disconnected", async () => {
+  logger.warn("⚠️ MongoDB disconnected. Trying to reconnect...");
+  await connectMongoDB();  // <== AGGIUNTA RICONNESSIONE AUTOMATICA
+});
 
 // ✅ Health Check
 router.get("/health", async (req, res) => {
