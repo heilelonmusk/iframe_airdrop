@@ -47,8 +47,12 @@ const { generateResponse } = require("../modules/nlp/transformer");
 // });
 
 // Crea l'app Express e il router
-const app = require("../../api/server");
+const app = express();
 const router = express.Router();
+
+app.get("/", (req, res) => {
+  res.send("✅ API is running on Netlify!");
+});
 
 // Middleware
 app.set("trust proxy", true);

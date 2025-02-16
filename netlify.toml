@@ -4,7 +4,7 @@ PORT = "8889"  # ⬅️ Aggiunto per la configurazione globale
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm install && npm run start"
+  command = "npm install"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
@@ -62,10 +62,9 @@ PORT = "8889"  # ⬅️ Aggiunto per la configurazione globale
 
 # 🔒 Enforce HTTPS
 [[redirects]]
-  from = "http://*"
-  to = "https://:splat"
-  status = 301
-  force = true
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
 
 # 🔧 Redirect Static Assets Correctly
 [[redirects]]
