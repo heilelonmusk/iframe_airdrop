@@ -46,12 +46,11 @@ const checkEnvVariables = () => {
 // 🚀 **Connessione a Redis con Strategia di Retry**
 let redis;
 try {
-  redis = new Redis(process.env.REDIS_URL, {
-    password: process.env.REDIS_PASSWORD,
-    enableOfflineQueue: false,
-    connectTimeout: 5000,
-    retryStrategy: (times) => Math.min(times * 100, 2000),
-  });
+   const redis = new Redis(process.env.REDIS_URL, {
+      enableOfflineQueue: false,
+      connectTimeout: 5000,
+      retryStrategy: (times) => Math.min(times * 100, 2000),
+    });
 } catch (error) {
   logger.warn("⚠️ Connessione Redis fallita. Simuliamo Redis per i test.");
   redis = { ping: async () => "PONG", get: async () => null, setex: async () => null, del: async () => null };

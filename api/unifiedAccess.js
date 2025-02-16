@@ -14,10 +14,9 @@ const app = express();
 const router = express.Router();
 
 const redis = new Redis(process.env.REDIS_URL, {
-  password: process.env.REDIS_PASSWORD, // Aggiungi la password separatamente
-  retryStrategy: (times) => Math.min(times * 50, 2000),
   enableOfflineQueue: false,
   connectTimeout: 5000,
+  retryStrategy: (times) => Math.min(times * 100, 2000),
 });
 
 // 📁 Assicurarsi che la cartella dei log esista (Usiamo /tmp/logs per Netlify)
