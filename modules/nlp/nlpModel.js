@@ -10,16 +10,17 @@ const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModel
 // ✅ 
 async function loadNLPModel() {
   try {
-    const savedModel = await NLPModel.findOne({});
-    if (savedModel && savedModel.modelData) {
-      console.log("✅ NLP Model loaded from MongoDB");
+    const savedModel = await SomeModel.findOne({});
+    if (savedModel) {
+      // Sostituisci console.log con logger.info se possibile
+      logger.info("✅ NLP Model loaded from MongoDB");
       return savedModel.modelData;
     }
-    console.log("⚠️ No NLP Model found in database. Training required.");
+    logger.warn("⚠️ No NLP Model found in database. Training required.");
     return null;
   } catch (error) {
-    console.error("❌ Error loading NLP model from MongoDB:", error);
-    return null;
+    logger.error("❌ Error loading NLP model:", error);
+    throw error;
   }
 }
 
