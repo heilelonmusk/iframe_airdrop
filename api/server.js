@@ -47,7 +47,7 @@ const { generateResponse } = require("../modules/nlp/transformer");
 // });
 
 // Crea l'app Express e il router
-const app = express();
+const app = require("../../api/server");
 const router = express.Router();
 
 // Middleware
@@ -284,6 +284,8 @@ router.post("/api/nlp", async (req, res) => {
   return res.json({ answer: intent.answer });
 });
 
+app.use("/", router);
+
 // ✅ Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", async (req, res) => {
   const { source, file, query } = req.query;
@@ -296,8 +298,9 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-// Avvio del server (solo se eseguito come modulo principale e non in ambiente serverless)
-if (require.main === module && !process.env.NETLIFY) {
+if (!process.env.LOCAL_DEV) {
+  module.exports.handler = serverless(app);
+} else {
   app.listen(port, () => logger.info(`Server running on port ${port}`));
 }
 
