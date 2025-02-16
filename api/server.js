@@ -99,10 +99,21 @@ mongoose.connection.on("disconnected", async () => {
 // ✅ Health Check
 router.get("/health", async (req, res) => {
   try {
+    logger.info("🔹 Health check started...");
+
     const mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
-    const redisStatus = await redis.ping().then((res) => (res === "PONG" ? "Connected" : "Disconnected"));
+    logger.info(`🔹 MongoDB Status: ${mongoStatus}`);  // <== AGGIUNTA LOG DI DEBUG
+
+    let redisStatus = "Disconnected";
+    if (redis.status === "ready") {
+      redisStatus = await redis.ping()
+        .then((res) => (res === "PONG" ? "Connected" : "Disconnected"))
+        .catch(() => "Disconnected");
+    }
+
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
   } catch (error) {
+    logger.error(`❌ Health check failed: ${error.message}`);
     res.status(500).json({ error: "Service is unhealthy", details: error.message });
   }
 });
