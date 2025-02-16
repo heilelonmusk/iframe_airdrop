@@ -91,59 +91,56 @@ app.use(
 //  setTimeout(() => redis.connect(), 5000);
 //});
 
-// Funzione per connettersi a MongoDB con gestione forzata se rimane in stato "connecting"
+const MAX_RETRIES = 5;
+const RETRY_DELAY = 2000; // 2 secondi
+
 const connectMongoDB = async () => {
-  // Se già connesso (stato 1), restituisci la connessione attiva
-  if (mongoose.connection.readyState === 1) {
-    logger.info("🔄 MongoDB already connected, reusing existing connection.");
-    return mongoose.connection;
-  }
-  
-  // Se rimane in "connecting" (stato 2), forziamo la disconnessione e attendiamo che lo stato diventi 0 (disconnesso)
-if (mongoose.connection.readyState === 2) {
-  logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
-  try {
-    await mongoose.disconnect();
-    // Attende finché lo stato non diventa 0, con un timeout massimo di 5000ms
-    await new Promise((resolve, reject) => {
-      const start = Date.now();
-      const checkState = () => {
-        if (mongoose.connection.readyState === 0) {
-          resolve();
-        } else if (Date.now() - start > 5000) {
-          reject(new Error("Timeout waiting for mongoose to disconnect."));
-        } else {
-          setTimeout(checkState, 500); // Ritardo aumentato a 500ms
-        }
-      };
-      checkState();
-    });
-    logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
-  } catch (err) {
-    logger.error("Error during forced disconnect: " + err.message);
-  }
-}
-  
-  // Ora tenta di connettersi
-try {
-  await mongoose.connect(process.env.MONGO_URI, {
-    // Le opzioni deprecate possono essere omesse con il driver 4.x
-  });
-  logger.info("📚 Connected to MongoDB");
+  let attempts = 0;
 
-  // Aggiungi i listener di connessione
-  mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
-  mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
-  mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
-} catch (err) {
-  logger.error(`❌ MongoDB connection error: ${err.message}`);
-}
+  while (attempts < MAX_RETRIES) {
+    if (mongoose.connection.readyState === 1) {
+      logger.info("🔄 MongoDB already connected, reusing existing connection.");
+      return mongoose.connection;
+    }
 
-// Attende un po' per permettere l'aggiornamento dello stato
-await new Promise((resolve) => setTimeout(resolve, 1000));
-logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
-return mongoose.connection;
+    if (mongoose.connection.readyState === 2) {
+      logger.warn("⚠️ Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
+      try {
+        await mongoose.disconnect();
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Attendi per permettere il reset
+        logger.info("✅ Forced disconnect successful.");
+      } catch (err) {
+        logger.error("❌ Error during forced disconnect: " + err.message);
+      }
+    }
+
+    try {
+      logger.info(`🔌 Attempting to connect to MongoDB (Attempt ${attempts + 1}/${MAX_RETRIES})...`);
+      await mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+
+      if (mongoose.connection.readyState === 1) {
+        logger.info("📚 Connected to MongoDB successfully!");
+        mongoose.connection.on("error", (err) => logger.error("❌ MongoDB error:", err));
+        mongoose.connection.on("disconnected", () => logger.warn("⚠️ MongoDB disconnected."));
+        mongoose.connection.on("reconnected", () => logger.info("🔄 MongoDB reconnected!"));
+        return mongoose.connection;
+      }
+    } catch (err) {
+      logger.error(`❌ MongoDB connection error: ${err.message}`);
+    }
+
+    attempts++;
+    logger.warn(`🔁 Retrying connection in ${RETRY_DELAY / 1000} seconds...`);
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+  }
+
+  logger.error("🚨 Max retries reached. MongoDB connection failed.");
+  throw new Error("MongoDB connection failed after multiple attempts.");
 };
+
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
 router.get("/health", async (req, res) => {
@@ -299,4 +296,4 @@ if (require.main === module && !process.env.NETLIFY) {
   app.listen(port, () => logger.info(`Server running on port ${port}`));
 }
 
-module.exports = { app, handler: serverless(app), redis };
+module.exports = { app, handler: serverless(app), redis, connectMongoDB };
