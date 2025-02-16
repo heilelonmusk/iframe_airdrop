@@ -19,7 +19,7 @@ const { logConversation } = require("../modules/logging/logger");
 
 const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
-if (!process.env.NETLIFY) {
+if (require.main === module && !process.env.NETLIFY) {
   app.listen(port, () => logger.info(`Server running on port ${port}`));
 }
 
@@ -38,7 +38,12 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: path.join(logDir, "server.log") }),
+    new winston.transports.File({
+      filename: path.join(logDir, "server.log"),
+      maxsize: 1024 * 1024 * 5, // Max 5MB
+      maxFiles: 3,
+      tailable: true
+    }),
   ],
 });
 
@@ -70,7 +75,13 @@ const redis = new Redis({
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
   tls: {},
-  retryStrategy: (times) => (times > 5 ? null : Math.min(times * 500, 30000)),
+  retryStrategy: (times) => {
+    if (times > 10) {
+      logger.error("❌ Too many Redis reconnection attempts. Stopping...");
+      return null;
+    }
+    return Math.min(times * 1000, 30000);
+  }
 });
 
 redis.on("connect", () => logger.info("✅ Connected to Redis successfully!"));
@@ -140,10 +151,11 @@ router.get("/health", async (req, res) => {
 
     let mongoStatus = "Disconnected";
     try {
-      const admin = mongoose.connection.db.admin();
-      await admin.ping();
-      const collections = await mongoose.connection.db.listCollections().toArray();
-      mongoStatus = collections.length > 0 ? "Connected" : "Empty DB";
+      if (mongoose.connection.readyState === 1) {
+        const admin = mongoose.connection.db.admin();
+        await admin.ping();
+        mongoStatus = "Connected";
+      }
     } catch (e) {
       mongoStatus = "Disconnected";
     }
