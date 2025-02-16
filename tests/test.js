@@ -1,5 +1,6 @@
 require("dotenv").config();
-const { handler, redis } = require("../api/server.js");
+const { app, handler} = require("../api/server.js");
+const redis = require("../lib/redis");
 const winston = require("winston");
 const { execSync } = require("child_process");
 const mongoose = require("mongoose");
