@@ -12,7 +12,7 @@ const { loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpMode
 const redis = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
-const port = process.env.PORT;
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8890;
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 //logger.error("This is an error message");
 logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
