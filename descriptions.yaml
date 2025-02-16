@@ -17,6 +17,7 @@ descriptions:
     ensuring consistency in AI-generated responses.
   ./config.yaml: Global configuration file managing system-wide settings, service
     integrations, and environment variables.
+  ./connectMongoDB.js: "\U0001F680 Add a description here"
   ./descriptions.yaml: Metadata file storing structured descriptions for all repository
     files, keeping documentation updated.
   ./download_mistral.py: Python script related to the now-removed Mistral component.

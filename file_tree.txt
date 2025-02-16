@@ -1,6 +1,7 @@
   📁 node_modules/  [Hidden, 25191 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 .netlifyignore - 🚀 Add a description here
+     📄 connectMongoDB.js - 🚀 Add a description here
      📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
      📄 AI_DEVELOPER_NOTES.md - Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
      📄 netlify.toml - Configuration file managing Netlify deployments, routing, API function settings, and CORS policies.
