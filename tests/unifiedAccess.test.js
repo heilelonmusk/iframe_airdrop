@@ -1,7 +1,7 @@
 require("dotenv").config();
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { app, redis } = require("../api/unifiedAccess"); // Importa l'istanza Redis dal modulo
+const redis = require("../lib/redis");
 const winston = require("winston");
 const { execSync } = require("child_process");
 

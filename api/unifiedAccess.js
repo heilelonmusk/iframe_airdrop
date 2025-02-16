@@ -7,7 +7,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-const Redis = require("ioredis");
+const redis = require("./lib/redis");
 const winston = require("winston");
 
 const app = express();
@@ -23,15 +23,15 @@ if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
   process.exit(1);
 }
 
-const redis = new Redis({
-  host: REDIS_HOST,
-  port: REDIS_PORT,
-  password: REDIS_PASSWORD,
-  tls: { rejectUnauthorized: false }, // Miglioramento per Upstash
-  enableOfflineQueue: false,
-  connectTimeout: 5000,
-  retryStrategy: (times) => Math.min(times * 100, 2000),
-});
+//const redis = new Redis({
+//  host: REDIS_HOST,
+//  port: REDIS_PORT,
+//  password: REDIS_PASSWORD,
+//  tls: { rejectUnauthorized: false }, // Miglioramento per Upstash
+//  enableOfflineQueue: false,
+//  connectTimeout: 5000,
+//  retryStrategy: (times) => Math.min(times * 100, 2000),
+// });
 
 redis.on("connect", () => {
   console.log("✅ Connected to Redis successfully!");

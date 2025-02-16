@@ -7,7 +7,7 @@ const cors = require("cors");
 const timeout = require("connect-timeout");
 const { NlpManager } = require("node-nlp");
 const winston = require("winston");
-const Redis = require("ioredis");
+const redis = require("./lib/redis");
 const fs = require("fs");
 const path = require("path");
 const port = process.env.PORT || 8889;
@@ -64,22 +64,22 @@ app.use(
 );
 
 // ✅ Connessione a Redis
-console.log("🔹 REDIS_HOST:", process.env.REDIS_HOST);
-console.log("🔹 REDIS_PORT:", process.env.REDIS_PORT);
-console.log("🔹 REDIS_PASSWORD:", process.env.REDIS_PASSWORD ? "********" : "Not Set");
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
-  password: process.env.REDIS_PASSWORD,
-  tls: {},
-  retryStrategy: (times) => {
-    if (times > 10) {
-      logger.error("❌ Too many Redis reconnection attempts. Stopping...");
-      return null;
-    }
-    return Math.min(times * 1000, 30000);
-  }
-});
+//console.log("🔹 REDIS_HOST:", process.env.REDIS_HOST);
+//console.log("🔹 REDIS_PORT:", process.env.REDIS_PORT);
+//console.log("🔹 REDIS_PASSWORD:", process.env.REDIS_PASSWORD ? "********" : "Not Set");
+//const redis = new Redis({
+//  host: process.env.REDIS_HOST,
+//  port: process.env.REDIS_PORT,
+//  password: process.env.REDIS_PASSWORD,
+//  tls: {},
+//  retryStrategy: (times) => {
+//    if (times > 10) {
+//      logger.error("❌ Too many Redis reconnection attempts. Stopping...");
+//      return null;
+//    }
+//   return Math.min(times * 1000, 30000);
+//  }
+// });
 
 redis.on("connect", () => logger.info("✅ Connected to Redis successfully!"));
 redis.on("error", (err) => logger.error(`❌ Redis connection error: ${err.message}`));
