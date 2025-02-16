@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { app, handler } = require("../api/unifiedAccess.js");
+const { app, handler } = require("../api/server.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
 const redis = require("../lib/redis");
@@ -89,16 +89,20 @@ afterAll(async () => {
   await mongoose.connection.close();
   logger.info("✅ MongoDB connection closed.");
   
-  logger.info("✅ Chiusura connessioni a Redis...");
+  logger.info("🗑️ Pulizia finale di Redis...");
+  try {
+    await redis.flushdb();
+    logger.info("✅ Redis ripulito con successo.");
+  } catch (cleanupError) {
+    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
+  }
   try {
     await redis.quit();
-    logger.info("✅ Redis connection closed with quit().");
+    logger.info("🔹 Connessione Redis chiusa.");
   } catch (quitError) {
-    logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
+    logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+    redis.disconnect();
   }
-  // Forza la disconnessione completa dei socket Redis
-  redis.disconnect();
-  logger.info("✅ Redis disconnected via disconnect().");
   
   // Attendi brevemente per consentire la chiusura dei socket residui
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -117,11 +121,11 @@ afterEach(async () => {
   } catch (error) {
     logger.error("❌ Errore durante la pulizia della collezione 'knowledges':", error.message);
   }
-  try {
-    await redis.flushdb();
-  } catch (error) {
-    logger.error("❌ Errore durante la pulizia di Redis:", error.message);
-  }
+ // try {
+ //   await redis.flushdb();
+ // } catch (error) {
+ //   logger.error("❌ Errore durante la pulizia di Redis:", error.message);
+ // }
 });
 
 describe("Unified Access API Tests", () => {
