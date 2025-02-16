@@ -69,7 +69,7 @@
   "license": "MIT",
   "jest": {
     "transform": {
-      "^.+\\.js$": "@babel/jest"
+      "^.+\\.js$": "babel-jest"
     }
   }
 }
