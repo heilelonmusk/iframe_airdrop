@@ -12,24 +12,21 @@ const fs = require("fs");
 const path = require("path");
 const port = process.env.PORT || 8889;
 
+// Import dei moduli
 const { getIntent } = require("../modules/intent/intentRecognizer");
 const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
 const { generateResponse } = require("../modules/nlp/transformer");
 const { logConversation } = require("../modules/logging/logger");
 
+// Inizializza il manager NLP
 const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
-if (require.main === module && !process.env.NETLIFY) {
-  app.listen(port, () => logger.info(`Server running on port ${port}`));
-}
-
-// Usa "/tmp/logs" in produzione, altrimenti "../logs"
+// Configurazione del logger con Winston
+// Usa "/tmp/logs" in sviluppo, altrimenti "../logs"
 const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
-
-// Configurazione del logger con Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -47,6 +44,7 @@ const logger = winston.createLogger({
   ],
 });
 
+// Crea l'app Express e il router
 const app = express();
 const router = express.Router();
 
@@ -248,8 +246,9 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-if (require.main === module) {
-  app.listen(8889, () => logger.info("Server running on port 8889"));
+// Avvio del server (solo se eseguito come modulo principale e non in ambiente serverless)
+if (require.main === module && !process.env.NETLIFY) {
+  app.listen(port, () => logger.info(`Server running on port ${port}`));
 }
 
 module.exports = app;
