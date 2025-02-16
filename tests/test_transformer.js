@@ -52,6 +52,11 @@ beforeAll(async () => {
       socketTimeoutMS: 45000,
     });
     logger.info("✅ MongoDB Connected Successfully");
+
+    // Aggiungi i listener per il debug della connessione:
+    mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
+    mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
+    mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
   } catch (error) {
     logger.error("❌ MongoDB Connection Error:", error.message);
     process.exit(1);

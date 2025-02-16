@@ -78,6 +78,11 @@ beforeAll(async () => {
     logger.info("✅ Connessione a MongoDB riuscita.");
     // Attendi un attimo per essere sicuri che la connessione sia stabile
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Aggiungi i listener qui:
+    mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
+    mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
+    mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
   } catch (error) {
     logger.error("❌ Errore di connessione a MongoDB:", error.message);
     process.exit(1);

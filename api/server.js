@@ -122,20 +122,24 @@ if (mongoose.connection.readyState === 2) {
 }
   
   // Ora tenta di connettersi
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      // Le opzioni deprecate possono essere omesse con il driver 4.x
-      // useNewUrlParser e useUnifiedTopology non sono più necessarie
-    });
-    logger.info("📚 Connected to MongoDB");
-  } catch (err) {
-    logger.error(`❌ MongoDB connection error: ${err.message}`);
-  }
-  
-  // Attende un po' per permettere l'aggiornamento dello stato
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
-  return mongoose.connection;
+try {
+  await mongoose.connect(process.env.MONGO_URI, {
+    // Le opzioni deprecate possono essere omesse con il driver 4.x
+  });
+  logger.info("📚 Connected to MongoDB");
+
+  // Aggiungi i listener di connessione
+  mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
+  mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
+  mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
+} catch (err) {
+  logger.error(`❌ MongoDB connection error: ${err.message}`);
+}
+
+// Attende un po' per permettere l'aggiornamento dello stato
+await new Promise((resolve) => setTimeout(resolve, 1000));
+logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
+return mongoose.connection;
 };
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
