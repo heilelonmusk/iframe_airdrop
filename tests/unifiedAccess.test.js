@@ -11,16 +11,16 @@ logger.error("This is an error message");
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
 // 🚀 Configurazione del Logger con Winston
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(
-      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
-    )
-  ),
-  transports: [new winston.transports.Console()],
-});
+//const logger = winston.createLogger({
+//  level: "info",
+//  format: winston.format.combine(
+//    winston.format.timestamp(),
+//    winston.format.printf(
+//      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+//    )
+//  ),
+//  transports: [new winston.transports.Console()],
+//});
 
 // 🚀 Controllo processi attivi sulla porta 5000 (solo log)
 const checkActiveProcesses = () => {
