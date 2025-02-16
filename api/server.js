@@ -234,12 +234,12 @@ const Question = mongoose.models.Question || mongoose.model("Question", question
 //const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
 // Funzione per allenare e salvare il modello NLP
-async function trainAndSaveNLP() {
-  manager.addDocument("en", "hello", "greeting");
-  await manager.train();
-  await saveNLPModel(manager.export());
-  logger.info("✅ New NLP Model trained and saved!");
-}
+//async function trainAndSaveNLP() {
+//  manager.addDocument("en", "hello", "greeting");
+//  await manager.train();
+//  await saveNLPModel(manager.export());
+//  logger.info("✅ New NLP Model trained and saved!");
+//}
 
 // Inizializza il modello NLP
 (async () => {
@@ -259,6 +259,11 @@ async function trainAndSaveNLP() {
     logger.error("❌ Error initializing NLP model:", error);
   }
 })();
+
+NLPModelSchema.methods.processText = async function (text) {
+  if (!text) throw new Error("Input text is required");
+  return this.modelData[text] || "Unknown intent";
+};
 
 // Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", async (req, res) => {

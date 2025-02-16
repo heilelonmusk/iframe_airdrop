@@ -25,12 +25,11 @@ async function loadNLPModel() {
   }
 }
 
-// ✅ Salva il modello NLP nel database
+// ✅ Funzione per salvare il modello NLP nel database
 async function saveNLPModel(modelData) {
   try {
-    const result = await NLPModel.updateOne({}, { modelData }, { upsert: true });
+    await NLPModel.updateOne({}, { modelData }, { upsert: true });
     logger.info("✅ NLP Model saved in MongoDB");
-    return result;
   } catch (error) {
     logger.error("❌ Error saving NLP model:", error.message);
     throw error;
