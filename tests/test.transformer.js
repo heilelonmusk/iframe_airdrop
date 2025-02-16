@@ -1,21 +1,21 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { NLPModel } = require("../modules/nlp/nlpModel");
-const winston = require("winston");
 const { execSync } = require("child_process");
 const { logger } = require("../modules/logging/logger");
+const redis = require("../config/redis")
 
 jest.setTimeout(30000); // Evita blocchi nei test lunghi
 
 // 🚀 Configurazione del Logger
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
-  ),
-  transports: [new winston.transports.Console()],
-});
+//const logger = winston.createLogger({
+//  level: "info",
+//  format: winston.format.combine(
+//    winston.format.timestamp(),
+//    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+//  ),
+//  transports: [new winston.transports.Console()],
+//});
 
 // 🚀 Verifica se ci sono processi MongoDB attivi sulla porta 27017
 const checkMongoDBProcesses = () => {
