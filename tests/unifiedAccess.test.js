@@ -101,12 +101,11 @@ afterAll(async () => {
   
   // Attendi brevemente per consentire la chiusura dei socket residui
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // (Opzionale) Log degli active handles per debug
-  setTimeout(() => {
-    console.log("Active handles:", process._getActiveHandles());
-    process.exit(0);
-  }, 2000);
+
+  // Rimuovi il blocco che forza l'uscita con process.exit
+  // Se desideri loggare gli active handles per il debug, puoi farlo,
+  // ma non chiamare process.exit.
+  console.log("Active handles:", process._getActiveHandles());
 });
 
 // Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
