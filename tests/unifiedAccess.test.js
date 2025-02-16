@@ -20,7 +20,7 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-// 🚀 Verifica processi attivi sulla porta 5000 (solo log, senza terminare l'esecuzione)
+// 🚀 Controllo processi attivi sulla porta 5000 (solo log)
 const checkActiveProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :5000").toString();
@@ -76,6 +76,8 @@ beforeAll(async () => {
       socketTimeoutMS: 45000,
     });
     logger.info("✅ Connessione a MongoDB riuscita.");
+    // Attendi un attimo per essere sicuri che la connessione sia stabile
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   } catch (error) {
     logger.error("❌ Errore di connessione a MongoDB:", error.message);
     process.exit(1);
