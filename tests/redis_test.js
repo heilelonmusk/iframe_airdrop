@@ -5,14 +5,10 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-// 📁 Assicuriamoci che la cartella dei log esista (Usiamo /tmp per Netlify)
+// 📁 Assicuriamoci che la cartella dei log esista
 const logsDir = "/tmp/logs";
 if (!fs.existsSync(logsDir)) {
-  try {
-    fs.mkdirSync(logsDir, { recursive: true });
-  } catch (err) {
-    console.error("❌ Error creating logs directory:", err.message);
-  }
+  fs.mkdirSync(logsDir, { recursive: true });
 }
 
 // 🚀 Winston Logger Setup
@@ -46,10 +42,11 @@ if (!process.env.REDIS_URL) {
   process.exit(1);
 }
 
-// 🚀 Connect to Redis with Retry Strategy
+// 🚀 Connect to Redis con TLS (necessario per Upstash)
 let redis;
 try {
   const redis = new Redis(process.env.REDIS_URL, {
+    tls: {}, // ✅ NECESSARIO per Upstash Redis
     enableOfflineQueue: false,
     connectTimeout: 5000,
     retryStrategy: (times) => Math.min(times * 100, 2000),
@@ -62,7 +59,6 @@ try {
   redis.on("error", (err) => {
     logger.error("❌ Redis connection error:", err.message);
   });
-
 } catch (error) {
   logger.error("❌ Critical Error: Unable to initialize Redis client.", error.message);
   process.exit(1);
@@ -79,7 +75,7 @@ try {
       throw new Error("Redis is not responding.");
     }
 
-    // 🗑️ Pulizia iniziale solo se Redis è connesso
+    // 🗑️ Pulizia iniziale
     logger.info("🗑️ Cleaning up Redis before tests...");
     try {
       await redis.flushdb();
@@ -126,7 +122,7 @@ try {
   } catch (error) {
     logger.error("❌ Redis test failed:", error.message);
   } finally {
-    // 🗑️ Cleanup finale solo se Redis è connesso
+    // 🗑️ Cleanup finale
     logger.info("🗑️ Final cleanup of Redis...");
     try {
       await redis.flushdb();
