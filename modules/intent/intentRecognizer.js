@@ -1,8 +1,7 @@
 require('dotenv').config();
 const { NlpManager } = require('node-nlp');
-const { loadNLPModel, saveNLPModel, NLPModel } = require("../nlp/nlpModel");
-
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
+const { loadNLPModel, saveNLPModel, NLPModel } = require("../nlp/nlpModel");
 
 // ✅ Funzione per caricare il modello NLP o allenarlo se non esiste
 async function initializeNLP() {

@@ -1,0 +1,5 @@
+
+> iframe_airdrop@1.0.3 start
+> node api/server.js
+
+[20:29:16] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
