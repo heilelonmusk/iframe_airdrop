@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { logger, logConversation, getFrequentQuestions } = require("../logging/logger");
+const path = require("path");
+const { logger } = require(path.resolve(__dirname, "../logging/logger"));
 
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true }
