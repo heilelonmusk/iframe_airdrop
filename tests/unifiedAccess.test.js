@@ -1,7 +1,8 @@
 require("dotenv").config();
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { handler } = require("../api/unifiedAccess"); // Import del handler dalla funzione unifiedAccess
+// Importa sia l'app che il handler da unifiedAccess.js
+const { app, handler } = require("../api/unifiedAccess");
 const express = require("express");
 const winston = require("winston");
 const Redis = require("ioredis");
@@ -21,13 +22,13 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-// 🚀 Verifica processi attivi sulla porta 5000
+// 🚀 Verifica processi attivi sulla porta 5000 (solo log, senza terminare l'esecuzione)
 const checkActiveProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :5000").toString();
     if (runningProcesses && runningProcesses.trim() !== "") {
       logger.warn("⚠️ Un altro processo è attivo sulla porta 5000. Questo potrebbe interferire con i test.");
-      // Non interrompiamo l'esecuzione: lasciamo solo l'avviso.
+      // Non terminare l'esecuzione
     }
   } catch (error) {
     logger.info("✅ Nessun processo attivo sulla porta 5000. Procediamo con i test.");
@@ -56,9 +57,9 @@ const checkEnvVariables = () => {
 // 🚀 Configurazione di Redis
 const redis = new Redis({
   host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  port: Number(process.env.REDIS_PORT),
   password: process.env.REDIS_PASSWORD,
-  tls: {}, // NECESSARIO per Upstash Redis
+  tls: { rejectUnauthorized: false }, // Necessario per Upstash
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
@@ -66,7 +67,7 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-// 📌 Helper per simulare richieste API
+// 📌 Helper per simulare richieste API (utilizzando direttamente il handler se necessario)
 const simulateRequest = async (method, path, body = null) => {
   const event = {
     httpMethod: method,
@@ -103,10 +104,12 @@ beforeAll(async () => {
     logger.warn("⚠️ Connessione Redis fallita:", error.message);
   }
 
-  // Avvio di un server di test su porta 5000
+  // Avvio di un server di test sulla porta 5000 usando l'app Express
   const testApp = express();
-  testApp.use("/.netlify/functions/unifiedAccess", handler);
-  server = testApp.listen(5000, () => logger.info("🔹 Server di test avviato sulla porta 5000"));
+  testApp.use("/.netlify/functions/unifiedAccess", app);
+  server = testApp.listen(5000, () =>
+    logger.info("🔹 Server di test avviato sulla porta 5000")
+  );
 });
 
 // Teardown dopo tutti i test
@@ -122,7 +125,7 @@ afterAll(async () => {
   }
 });
 
-// Cleanup dopo ogni test: rimuove i documenti dalla collezione "knowledges" e pulisce Redis
+// Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
 afterEach(async () => {
   logger.info("🗑️ Pulizia del database di test...");
   try {
@@ -142,7 +145,11 @@ test("GET /health - Controllo stato servizio", async () => {
   const response = await simulateRequest("GET", "/health");
   expect(response.statusCode).toBe(200);
   const body = JSON.parse(response.body);
-  expect(body).toMatchObject({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
+  expect(body).toMatchObject({
+    status: "✅ Healthy",
+    mongo: "Connected",
+    redis: "Connected",
+  });
 });
 
 // Test: Redis deve rispondere al PING
