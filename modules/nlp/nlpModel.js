@@ -37,6 +37,30 @@ async function saveNLPModel(modelData) {
   }
 }
 
-await trainAndSaveNLP();
+// ✅ Funzione per allenare e salvare il modello NLP
+async function trainAndSaveNLP() {
+  const { NlpManager } = require('node-nlp');
+  const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 
-module.exports = { loadNLPModel, saveNLPModel, NLPModel };
+  manager.addDocument("en", "hello", "greeting");
+  await manager.train();
+
+  const modelData = manager.export();
+  await saveNLPModel(modelData);
+
+  logger.info("✅ New NLP Model trained and saved!");
+}
+
+// ❗❗ Chiamata a trainAndSaveNLP() solo se il modello non esiste già
+(async () => {
+  try {
+    const model = await loadNLPModel();
+    if (!model) {
+      await trainAndSaveNLP();
+    }
+  } catch (error) {
+    logger.error("❌ Error initializing NLP model:", error.message);
+  }
+})();
+
+module.exports = { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP };

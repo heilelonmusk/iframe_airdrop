@@ -7,7 +7,7 @@ const cors = require("cors");
 const timeout = require("connect-timeout");
 const { NlpManager } = require('node-nlp');
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
-const { loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpModel");
+const { trainAndSaveNLP, loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpModel");
 //const winston = require("winston");
 const redis = require("../config/redis");
 const fs = require("fs");
@@ -233,12 +233,20 @@ const Question = mongoose.models.Question || mongoose.model("Question", question
 //});
 //const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
-// Inizializza il modello NLP (aggiornato per attendere la connessione a MongoDB)
+// Funzione per allenare e salvare il modello NLP
+async function trainAndSaveNLP() {
+  manager.addDocument("en", "hello", "greeting");
+  await manager.train();
+  await saveNLPModel(manager.export());
+  logger.info("✅ New NLP Model trained and saved!");
+}
+
+// Inizializza il modello NLP
 (async () => {
   try {
     // Attende esplicitamente che la connessione sia attiva
     await connectMongoDB();
-    
+
     // Ora è sicuro eseguire le operazioni sul database
     const savedModel = await loadNLPModel();
     if (savedModel) {
@@ -251,14 +259,6 @@ const Question = mongoose.models.Question || mongoose.model("Question", question
     logger.error("❌ Error initializing NLP model:", error);
   }
 })();
-
-// Funzione per allenare e salvare il modello NLP
-async function trainAndSaveNLP() {
-  manager.addDocument("en", "hello", "greeting");
-  await manager.train();
-  await saveNLPModel(manager.export());
-  logger.info("✅ New NLP Model trained and saved!");
-}
 
 // Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", async (req, res) => {
