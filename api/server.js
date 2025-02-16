@@ -304,10 +304,10 @@ router.get("/fetch", async (req, res) => {
   }
 });
 
-if (!process.env.LOCAL_DEV) {
+if (process.env.NETLIFY) {
   module.exports.handler = serverless(app);
 } else {
-  app.listen(port, () => logger.info(`Server running on port ${port}`));
+  app.listen(port, () => logger.info(`🚀 Server running on port ${port}`));
 }
 
 module.exports = { app, handler: serverless(app), redis, connectMongoDB };
