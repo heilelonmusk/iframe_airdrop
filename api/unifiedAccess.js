@@ -7,7 +7,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-const redis = require("../lib/redis");
+const redis = require("../config/redis");
 const winston = require("winston");
 const { logger } = require("../modules/logging/logger");
 logger.error("This is an error message");

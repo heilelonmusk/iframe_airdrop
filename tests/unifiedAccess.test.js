@@ -2,7 +2,7 @@ require("dotenv").config();
 const { app, handler } = require("../api/unifiedAccess.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
-const redis = require("../lib/redis");
+const redis = require("../config/redis");
 const winston = require("winston");
 const { execSync } = require("child_process");
 const { logger } = require("../modules/logging/logger");
