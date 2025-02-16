@@ -12,7 +12,8 @@ NODE_VERSION = "23.7.0"
 [dev]
   command = "npm run dev"
   framework = "#custom"
-  targetPort = 8889
+  targetPort = 8889  # Porta del tuo server locale
+  port = 3000        # Porta su cui Netlify Dev gira il proxy
   autoLaunch = false
 
 # ✅ Pass Environment Variables to Build (imposta i valori in Netlify senza virgolette)
