@@ -4,6 +4,7 @@ const winston = require("winston");
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+const mongoose = require("mongoose");
 
 // 📁 Assicuriamoci che la cartella dei log esista
 const logsDir = "/tmp/logs";

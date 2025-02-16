@@ -2,6 +2,7 @@ require("dotenv").config();
 const { handler, redis } = require("../api/server.js");
 const winston = require("winston");
 const { execSync } = require("child_process");
+const mongoose = require("mongoose");
 
 
 jest.setTimeout(20000); // Evita blocchi nei test lunghi
