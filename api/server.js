@@ -203,9 +203,13 @@ const NLPModelSchema = new mongoose.Schema({
 });
 const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
-// Inizializza il modello NLP
+// Inizializza il modello NLP (aggiornato per attendere la connessione a MongoDB)
 (async () => {
   try {
+    // Attende esplicitamente che la connessione sia attiva
+    await connectMongoDB();
+    
+    // Ora è sicuro eseguire le operazioni sul database
     const savedModel = await loadNLPModel();
     if (savedModel) {
       manager.import(savedModel);
