@@ -4,14 +4,14 @@ PORT = "8889"  # ⬅️ Aggiunto per la configurazione globale
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "NODE_ENV=development npm run build"
+  command = "npm install && npm run start"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
 
 # 🛠️ Local Development Settings
 [dev]
-  command = "npm run dev"
+  command = "npm start"
   framework = "#custom"
   targetPort = 8889  # Porta del tuo server locale
   port = 3000        # Porta su cui Netlify Dev gira il proxy
@@ -75,17 +75,6 @@ PORT = "8889"  # ⬅️ Aggiunto per la configurazione globale
   force = true
 
 # ✅ Redirect Root URL to Docs
-[[redirects]]
-  from = "/"
-  to = "/docs/index.html"
-  status = 302
-
-  [[redirects]]
-  from = "/*"
-  to = "/maintenance.html"
-  status = 503
-  conditions = { country = ["CN", "RU"] }
-  force = false
 
   # 🛠 Debugging & Logging Headers
 [[headers]]
