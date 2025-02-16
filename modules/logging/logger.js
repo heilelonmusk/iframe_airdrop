@@ -85,7 +85,7 @@ async function cleanupOldLogs() {
 }
 
 // Pianifica la pulizia dei log ogni 24 ore
-setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
+const intervalId = setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
 intervalId.unref();
 
 module.exports = { logConversation, getFrequentQuestions };

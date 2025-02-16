@@ -33,7 +33,7 @@ const checkRedisProcess = () => {
       const runningProcesses = execSync("ps aux | grep redis-server | grep -v grep").toString();
       if (runningProcesses && runningProcesses.trim() !== "") {
         logger.warn("⚠️ Redis potrebbe essere già in esecuzione. Verifica prima di procedere.");
-        process.exit(1);
+        // Puoi decidere di terminare o semplicemente loggare l'avviso
       }
     } catch (error) {
       logger.info("✅ Nessun processo Redis attivo trovato. Procediamo con il test.");
@@ -58,7 +58,6 @@ checkEnvVariables();
 checkRedisProcess();
 
 // ✅ Connessione a Redis con TLS (necessario per Upstash)
-// Convertiamo REDIS_PORT in numero, impostiamo family: 4 e rejectUnauthorized: false
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: Number(process.env.REDIS_PORT),
@@ -79,7 +78,6 @@ const waitForReady = () => {
     if (redis.status === "ready") {
       resolve();
     } else {
-      // Attende il primo evento "ready" o timeout dopo 5 secondi
       const readyHandler = () => {
         clearTimeout(timeoutId);
         resolve();
@@ -92,81 +90,69 @@ const waitForReady = () => {
   });
 };
 
-(async () => {
-  try {
+describe("Test di base per Redis", () => {
+  test("Verifica che Redis risponda al PING", async () => {
+    logger.info("🔹 Attesa che Redis sia pronto...");
+    await waitForReady();
+    logger.info("🔹 Redis pronto: " + redis.status);
+    const redisPing = await redis.ping();
+    expect(redisPing).toBe("PONG");
+  });
+});
+
+describe("Operazioni avanzate su Redis", () => {
+  test("Imposta, recupera ed elimina una chiave di test", async () => {
     logger.info("🔹 Attesa che Redis sia pronto...");
     await waitForReady();
     logger.info("🔹 Redis status: " + redis.status);
-
-    logger.info("🔹 Controllo connessione Redis...");
-    const isConnected = await redis.ping().catch((err) => {
-      logger.error("Ping error:", err.message);
-      return null;
-    });
-    if (isConnected !== "PONG") {
-      throw new Error("Redis non sta rispondendo.");
-    }
-
-    // 🗑️ Pulizia iniziale
+    
+    // Pulizia iniziale
     logger.info("🗑️ Pulizia Redis prima dei test...");
     try {
       await redis.flushdb();
     } catch (cleanupError) {
       logger.warn("⚠️ Impossibile eseguire flush su Redis prima del test:", cleanupError.message);
     }
-
-    // 🔹 Impostazione della chiave di test
+    
+    // Impostazione della chiave di test
     logger.info("🔹 Inserimento chiave di test in Redis...");
     const startTime = Date.now();
     await redis.set("test_key", "Hello Redis!", "EX", 60);
-
-    // 🔹 Recupero della chiave di test
+    
+    // Recupero della chiave di test
     logger.info("🔹 Recupero chiave di test da Redis...");
     const value = await redis.get("test_key");
     const latency = Date.now() - startTime;
-
-    if (value) {
-      logger.info(`✅ Chiave recuperata con successo: ${value} (Latenza: ${latency}ms)`);
-    } else {
-      logger.warn("⚠️ Valore nullo ricevuto. La chiave potrebbe essere scaduta.");
-    }
-
-    // 🔹 Verifica della persistenza della chiave
+    expect(value).toBe("Hello Redis!");
+    logger.info(`✅ Chiave recuperata: ${value} (Latenza: ${latency}ms)`);
+    
+    // Verifica della persistenza
     logger.info("🔹 Controllo persistenza chiave...");
     const exists = await redis.exists("test_key");
-    if (exists) {
-      logger.info("✅ La chiave è presente in Redis.");
-    } else {
-      logger.warn("⚠️ La chiave non esiste in Redis.");
-    }
-
-    // 🔹 Eliminazione della chiave di test
+    expect(exists).toBe(1);
+    
+    // Eliminazione della chiave
     logger.info("🔹 Eliminazione chiave di test...");
     await redis.del("test_key");
-
     const deletedCheck = await redis.get("test_key");
-    if (!deletedCheck) {
-      logger.info("✅ Chiave eliminata correttamente.");
-    } else {
-      logger.error("❌ Errore nell'eliminazione della chiave.");
-    }
-  } catch (error) {
-    logger.error("❌ Test Redis fallito:", error.message);
-  } finally {
-    // 🗑️ Pulizia finale
-    logger.info("🗑️ Pulizia finale di Redis...");
-    try {
-      await redis.flushdb();
-      logger.info("✅ Redis ripulito con successo.");
-    } catch (cleanupError) {
-      logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
-    }
-    try {
-      await redis.quit();
-      logger.info("🔹 Connessione Redis chiusa.");
-    } catch (quitError) {
-      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-      redis.disconnect();
-    }
+    expect(deletedCheck).toBeNull();
+    logger.info("✅ Chiave eliminata correttamente.");
+  });
+});
+
+afterAll(async () => {
+  logger.info("🗑️ Pulizia finale di Redis...");
+  try {
+    await redis.flushdb();
+    logger.info("✅ Redis ripulito con successo.");
+  } catch (cleanupError) {
+    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
   }
-})();
+  try {
+    await redis.quit();
+    logger.info("🔹 Connessione Redis chiusa.");
+  } catch (quitError) {
+    logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+    redis.disconnect();
+  }
+});
