@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const logger = require('../modules/logging/logger');
+const logger = require("../logging/logger");
 
 //
 const NLPModelSchema = new mongoose.Schema({

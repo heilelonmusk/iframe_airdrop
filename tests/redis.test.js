@@ -1,5 +1,5 @@
 require("dotenv").config();
-const Redis = require("ioredis");
+const redis = require("../lib/redis");;
 const winston = require("winston");
 const fs = require("fs");
 const path = require("path");

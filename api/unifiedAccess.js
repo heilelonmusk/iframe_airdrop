@@ -7,7 +7,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-const redis = require("./lib/redis");
+const redis = require("../lib/redis");
 const winston = require("winston");
 
 const app = express();
