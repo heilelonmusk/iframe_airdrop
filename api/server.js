@@ -286,4 +286,4 @@ if (require.main === module && !process.env.NETLIFY) {
 }
 
 module.exports = app;
-module.exports.handler = serverless(app);
+module.exports.handler = serverless(app), redis;
