@@ -1,7 +1,7 @@
 require("dotenv").config();
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { app } = require("../api/unifiedAccess"); // Assicurati che unifiedAccess.js esporti { app, handler }
+const { app, redis } = require("../api/unifiedAccess"); // Importa l'istanza Redis dal modulo
 const winston = require("winston");
 const { redis } = require("../api/unifiedAccess");
 const { execSync } = require("child_process");
@@ -53,19 +53,6 @@ const checkEnvVariables = () => {
 
 checkActiveProcesses();
 checkEnvVariables();
-
-// 🚀 Configurazione di Redis (con TLS per Upstash)
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD,
-  tls: { rejectUnauthorized: false },
-  enableOfflineQueue: false,
-  connectTimeout: 5000,
-  retryStrategy: (times) => Math.min(times * 100, 2000),
-});
-redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
-redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
 // Setup prima di tutti i test
 beforeAll(async () => {
