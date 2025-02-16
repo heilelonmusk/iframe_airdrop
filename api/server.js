@@ -88,39 +88,49 @@ redis.on("end", () => {
   setTimeout(() => redis.connect(), 5000);
 });
 
-// Funzione per connettersi a MongoDB con log e gestione forzata se rimane in stato "connecting"
+// Funzione per connettersi a MongoDB con gestione forzata se rimane in stato "connecting"
 const connectMongoDB = async () => {
-  // Se già connesso, restituisci la connessione attiva
+  // Se già connesso (stato 1), restituisci la connessione attiva
   if (mongoose.connection.readyState === 1) {
     logger.info("🔄 MongoDB already connected, reusing existing connection.");
     return mongoose.connection;
   }
   
-  // Se rimane in "connecting" (stato 2), forziamo la disconnessione per ripartire da zero
+  // Se rimane in "connecting" (stato 2), forziamo la disconnessione e attendiamo che lo stato diventi 0 (disconnesso)
   if (mongoose.connection.readyState === 2) {
     logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
     try {
       await mongoose.disconnect();
-      logger.info("Forced disconnect successful.");
+      // Attende finché lo stato non diventa 0
+      await new Promise(resolve => {
+        const checkState = () => {
+          if (mongoose.connection.readyState === 0) {
+            resolve();
+          } else {
+            setTimeout(checkState, 100);
+          }
+        };
+        checkState();
+      });
+      logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
     } catch (err) {
       logger.error("Error during forced disconnect: " + err.message);
     }
   }
   
-  // Proviamo a connetterci
+  // Ora tenta di connettersi
   try {
     await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 50000,
-      socketTimeoutMS: 60000,
-      connectTimeoutMS: 60000
+      // Le opzioni deprecate possono essere omesse con il driver 4.x
+      // useNewUrlParser e useUnifiedTopology non sono più necessarie
     });
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
   }
   
-  // Attende un breve intervallo per permettere l'aggiornamento dello stato
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // Attende un po' per permettere l'aggiornamento dello stato
+  await new Promise(resolve => setTimeout(resolve, 1000));
   logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
   return mongoose.connection;
 };
