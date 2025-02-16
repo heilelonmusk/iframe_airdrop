@@ -74,12 +74,17 @@ redis.on("end", () => {
 
 // ✅ Connessione a MongoDB con gestione della riconnessione
 const connectMongoDB = async () => {
+  logger.info(`🔹 MONGO_URI: ${process.env.MONGO_URI}`); // <-- Aggiunto qui per il debug
   try {
-    await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 10000, socketTimeoutMS: 60000 });
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 10000, // Aspetta max 10 sec per il server
+      socketTimeoutMS: 60000, // Timeout di 60 sec per le operazioni
+    });
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
-    setTimeout(connectMongoDB, 5000); // Riprova la connessione dopo 5 secondi
   }
 };
 connectMongoDB();
