@@ -21,7 +21,7 @@ const redis = __webpack_require__(/*! ../config/redis */ "./config/redis.js");
 const fs = __webpack_require__(/*! fs */ "fs");
 const path = __webpack_require__(/*! path */ "path");
 const port = process.env.PORT || 8889;
-const { logger, logConversation, getFrequentQuestions } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '../logging/logger'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+const { logger, logConversation, getFrequentQuestions } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '..modules/logging/logger'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 //logger.error("This is an error message");
 
 // Import dei moduli
@@ -344,7 +344,7 @@ module.exports = redis;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 (__webpack_require__(/*! dotenv */ "dotenv").config)();
-const { loadNLPModel, saveNLPModel, NLPModel } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '../modules/nlp/nlpModel'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+const { loadNLPModel, saveNLPModel, NLPModel } = __webpack_require__(/*! ../nlp/nlpModel */ "./modules/nlp/nlpModel.js");
 
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 
@@ -413,6 +413,121 @@ module.exports = { getIntent, initializeNLP, trainModel };
 
 /***/ }),
 
+/***/ "./modules/logging/logger.js":
+/*!***********************************!*\
+  !*** ./modules/logging/logger.js ***!
+  \***********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+(__webpack_require__(/*! dotenv */ "dotenv").config)();
+const mongoose = __webpack_require__(/*! mongoose */ "mongoose");
+
+const LOG_RETENTION_DAYS = 30; // Auto-delete logs older than this
+const MONGO_URI = process.env.MONGO_URI;
+
+const winston = __webpack_require__(/*! winston */ "winston");
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "HH:mm:ss" }),
+    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+  ),
+  transports: [
+    new winston.transports.Console(),
+    // Aggiungi altri transport se necessario (es. File)
+  ]
+});
+
+if (!MONGO_URI) {
+  console.error("❌ ERROR: MONGO_URI is missing! Logging is disabled.");
+  process.exit(1);
+}
+
+// Connessione a MongoDB per il logging
+mongoose.connect(MONGO_URI, { })
+  .then(() => console.log("📜 Connected to MongoDB for logging"))
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
+
+// Schema per il logging delle conversazioni
+const logSchema = new mongoose.Schema({
+  userId: { type: String, default: "anonymous" },
+  question: { type: String, required: true },
+  answer: { type: String, required: true }, // Salvato sempre come stringa (JSON)
+  detectedIntent: { type: String },
+  confidence: { type: Number },
+  timestamp: { type: Date, default: Date.now }
+});
+
+// Creazione del modello ConversationLog
+const ConversationLog = mongoose.models.ConversationLog || mongoose.model('ConversationLog', logSchema);
+
+// Funzione per loggare una conversazione
+async function logConversation({ userId, question, answer, detectedIntent, confidence }) {
+  try {
+    const logEntry = new ConversationLog({
+      userId,
+      question,
+      answer: typeof answer === "string" ? answer : JSON.stringify(answer),
+      detectedIntent,
+      confidence
+    });
+
+    await logEntry.save();
+    console.log("📝 Conversation logged successfully.");
+  } catch (error) {
+    console.error("❌ Error logging conversation:", error);
+  }
+}
+
+// Funzione per recuperare le domande più frequenti
+async function getFrequentQuestions(limit = 5) {
+  try {
+    const results = await ConversationLog.aggregate([
+      { $group: { _id: "$question", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: limit }
+    ]);
+
+    if (!Array.isArray(results)) {
+      console.error("❌ Expected aggregation results to be an array, got:", results);
+      return [];
+    }
+    
+    return results.map(q => ({ question: q._id, count: q.count }));
+  } catch (error) {
+    console.error("❌ Error retrieving frequent questions:", error);
+    return [];
+  }
+}
+
+// Funzione per eliminare automaticamente i log vecchi (Retention Policy)
+async function cleanupOldLogs() {
+  try {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - LOG_RETENTION_DAYS);
+    const result = await ConversationLog.deleteMany({ timestamp: { $lt: cutoff } });
+    console.log(`🗑 Deleted ${result.deletedCount} old log entries.`);
+  } catch (error) {
+    console.error("❌ Error deleting old logs:", error);
+  }
+}
+
+// Pianifica la pulizia dei log ogni 24 ore
+const intervalId = setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
+intervalId.unref();
+
+module.exports = { 
+  logger, 
+  logConversation, 
+  getFrequentQuestions 
+};
+
+/***/ }),
+
 /***/ "./modules/nlp/nlpModel.js":
 /*!*********************************!*\
   !*** ./modules/nlp/nlpModel.js ***!
@@ -420,7 +535,7 @@ module.exports = { getIntent, initializeNLP, trainModel };
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const mongoose = __webpack_require__(/*! mongoose */ "mongoose");
-const { logger, logConversation, getFrequentQuestions } = __webpack_require__(Object(function webpackMissingModule() { var e = new Error("Cannot find module '../modules/logging/logger'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+const { logger, logConversation, getFrequentQuestions } = __webpack_require__(/*! ../logging/logger */ "./modules/logging/logger.js");
 
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true }
