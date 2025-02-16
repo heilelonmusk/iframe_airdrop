@@ -10,6 +10,7 @@ const winston = require("winston");
 const Redis = require("ioredis");
 const fs = require("fs");
 const path = require("path");
+const port = process.env.PORT || 8889;
 
 const { getIntent } = require("../modules/intent/intentRecognizer");
 const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
