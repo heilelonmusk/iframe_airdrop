@@ -78,10 +78,3 @@ NODE_VERSION = "23.7.0"
   from = "/"
   to = "/docs/index.html"
   status = 302
-
-  [[redirects]]
-  from = "/*"
-  to = "/maintenance.html"
-  status = 503
-  conditions = { country = ["CN", "RU"] }
-  force = false
