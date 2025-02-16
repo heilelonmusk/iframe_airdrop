@@ -12,7 +12,6 @@ const fs = require("fs");
 const path = require("path");
 const port = process.env.PORT || 8889;
 const { logger, logConversation, getFrequentQuestions } = require("../logging/logger");
-const { logger } = require("../logging/logger");
 //logger.error("This is an error message");
 
 // Import dei moduli
