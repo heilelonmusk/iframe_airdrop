@@ -1,7 +1,8 @@
 require("dotenv").config();
-const { handler } = require("../api/server.js");
+const { handler, redis } = require("../api/server.js");
 const winston = require("winston");
 const { execSync } = require("child_process");
+
 
 jest.setTimeout(20000); // Evita blocchi nei test lunghi
 
@@ -91,14 +92,15 @@ describe("🔍 API Tests", () => {
     } catch (quitError) {
       logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
     }
-    // Forza la disconnessione completa dei socket Redis, se necessario
+    // Forza la disconnessione dei socket residui, se necessario
     redis.disconnect();
     logger.info("✅ Redis disconnected via disconnect().");
     
     // Attendi brevemente per consentire la chiusura dei socket residui
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // (Opzionale) Log degli active handles per debug, ma senza forzare process.exit
+    // Rimuovi la chiamata a process.exit, in modo che Jest termini naturalmente
+    // Se vuoi ancora loggare gli active handles, puoi farlo qui senza forzare l'uscita:
     console.log("Active handles:", process._getActiveHandles());
   });
 
