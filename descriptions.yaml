@@ -173,6 +173,7 @@ descriptions:
   tests/test_netlify.sh: "\U0001F680 Add a description here"
   tests/test_transformer.js: Test suite validating AI-powered `transformer.js`, ensuring
     accurate NLP processing and text refinement.
+  tests/transformer.test.js: "\U0001F680 Add a description here"
   tests/unifiedAccess.test.js: "\U0001F680 Add a description here"
   tmp/: "\U0001F680 Add a description here"
   tmp/logs/: "\U0001F680 Add a description here"

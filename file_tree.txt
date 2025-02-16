@@ -26,10 +26,10 @@
   📁 config/ - 🚀 Add a description here
      📄 redis.js - 🚀 Add a description here
   📁 tests/ - Contains all test scripts and debugging tools.
-     📄 test.transformer.js - 🚀 Add a description here
      📄 test.js - Primary test script validating API endpoints, chatbot functionality, and system responses.
      📄 unifiedAccess.test.js - 🚀 Add a description here
      📄 .gitkeep - Placeholder file ensuring Git tracks the `tests/` directory.
+     📄 transformer.test.js - 🚀 Add a description here
      📄 test.netlify.sh - 🚀 Add a description here
      📄 redis.test.js - 🚀 Add a description here
      📄 test.auto.update.sh - 🚀 Add a description here
