@@ -75,4 +75,9 @@ async function generateResponse(question) {
   }
 }
 
+afterAll(async () => {
+  await mongoose.connection.close();
+  await redis.quit();
+});
+
 module.exports = { generateResponse };

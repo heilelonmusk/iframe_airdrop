@@ -8,6 +8,12 @@ const NLPModelSchema = new mongoose.Schema({
 
 const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
 
+NLPModelSchema.methods.processText = async function (text) {
+  if (!text) throw new Error("Input text is required");
+  const response = await manager.process("en", text);
+  return response;
+};
+
 // ✅ Carica il modello NLP dal database
 async function loadNLPModel() {
   try {
@@ -62,4 +68,4 @@ async function trainAndSaveNLP() {
   }
 })();
 
-module.exports = { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP };
+module.exports = { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, processText };
