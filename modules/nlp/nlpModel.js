@@ -12,6 +12,7 @@ const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModel
 async function loadNLPModel() {
   try {
     const savedModel = await NLPModel.findOne({});
+    console.log("🔍 NLPModel loaded:", savedModel);
     if (savedModel) {
       logger.info("✅ NLP Model loaded from MongoDB");
       return savedModel.modelData;
@@ -35,5 +36,7 @@ async function saveNLPModel(modelData) {
     throw error;
   }
 }
+
+await trainAndSaveNLP();
 
 module.exports = { loadNLPModel, saveNLPModel, NLPModel };

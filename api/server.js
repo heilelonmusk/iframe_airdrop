@@ -211,12 +211,11 @@ router.get("/health", async (req, res) => {
 
 app.use("/.netlify/functions/server", router); // Netlify usa questa route
 
+let server;
 if (!process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  if (!server.listening) {
-    const server = app.listen(port, () => {
-      logger.info(`🚀 Server running on port ${port}`);
-    });
-  }
+  server = app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${port}`);
+  });
 }
 
 // Schema & Model per Knowledge Base
