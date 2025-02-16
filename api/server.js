@@ -142,13 +142,23 @@ router.get("/health", async (req, res) => {
     logger.info("🔹 Health check started...");
 
     // Log dello stato corrente della connessione MongoDB
-    const currentState = mongoose.connection.readyState;
+    let currentState = mongoose.connection.readyState;
     logger.info(`Current mongoose.connection.readyState: ${currentState}`);
-
+    
+    // Se lo stato è "connecting" (2), attendiamo 500ms e logghiamo nuovamente lo stato
+    if (currentState === 2) {
+      logger.warn("Mongoose connection is in 'connecting' state. Waiting 500ms for state change...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      currentState = mongoose.connection.readyState;
+      logger.info(`After waiting, mongoose.connection.readyState: ${currentState}`);
+    }
+    
+    // Se non è connesso (stato 1), proviamo a riconnetterci
     if (currentState !== 1) {
       logger.warn(`⚠️ MongoDB not connected (state ${currentState}), attempting to reconnect...`);
       await connectMongoDB();
-      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${mongoose.connection.readyState}`);
+      currentState = mongoose.connection.readyState;
+      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${currentState}`);
     }
 
     let mongoStatus = "Disconnected";
