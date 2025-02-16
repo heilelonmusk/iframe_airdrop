@@ -20,7 +20,7 @@ const { generateResponse } = require("../modules/nlp/transformer");
 //const { logConversation } = require("../modules/logging/logger");
 
 // Inizializza il manager NLP
-const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
+//const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
 // Configurazione del logger con Winston
 const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
