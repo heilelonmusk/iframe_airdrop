@@ -90,12 +90,10 @@ redis.on("end", () => {
 
 // ✅ Funzione per connettersi a MongoDB
 const connectMongoDB = async () => {
-  // Controlla lo stato della connessione: 1 significa "connesso"
   if (mongoose.connection.readyState === 1) {
     logger.info("🔄 MongoDB already connected, reusing existing connection.");
     return mongoose.connection;
   }
-
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
@@ -138,7 +136,7 @@ mongoose.connection.on("reconnected", () => {
   logger.info("✅ MongoDB reconnected!");
 });
 
-// ✅ Health Check
+// ✅ Health Check aggiornato
 router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
@@ -151,12 +149,17 @@ router.get("/health", async (req, res) => {
 
     let mongoStatus = "Disconnected";
     try {
-      if (mongoose.connection.readyState === 1) {
-        const admin = mongoose.connection.db.admin();
-        await admin.ping();
-        mongoStatus = "Connected";
+      if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+        logger.info("mongoose.connection.readyState: " + mongoose.connection.readyState);
+        // Utilizza il comando ping direttamente
+        const result = await mongoose.connection.db.command({ ping: 1 });
+        logger.info("MongoDB ping result: " + JSON.stringify(result));
+        if (result && result.ok === 1) {
+          mongoStatus = "Connected";
+        }
       }
     } catch (e) {
+      logger.error("MongoDB ping error: " + e.message);
       mongoStatus = "Disconnected";
     }
     logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
@@ -166,7 +169,10 @@ router.get("/health", async (req, res) => {
       redisStatus = await redis
         .ping()
         .then((res) => (res === "PONG" ? "Connected" : "Disconnected"))
-        .catch(() => "Disconnected");
+        .catch((e) => {
+          logger.error("Redis ping error: " + e.message);
+          return "Disconnected";
+        });
     }
 
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
