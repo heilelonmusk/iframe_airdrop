@@ -27,7 +27,7 @@ const checkMongoDBProcesses = () => {
       logger.info("✅ Nessun processo MongoDB attivo. Procediamo con i test.");
     }
   } catch (error) {
-    logger.info("✅ Nessun processo MongoDB attivo. Procediamo con i test.");
+    logger.error("❌ Errore durante il controllo di MongoDB:", error.message);
   }
 };
 
