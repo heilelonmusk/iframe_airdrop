@@ -107,6 +107,13 @@ descriptions:
     airdrop rewards.
   data/whitelist.csv: Maintains a list of wallet addresses eligible for airdrop rewards,
     cross-referenced in API checks.
+  dist/: "\U0001F680 Add a description here"
+  dist/dymensionAPI.js: "\U0001F680 Add a description here"
+  dist/externalTokenListingUpdate.js: "\U0001F680 Add a description here"
+  dist/knowledge.js: "\U0001F680 Add a description here"
+  dist/seedKnowledge.js: "\U0001F680 Add a description here"
+  dist/server.js: "\U0001F680 Add a description here"
+  dist/unifiedAccess.js: "\U0001F680 Add a description here"
   example_folder/: Placeholder directory, possibly used for testing or documentation.
     Needs verification if still required.
   example_folder/example.py: Sample Python script demonstrating API calls, chatbot
