@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { NlpManager } = require('node-nlp');  // ✅ AGGIUNGI QUESTA RIGA
 const { loadNLPModel, saveNLPModel, NLPModel } = require("../nlp/nlpModel");
 
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
