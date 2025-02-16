@@ -195,12 +195,36 @@ router.post("/logQuestion", async (req, res) => {
 // ✅ Health Check
 router.get("/health", async (req, res) => {
   try {
-    await mongoose.connection.db.admin().ping();
-    await redis.ping();
-    res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
+    logger.info("🔹 Health check started...");
+
+    // Test MongoDB
+    let mongoStatus = "Disconnected";
+    if (mongoose.connection.readyState === 1) {
+      mongoStatus = "Connected";
+    } else {
+      throw new Error("MongoDB not connected");
+    }
+
+    // Test Redis
+    let redisStatus = "Disconnected";
+    try {
+      const pingResult = await redis.ping();
+      logger.info(`🔹 Redis Ping Result: ${pingResult}`);
+      if (pingResult === "PONG") {
+        redisStatus = "Connected";
+      } else {
+        throw new Error(`Unexpected Redis ping response: ${pingResult}`);
+      }
+    } catch (err) {
+      throw new Error("Redis connection failed: " + err.message);
+    }
+
+    logger.info(`✅ Health check passed! MongoDB: ${mongoStatus}, Redis: ${redisStatus}`);
+    res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
+
   } catch (error) {
-    logger.error("❌ Health check failed:", error.message);
-    res.status(500).json({ error: "Service is unhealthy" });
+    logger.error(`❌ Health check failed: ${error.message}`);
+    res.status(500).json({ error: "Service is unhealthy", details: error.message });
   }
 });
 
