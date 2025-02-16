@@ -16,7 +16,6 @@ const { logger, logConversation, getFrequentQuestions } = require("../modules/lo
 
 // Import dei moduli
 const { getIntent } = require("../modules/intent/intentRecognizer");
-const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
 const { generateResponse } = require("../modules/nlp/transformer");
 //const { logConversation } = require("../modules/logging/logger");
 
