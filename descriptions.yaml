@@ -170,6 +170,7 @@ descriptions:
     and system responses.
   tests/test.netlify.sh: "\U0001F680 Add a description here"
   tests/test.transformer.js: "\U0001F680 Add a description here"
+  tests/testMongo.js: "\U0001F680 Add a description here"
   tests/test_auto_update.sh: Shell script automating testing for `update_tree.py`,
     ensuring the repository structure remains updated.
   tests/test_netlify.sh: "\U0001F680 Add a description here"
