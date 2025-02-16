@@ -18,7 +18,7 @@ const port = process.env.PORT || 8889;
 const { getIntent } = require("../modules/intent/intentRecognizer");
 const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
 const { generateResponse } = require("../modules/nlp/transformer");
-const { logger } = require("../modules/logging/logger");
+//const { logConversation } = require("../modules/logging/logger");
 
 // Inizializza il manager NLP
 const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
