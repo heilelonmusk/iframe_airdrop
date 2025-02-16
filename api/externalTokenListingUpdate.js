@@ -5,7 +5,7 @@ const evmJsonRpcUrl = process.env.EVM_JSON_RPC_URL;
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const { logger } = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 // Update the API_URL with the correct endpoint
 const API_URL = 'https://dymension-mainnet.public.blastapi.io';

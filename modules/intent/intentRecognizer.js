@@ -1,6 +1,5 @@
 require('dotenv').config();
-const { NlpManager } = require('node-nlp');
-const { saveNLPModel, loadNLPModel } = require('../nlp/nlpModel');
+const { loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpModel");
 
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 
@@ -65,4 +64,4 @@ async function initializeNLP() {
   }
 }
 
-module.exports = { getIntent, initializeNLP };
+module.exports = { getIntent, initializeNLP, trainModel };

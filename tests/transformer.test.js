@@ -1,6 +1,6 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
-const { NLPModel } = require("../modules/nlp/nlpModel");
+const { loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpModel");
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 const redis = require("../config/redis")

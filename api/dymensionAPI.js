@@ -2,7 +2,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const { ethers } = require("ethers");
-const { logger } = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 // Load endpoints from environment variables
 const TENDERMINT_RPC_URL = process.env.TENDERMINT_RPC_URL;

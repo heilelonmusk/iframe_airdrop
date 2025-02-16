@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const { Knowledge } = require('./knowledge');
-const { logger } = require("../modules/logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB for seeding"))

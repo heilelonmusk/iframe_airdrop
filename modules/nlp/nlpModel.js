@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const logger = require("../logging/logger");
+const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true }
