@@ -22,7 +22,6 @@ const { logConversation } = require("../modules/logging/logger");
 const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
 // Configurazione del logger con Winston
-// Usa "/tmp/logs" in sviluppo, altrimenti "../logs"
 const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
@@ -89,11 +88,10 @@ redis.on("end", () => {
   setTimeout(() => redis.connect(), 5000);
 });
 
-// ✅ Connessione a MongoDB con gestione della riconnessione
-let isConnected = false; // Stato della connessione globale
-
+// ✅ Funzione per connettersi a MongoDB
 const connectMongoDB = async () => {
-  if (isConnected) {
+  // Controlla lo stato della connessione: 1 significa "connesso"
+  if (mongoose.connection.readyState === 1) {
     logger.info("🔄 MongoDB already connected, reusing existing connection.");
     return mongoose.connection;
   }
@@ -106,11 +104,9 @@ const connectMongoDB = async () => {
       socketTimeoutMS: 60000,
       connectTimeoutMS: 60000
     });
-    isConnected = true;
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
-    isConnected = false;
   }
   return mongoose.connection;
 };
@@ -147,7 +143,7 @@ router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
 
-    // Se la connessione non è pronta, tentiamo di riconnetterci
+    // Se la connessione non è attiva, tentiamo di riconnetterci
     if (mongoose.connection.readyState !== 1) {
       logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
       await connectMongoDB();
