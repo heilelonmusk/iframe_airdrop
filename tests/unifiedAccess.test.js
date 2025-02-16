@@ -96,6 +96,8 @@ afterAll(async () => {
   logger.info("✅ Chiusura connessioni a MongoDB e Redis...");
   await mongoose.connection.close();
   await redis.quit();
+  // Forza l'uscita dopo un breve ritardo
+  setTimeout(() => process.exit(0), 1000);
 });
 
 // Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
