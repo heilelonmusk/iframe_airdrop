@@ -16,8 +16,8 @@ const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) =>
-      `[${timestamp}] ${level.toUpperCase()}: ${message}`
+    winston.format.printf(
+      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
     )
   ),
   transports: [
@@ -26,15 +26,20 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ Verifica processi attivi su Redis
+// ✅ Verifica processi attivi su Redis (solo se il Redis host è locale)
 const checkRedisProcess = () => {
-  try {
-    const runningProcesses = execSync("ps aux | grep redis-server | grep -v grep").toString();
-    if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn("⚠️ Redis potrebbe essere già in esecuzione. Verifica prima di procedere.");
+  if (process.env.REDIS_HOST === "localhost" || process.env.REDIS_HOST === "127.0.0.1") {
+    try {
+      const runningProcesses = execSync("ps aux | grep redis-server | grep -v grep").toString();
+      if (runningProcesses && runningProcesses.trim() !== "") {
+        logger.warn("⚠️ Redis potrebbe essere già in esecuzione. Verifica prima di procedere.");
+        process.exit(1);
+      }
+    } catch (error) {
+      logger.info("✅ Nessun processo Redis attivo trovato. Procediamo con il test.");
     }
-  } catch (error) {
-    logger.info("✅ Nessun processo Redis attivo trovato. Procediamo con il test.");
+  } else {
+    logger.info("✅ Redis host è remoto, saltiamo il controllo dei processi locali.");
   }
 };
 
@@ -70,7 +75,10 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
 (async () => {
   try {
     logger.info("🔹 Controllo connessione Redis...");
-    const isConnected = await redis.ping().catch(() => null);
+    const isConnected = await redis.ping().catch((err) => {
+      logger.error("Ping error:", err.message);
+      return null;
+    });
     if (isConnected !== "PONG") {
       throw new Error("Redis non sta rispondendo.");
     }
@@ -134,7 +142,8 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
       await redis.quit();
       logger.info("🔹 Connessione Redis chiusa.");
     } catch (quitError) {
-      logger.warn("⚠️ Errore durante la chiusura della connessione Redis:", quitError.message);
+      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+      redis.disconnect();
     }
   }
 })();
