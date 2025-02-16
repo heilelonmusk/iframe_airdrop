@@ -53,6 +53,13 @@ async function getIntent(question) {
   return { intent: "unknown", answer: "I'm not sure how to answer that yet. Try rephrasing?", score: 0 };
 }
 
+// ✅ **Train Model Function**
+async function trainModel() {
+  await manager.train();
+  manager.save();
+  console.log("✅ NLP Model trained and saved!");
+}
+
 // ✅ **Train Model on Startup**
 async function initializeNLP() {
   const savedModel = await loadNLPModel();
@@ -63,11 +70,7 @@ async function initializeNLP() {
     console.log("🚀 Training new NLP Model...");
     await trainNLP();
   }
-  async function trainModel(manager) {
-    await manager.train();
-    manager.save();
-    console.log("✅ NLP Model trained and saved!");
-}
 }
 
+// ✅ **Esportiamo le funzioni corrette**
 module.exports = { getIntent, initializeNLP, trainModel };
