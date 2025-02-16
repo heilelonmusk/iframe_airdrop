@@ -4,9 +4,9 @@ const { NLPModel } = require("../modules/nlp/nlpModel");
 const winston = require("winston");
 const { execSync } = require("child_process");
 
-jest.setTimeout(30000); // ⏳ Evita blocchi nei test lunghi
+jest.setTimeout(30000); // Evita blocchi nei test lunghi
 
-// 🚀 **Configurazione del Logger**
+// 🚀 Configurazione del Logger
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -16,11 +16,11 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-// 🚀 **Verifica se MongoDB è già in uso**
+// 🚀 Verifica se ci sono processi MongoDB attivi sulla porta 27017
 const checkMongoDBProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :27017 || pgrep mongod").toString();
-    if (runningProcesses) {
+    if (runningProcesses && runningProcesses.trim() !== "") {
       logger.warn("⚠️ MongoDB è già in esecuzione sulla porta 27017. Potrebbe interferire con i test.");
       process.exit(1);
     }
@@ -29,7 +29,7 @@ const checkMongoDBProcesses = () => {
   }
 };
 
-// ✅ **Verifica variabili d’ambiente**
+// ✅ Verifica delle variabili d’ambiente
 const checkEnvVariables = () => {
   const requiredEnvVars = ["MONGO_URI"];
   requiredEnvVars.forEach((envVar) => {
@@ -40,7 +40,7 @@ const checkEnvVariables = () => {
   });
 };
 
-// ✅ **Setup prima di tutti i test**
+// Setup prima di tutti i test
 beforeAll(async () => {
   checkMongoDBProcesses();
   checkEnvVariables();
@@ -58,7 +58,7 @@ beforeAll(async () => {
   }
 });
 
-// ✅ **Teardown dopo tutti i test**
+// Teardown dopo tutti i test
 afterAll(async () => {
   logger.info("✅ Closing MongoDB connection...");
   if (mongoose.connection.readyState !== 0) {
@@ -69,7 +69,7 @@ afterAll(async () => {
   }
 });
 
-// ✅ **Test se il modello NLP è caricato correttamente**
+// Test: Verifica che il modello NLP venga caricato da MongoDB
 test("🔍 NLPModel should load from MongoDB", async () => {
   try {
     if (!NLPModel || typeof NLPModel.findOne !== "function") {
@@ -78,7 +78,7 @@ test("🔍 NLPModel should load from MongoDB", async () => {
 
     const savedModel = await NLPModel.findOne({});
     expect(savedModel).toBeTruthy();
-    
+
     if (savedModel) {
       logger.info("✅ NLP Model loaded from MongoDB");
     } else {
@@ -90,12 +90,11 @@ test("🔍 NLPModel should load from MongoDB", async () => {
   }
 });
 
-// ✅ **Test se il modello NLP elabora correttamente il testo**
+// Test: Verifica che il modello NLP elabori correttamente il testo
 test("💬 NLPModel should process text correctly", async () => {
   try {
     const mockInput = "What is Helon?";
-    const expectedOutput = "Helon is a decentralized AI ecosystem.";
-
+    // L'output atteso deve contenere il termine "helon" (case-insensitive)
     if (!NLPModel || typeof NLPModel.processText !== "function") {
       throw new Error("❌ NLPModel.processText is not a function");
     }
@@ -103,8 +102,6 @@ test("💬 NLPModel should process text correctly", async () => {
     const modelResponse = await NLPModel.processText(mockInput);
     expect(modelResponse).toBeDefined();
     expect(typeof modelResponse).toBe("string");
-
-    // Il confronto deve essere più flessibile, evitando errori di minimi cambiamenti di output.
     expect(modelResponse.toLowerCase()).toContain("helon");
 
     logger.info("✅ NLPModel processed text correctly.");
@@ -114,7 +111,7 @@ test("💬 NLPModel should process text correctly", async () => {
   }
 });
 
-// ✅ **Test per verificare comportamento con input vuoto**
+// Test: Verifica comportamento con input vuoto
 test("🚨 NLPModel should return an error for empty input", async () => {
   try {
     const response = await NLPModel.processText("");
@@ -122,10 +119,11 @@ test("🚨 NLPModel should return an error for empty input", async () => {
     logger.warn("⚠️ NLPModel correctly handled empty input.");
   } catch (error) {
     logger.error("❌ NLPModel failed on empty input:", error.message);
+    throw error;
   }
 });
 
-// ✅ **Test per verificare comportamento con input `null`**
+// Test: Verifica comportamento con input null
 test("🚨 NLPModel should return an error for null input", async () => {
   try {
     const response = await NLPModel.processText(null);
@@ -133,10 +131,11 @@ test("🚨 NLPModel should return an error for null input", async () => {
     logger.warn("⚠️ NLPModel correctly handled null input.");
   } catch (error) {
     logger.error("❌ NLPModel failed on null input:", error.message);
+    throw error;
   }
 });
 
-// ✅ **Test per verificare comportamento con input `undefined`**
+// Test: Verifica comportamento con input undefined
 test("🚨 NLPModel should return an error for undefined input", async () => {
   try {
     const response = await NLPModel.processText(undefined);
@@ -144,10 +143,11 @@ test("🚨 NLPModel should return an error for undefined input", async () => {
     logger.warn("⚠️ NLPModel correctly handled undefined input.");
   } catch (error) {
     logger.error("❌ NLPModel failed on undefined input:", error.message);
+    throw error;
   }
 });
 
-// ✅ **Cleanup: Rimozione dati di test da MongoDB**
+// Cleanup: Rimozione dati di test dalla collezione "nlpmodels" dopo ogni test
 afterEach(async () => {
   try {
     logger.info("🗑️ Cleaning up test database...");

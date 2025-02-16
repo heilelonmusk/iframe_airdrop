@@ -3,23 +3,25 @@ const { handler } = require("../api/server.js");
 const winston = require("winston");
 const { execSync } = require("child_process");
 
-jest.setTimeout(20000); // ⏳ Evita blocchi nei test lunghi
+jest.setTimeout(20000); // Evita blocchi nei test lunghi
 
-// 🚀 **Configurazione del Logger**
+// 🚀 Configurazione del Logger
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+    winston.format.printf(
+      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+    )
   ),
   transports: [new winston.transports.Console()],
 });
 
-// 🚀 **Verifica processi attivi su Netlify**
+// 🚀 Verifica processi attivi sulle porte 5000 o 8888
 const checkActiveProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :5000 || lsof -i :8888").toString();
-    if (runningProcesses) {
+    if (runningProcesses && runningProcesses.trim() !== "") {
       logger.warn("⚠️ Esistono processi attivi sulla porta 5000 o 8888. Potrebbero interferire con i test.");
       process.exit(1);
     }
@@ -28,7 +30,7 @@ const checkActiveProcesses = () => {
   }
 };
 
-// ✅ **Verifica variabili d’ambiente**
+// ✅ Verifica delle variabili d'ambiente
 const checkEnvVariables = () => {
   const requiredEnvVars = ["MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
   requiredEnvVars.forEach((envVar) => {
@@ -39,7 +41,7 @@ const checkEnvVariables = () => {
   });
 };
 
-// ✅ **Setup degli Eventi API**
+// Setup degli Eventi API e definizione dei test
 describe("🔍 API Tests", () => {
   let healthEvent;
   let logQuestionEvent;
@@ -49,6 +51,7 @@ describe("🔍 API Tests", () => {
     checkEnvVariables();
     logger.info("🛠 Setting up API tests...");
 
+    // Definizione degli eventi per i test
     healthEvent = {
       httpMethod: "GET",
       path: "/.netlify/functions/server/health",
@@ -81,7 +84,7 @@ describe("🔍 API Tests", () => {
     logger.info("✅ All tests completed.");
   });
 
-  // ✅ **Health Check**
+  // ✅ Health Check Test
   test("🛠 Health check should return status 200", async () => {
     const response = await handler(healthEvent, {});
     expect(response).toBeDefined();
@@ -90,7 +93,7 @@ describe("🔍 API Tests", () => {
     logger.info("✅ Health check passed.");
   });
 
-  // ✅ **logQuestion API Test**
+  // ✅ logQuestion API Test
   test("💬 logQuestion should return a valid response", async () => {
     const response = await handler(logQuestionEvent, {});
     expect(response).toBeDefined();
@@ -109,7 +112,7 @@ describe("🔍 API Tests", () => {
     logger.info("✅ logQuestion test passed.", data);
   });
 
-  // ✅ **Test Invalid Input**
+  // ✅ Test per input invalido
   test("❌ logQuestion should handle invalid input", async () => {
     const invalidEvent = {
       httpMethod: "POST",
@@ -124,7 +127,7 @@ describe("🔍 API Tests", () => {
     logger.warn("⚠️ logQuestion correctly handled missing input.");
   });
 
-  // ✅ **Test Endpoint Inesistente**
+  // ✅ Test per endpoint inesistente
   test("❌ Unknown endpoint should return 404", async () => {
     const unknownEvent = {
       httpMethod: "GET",

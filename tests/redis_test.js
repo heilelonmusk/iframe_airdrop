@@ -11,12 +11,14 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// 🚀 Winston Logger Setup
+// 🚀 Configurazione del logger con Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+    winston.format.printf(
+      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+    )
   ),
   transports: [
     new winston.transports.Console(),
@@ -24,11 +26,11 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ Verifica processi attivi su Redis
+// ✅ Funzione per verificare eventuali processi Redis attivi
 const checkRedisProcess = () => {
   try {
     const runningProcesses = execSync("ps aux | grep redis-server | grep -v grep").toString();
-    if (runningProcesses) {
+    if (runningProcesses && runningProcesses.trim() !== "") {
       logger.warn("⚠️ Redis potrebbe essere già in esecuzione. Verifica prima di procedere.");
     }
   } catch (error) {
@@ -36,7 +38,7 @@ const checkRedisProcess = () => {
   }
 };
 
-// ✅ **Verifica delle Variabili d'Ambiente**
+// ✅ Funzione per verificare le variabili d'ambiente necessarie
 const checkEnvVariables = () => {
   const requiredEnvVars = ["REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD"];
   requiredEnvVars.forEach((envVar) => {
@@ -47,12 +49,15 @@ const checkEnvVariables = () => {
   });
 };
 
-// ✅ **Connessione a Redis con TLS (necessario per Upstash)**
+checkEnvVariables();
+checkRedisProcess();
+
+// ✅ Connessione a Redis con TLS (necessario per Upstash)
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
-  tls: {}, // ✅ NECESSARIO per Upstash Redis
+  tls: {}, // NECESSARIO per Upstash Redis
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
@@ -61,12 +66,9 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-// ✅ **Test per Redis**
+// ✅ Test per Redis
 (async () => {
   try {
-    checkEnvVariables();
-    checkRedisProcess();
-
     logger.info("🔹 Controllo connessione Redis...");
     const isConnected = await redis.ping().catch(() => null);
     if (isConnected !== "PONG") {
@@ -78,15 +80,15 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
     try {
       await redis.flushdb();
     } catch (cleanupError) {
-      logger.warn("⚠️ Impossibile eseguire flush su Redis prima del test.");
+      logger.warn("⚠️ Impossibile eseguire flush su Redis prima del test:", cleanupError.message);
     }
 
-    // 🔹 Impostazione Chiave di Test
+    // 🔹 Impostazione della chiave di test
     logger.info("🔹 Inserimento chiave di test in Redis...");
     const startTime = Date.now();
     await redis.set("test_key", "Hello Redis!", "EX", 60);
 
-    // 🔹 Recupero Chiave di Test
+    // 🔹 Recupero della chiave di test
     logger.info("🔹 Recupero chiave di test da Redis...");
     const value = await redis.get("test_key");
     const latency = Date.now() - startTime;
@@ -97,7 +99,7 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
       logger.warn("⚠️ Valore nullo ricevuto. La chiave potrebbe essere scaduta.");
     }
 
-    // 🔹 Verifica Persistenza
+    // 🔹 Verifica della persistenza della chiave
     logger.info("🔹 Controllo persistenza chiave...");
     const exists = await redis.exists("test_key");
     if (exists) {
@@ -106,7 +108,7 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
       logger.warn("⚠️ La chiave non esiste in Redis.");
     }
 
-    // 🔹 Eliminazione Chiave
+    // 🔹 Eliminazione della chiave di test
     logger.info("🔹 Eliminazione chiave di test...");
     await redis.del("test_key");
 
@@ -116,11 +118,10 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
     } else {
       logger.error("❌ Errore nell'eliminazione della chiave.");
     }
-
   } catch (error) {
     logger.error("❌ Test Redis fallito:", error.message);
   } finally {
-    // 🗑️ Cleanup finale
+    // 🗑️ Pulizia finale
     logger.info("🗑️ Pulizia finale di Redis...");
     try {
       await redis.flushdb();
@@ -128,7 +129,6 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.mes
     } catch (cleanupError) {
       logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
     }
-
     await redis.quit();
     logger.info("🔹 Connessione Redis chiusa.");
   }

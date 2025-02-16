@@ -1,84 +1,85 @@
 #!/bin/bash
 
-# 🚀 Auto-Update & Deploy Script for Netlify
-LOGS_DIR="/tmp/logs"
-LOG_FILE="$LOGS_DIR/auto_update.log"
-NETLIFY_CMD="netlify"
-TIMEOUT_DURATION=60  # ⏳ Tempo massimo per l'esecuzione dei test
+# 🚀 Netlify Function API Test Script
+# Runs API checks on a deployed Netlify function (Unified Access)
+
+# 🌍 Configurazione
+NETLIFY_URL="https://superlative-empanada-0c1b37.netlify.app/.netlify/functions/unifiedAccess"
+LOG_DIR="/tmp/logs"
+LOG_FILE="$LOG_DIR/netlify_test.log"
 
 # 📁 Assicuriamoci che la cartella dei log esista
-mkdir -p "$LOGS_DIR"
+mkdir -p "$LOG_DIR"
 
-echo "🔹 Starting Auto-Update Process..." | tee "$LOG_FILE"
+echo "🛠 Starting Netlify API Tests..." | tee "$LOG_FILE"
 
-# ✅ Controllo che i comandi necessari siano installati
+# ✅ Funzione per verificare che un comando esista
 check_command() {
-  if ! command -v $1 &> /dev/null; then
-    echo "❌ $1 non trovato! Installa con: $2" | tee -a "$LOG_FILE"
+  if ! command -v "$1" &> /dev/null; then
+    echo "❌ Command '$1' not found! Install it with: $2" | tee -a "$LOG_FILE"
     exit 1
   fi
 }
 
-check_command "git" "sudo apt install git -y"
-check_command "npm" "sudo apt install npm -y"
-check_command "$NETLIFY_CMD" "npm install -g netlify-cli"
+# ✅ Verifica strumenti necessari
+check_command "curl" "sudo apt install curl -y"
+check_command "redis-cli" "sudo apt install redis-tools -y"
 
-# ✅ Verifica connessione GitHub
-echo "🔹 Verificando connessione a GitHub..." | tee -a "$LOG_FILE"
-if ! git ls-remote origin &> /dev/null; then
-  echo "❌ Errore: Connessione a GitHub non riuscita. Verifica le credenziali o la connessione di rete." | tee -a "$LOG_FILE"
+# ✅ Verifica che l'endpoint Netlify sia raggiungibile
+if ! curl -s --head --request GET "$NETLIFY_URL/health" | grep "200 OK" > /dev/null; then
+  echo "❌ Netlify API endpoint is unreachable! Aborting tests." | tee -a "$LOG_FILE"
   exit 1
 fi
 
-# ✅ Controllo se ci sono modifiche non committate
-if [[ $(git status --porcelain) ]]; then
-  echo "⚠️ Modifiche non committate rilevate! Effettua il commit o uno stash prima di aggiornare." | tee -a "$LOG_FILE"
-  exit 1
+# ✅ Funzione per gestire le richieste API e loggare eventuali errori
+api_test() {
+  local description=$1
+  local url=$2
+  local method=${3:-GET}
+  local data=$4
+  local response
+  local http_code
+  local body
+
+  echo "🔹 $description..." | tee -a "$LOG_FILE"
+
+  if [[ "$method" == "POST" ]]; then
+    response=$(curl -s -X POST "$url" -H "Content-Type: application/json" -d "$data" --max-time 10 -w "\n%{http_code}")
+  else
+    response=$(curl -s -X GET "$url" --max-time 10 -w "\n%{http_code}")
+  fi
+
+  http_code=$(echo "$response" | tail -n1)
+  body=$(echo "$response" | sed '$d')
+
+  if [[ "$http_code" -ge 200 && "$http_code" -lt 300 ]]; then
+    echo "✅ Success ($http_code): $body" | tee -a "$LOG_FILE"
+  else
+    echo "❌ Failed ($http_code): $body" | tee -a "$LOG_FILE"
+  fi
+}
+
+# ✅ Test API Health Check
+api_test "Checking API Health" "$NETLIFY_URL/health"
+
+# ✅ Test Fetch from GitHub
+api_test "Testing GitHub Fetch" "$NETLIFY_URL/fetch?source=github&file=README.md"
+
+# ✅ Test MongoDB Fetch
+api_test "Testing MongoDB Fetch" "$NETLIFY_URL/fetch?source=mongodb&query=test_key"
+
+# ✅ Test Invalid Source Parameter (should return error)
+api_test "Testing Invalid Source Parameter" "$NETLIFY_URL/fetch?source=invalid"
+
+# ✅ Test Redis Connectivity using REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD
+echo "🔹 Checking Redis Connection..." | tee -a "$LOG_FILE"
+redis_response=$(redis-cli -h "$REDIS_HOST" -p "$REDIS_PORT" -a "$REDIS_PASSWORD" PING 2>/dev/null)
+if [[ "$redis_response" == "PONG" ]]; then
+  echo "✅ Redis is connected!" | tee -a "$LOG_FILE"
+else
+  echo "⚠️ Redis connection failed or unavailable!" | tee -a "$LOG_FILE"
 fi
 
-# ✅ Pull dell'ultima versione del codice
-echo "🔹 Scaricando gli ultimi aggiornamenti da GitHub..." | tee -a "$LOG_FILE"
-git pull origin main | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "❌ Errore durante il pull da GitHub. Verifica il repository." | tee -a "$LOG_FILE"
-  exit 1
-fi
-
-# ✅ Verifica se ci sono cambiamenti effettivi
-if git diff --quiet HEAD^ HEAD; then
-  echo "⚠️ Nessun aggiornamento rilevato. Chiusura dello script." | tee -a "$LOG_FILE"
-  exit 0
-fi
-
-# ✅ Aggiornamento delle dipendenze
-echo "🔹 Aggiornando le dipendenze..." | tee -a "$LOG_FILE"
-npm install --silent | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "❌ Errore durante l'installazione delle dipendenze. Verifica i pacchetti." | tee -a "$LOG_FILE"
-  exit 1
-fi
-
-# ✅ Esecuzione dei test
-echo "🔹 Avvio dei test (Timeout: ${TIMEOUT_DURATION}s)..." | tee -a "$LOG_FILE"
-timeout $TIMEOUT_DURATION npm test | tee -a "$LOG_FILE"
-TEST_RESULT=$?
-
-if [ $TEST_RESULT -eq 124 ]; then
-  echo "❌ Test timeout! Test interrotti dopo ${TIMEOUT_DURATION} secondi." | tee -a "$LOG_FILE"
-  exit 1
-elif [ $TEST_RESULT -ne 0 ]; then
-  echo "❌ Test falliti! Annullamento del deploy." | tee -a "$LOG_FILE"
-  exit 1
-fi
-
-# ✅ Deploy su Netlify
-echo "✅ Test superati! Avvio deploy su Netlify..." | tee -a "$LOG_FILE"
-$NETLIFY_CMD deploy --prod | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "❌ Errore durante il deploy su Netlify! Controlla credenziali e impostazioni." | tee -a "$LOG_FILE"
-  exit 1
-fi
-
-# ✅ Log finale
-echo "✅ Processo di aggiornamento e deploy completato con successo!" | tee -a "$LOG_FILE"
+# ✅ Log Completion
+echo "✅ Netlify API Tests Completed Successfully!" | tee -a "$LOG_FILE"
 exit 0

@@ -1,29 +1,31 @@
 require("dotenv").config();
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { handler } = require("../api/unifiedAccess"); // Import server handler
+const { handler } = require("../api/unifiedAccess"); // Import del handler dalla funzione unifiedAccess
 const express = require("express");
 const winston = require("winston");
 const Redis = require("ioredis");
 const { execSync } = require("child_process");
 
-jest.setTimeout(30000); // Increase timeout for async operations
+jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
-// 🚀 Winston Logger Setup
+// 🚀 Configurazione del Logger con Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+    winston.format.printf(
+      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+    )
   ),
   transports: [new winston.transports.Console()],
 });
 
-// 🚀 **Verifica processi attivi prima dei test**
+// 🚀 Verifica processi attivi sulla porta 5000
 const checkActiveProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :5000").toString();
-    if (runningProcesses) {
+    if (runningProcesses && runningProcesses.trim() !== "") {
       logger.warn("⚠️ Un altro processo è attivo sulla porta 5000. Interrompiamolo per evitare conflitti.");
       process.exit(1);
     }
@@ -32,9 +34,17 @@ const checkActiveProcesses = () => {
   }
 };
 
-// 🚀 **Verifica delle Variabili d'Ambiente**
+// ✅ Verifica delle variabili d'ambiente richieste
 const checkEnvVariables = () => {
-  const requiredEnvVars = ["MONGO_URI", "REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
+  const requiredEnvVars = [
+    "MONGO_URI",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "REDIS_PASSWORD",
+    "MY_GITHUB_OWNER",
+    "MY_GITHUB_REPO",
+    "MY_GITHUB_TOKEN"
+  ];
   requiredEnvVars.forEach((envVar) => {
     if (!process.env[envVar]) {
       logger.error(`❌ Variabile d'ambiente mancante: ${envVar}`);
@@ -43,21 +53,20 @@ const checkEnvVariables = () => {
   });
 };
 
-// 🚀 **Connessione a Redis con Strategia di Retry**
+// 🚀 Configurazione di Redis
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
-  tls: {}, // ✅ NECESSARIO per Upstash Redis
+  tls: {}, // NECESSARIO per Upstash Redis
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
 });
-
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-// 📌 **Helper per simulare richieste API**
+// 📌 Helper per simulare richieste API
 const simulateRequest = async (method, path, body = null) => {
   const event = {
     httpMethod: method,
@@ -69,7 +78,7 @@ const simulateRequest = async (method, path, body = null) => {
   return await handler(event, {});
 };
 
-// ✅ **Setup prima di tutti i test**
+// Setup prima di tutti i test
 let server;
 beforeAll(async () => {
   checkActiveProcesses();
@@ -94,13 +103,13 @@ beforeAll(async () => {
     logger.warn("⚠️ Connessione Redis fallita:", error.message);
   }
 
-  // ✅ **Avvio server di test**
+  // Avvio di un server di test su porta 5000
   const testApp = express();
   testApp.use("/.netlify/functions/unifiedAccess", handler);
   server = testApp.listen(5000, () => logger.info("🔹 Server di test avviato sulla porta 5000"));
 });
 
-// ✅ **Teardown dopo tutti i test**
+// Teardown dopo tutti i test
 afterAll(async () => {
   logger.info("✅ Chiusura connessioni a MongoDB e Redis...");
   await mongoose.connection.close();
@@ -113,7 +122,22 @@ afterAll(async () => {
   }
 });
 
-// ✅ **Test di base (Sanity Check)**
+// Cleanup dopo ogni test: rimuove i documenti dalla collezione "knowledges" e pulisce Redis
+afterEach(async () => {
+  logger.info("🗑️ Pulizia del database di test...");
+  try {
+    await mongoose.connection.db.collection("knowledges").deleteMany({});
+  } catch (error) {
+    logger.error("❌ Errore durante la pulizia della collezione 'knowledges':", error.message);
+  }
+  try {
+    await redis.flushdb();
+  } catch (error) {
+    logger.error("❌ Errore durante la pulizia di Redis:", error.message);
+  }
+});
+
+// Test di base (Sanity Check): Health Check
 test("GET /health - Controllo stato servizio", async () => {
   const response = await simulateRequest("GET", "/health");
   expect(response.statusCode).toBe(200);
@@ -121,13 +145,13 @@ test("GET /health - Controllo stato servizio", async () => {
   expect(body).toMatchObject({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
 });
 
-// ✅ **Test connessione Redis**
+// Test: Redis deve rispondere al PING
 test("Redis deve essere connesso", async () => {
   const redisPing = await redis.ping();
   expect(redisPing).toBe("PONG");
 });
 
-// ✅ **Test principali API**
+// Test principali API: Fetch da GitHub
 test("GET /fetch (GitHub) - Recupero file da GitHub", async () => {
   const response = await simulateRequest("GET", "/fetch?source=github&file=README.md");
   expect(response.statusCode).toBe(200);
@@ -136,12 +160,16 @@ test("GET /fetch (GitHub) - Recupero file da GitHub", async () => {
   expect(body).toHaveProperty("content");
 });
 
+// Test principali API: Fetch da MongoDB
 test("GET /fetch (MongoDB) - Recupero dati da MongoDB", async () => {
-  const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", new mongoose.Schema({
-    key: { type: String, required: true, unique: true },
-    value: mongoose.Schema.Types.Mixed,
-  }));
-
+  // Crea un documento di test nella collezione "knowledges"
+  const Knowledge = mongoose.models.Knowledge || mongoose.model(
+    "Knowledge",
+    new mongoose.Schema({
+      key: { type: String, required: true, unique: true },
+      value: mongoose.Schema.Types.Mixed,
+    })
+  );
   await Knowledge.create({ key: "test_key", value: "Test Value" });
 
   const response = await simulateRequest("GET", "/fetch?source=mongodb&query=test_key");
@@ -149,11 +177,4 @@ test("GET /fetch (MongoDB) - Recupero dati da MongoDB", async () => {
   const body = JSON.parse(response.body);
   expect(body).toHaveProperty("key", "test_key");
   expect(body).toHaveProperty("value", "Test Value");
-});
-
-// ✅ **Cleanup dopo ogni test**
-afterEach(async () => {
-  logger.info("🗑️ Pulizia del database di test...");
-  await mongoose.connection.db.collection("knowledges").deleteMany({});
-  await redis.flushdb();
 });
