@@ -72,20 +72,9 @@ async function getIntent(question) {
 // ✅ **Train Model Function**
 async function trainModel() {
   await manager.train();
-  manager.save();
-  console.log("✅ NLP Model trained and saved!");
-}
-
-// ✅ **Train Model on Startup**
-async function initializeNLP() {
-  const savedModel = await loadNLPModel();
-  if (savedModel) {
-    manager.import(savedModel);
-    console.log("🧠 NLP Model Loaded from DB");
-  } else {
-    console.log("🚀 Training new NLP Model...");
-    await trainNLP();
-  }
+  const exportedModel = manager.export();
+  await saveNLPModel(exportedModel);
+  console.log("✅ NLP Model trained and saved in MongoDB!");
 }
 
 // ✅ **Esportiamo le funzioni corrette**
