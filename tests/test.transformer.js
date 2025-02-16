@@ -4,7 +4,6 @@ const { NLPModel } = require("../modules/nlp/nlpModel");
 const winston = require("winston");
 const { execSync } = require("child_process");
 const { logger } = require("../modules/logging/logger");
-logger.error("This is an error message");
 
 jest.setTimeout(30000); // Evita blocchi nei test lunghi
 
