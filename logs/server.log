@@ -390,3 +390,36 @@
 [2025-02-16T13:24:21.876Z] WARN: MongoDB disconnected.
 [2025-02-16T13:24:22.062Z] INFO: Final mongoose.connection.readyState: 0
 [2025-02-16T13:24:22.071Z] ERROR: ❌ Error initializing NLP model: logger.error is not a function
+[2025-02-16T13:41:25.582Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T13:41:26.562Z] INFO: Forced disconnect successful. ReadyState is now: 0
+[2025-02-16T13:41:27.179Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T13:41:27.187Z] WARN: MongoDB disconnected.
+[2025-02-16T13:41:28.184Z] INFO: Final mongoose.connection.readyState: 0
+[2025-02-16T13:41:28.192Z] ERROR: ❌ Error initializing NLP model: logger.error is not a function
+[2025-02-16T13:41:28.727Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T13:41:28.761Z] INFO: 🔹 Health check started...
+[2025-02-16T13:41:28.762Z] INFO: Current mongoose.connection.readyState: 2
+[2025-02-16T13:41:28.763Z] WARN: ⚠️ MongoDB not connected (state 2), attempting to reconnect...
+[2025-02-16T13:41:28.764Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T13:41:29.359Z] INFO: Forced disconnect successful. ReadyState is now: 0
+[2025-02-16T13:41:29.362Z] INFO: Forced disconnect successful. ReadyState is now: 2
+[2025-02-16T13:41:29.363Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T13:41:30.019Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T13:41:30.366Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T13:41:30.370Z] INFO: After reconnect attempt, mongoose.connection.readyState: 1
+[2025-02-16T13:41:30.372Z] INFO: Performing MongoDB ping command...
+[2025-02-16T13:41:30.438Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T13:41:30.442Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T13:41:30.444Z] INFO: Performing Redis ping...
+[2025-02-16T13:41:30.488Z] INFO: Redis ping result: PONG
+[2025-02-16T13:41:30.501Z] INFO: 🔹 Health check started...
+[2025-02-16T13:41:30.503Z] INFO: Current mongoose.connection.readyState: 1
+[2025-02-16T13:41:30.506Z] INFO: Performing MongoDB ping command...
+[2025-02-16T13:41:30.587Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T13:41:30.592Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T13:41:30.594Z] INFO: Performing Redis ping...
+[2025-02-16T13:41:30.642Z] INFO: Redis ping result: PONG
+[2025-02-16T13:41:30.798Z] WARN: MongoDB disconnected.
+[2025-02-16T13:41:30.800Z] WARN: MongoDB disconnected.
+[2025-02-16T13:41:31.026Z] INFO: Final mongoose.connection.readyState: 0
+[2025-02-16T13:41:31.034Z] ERROR: ❌ Error initializing NLP model: logger.error is not a function

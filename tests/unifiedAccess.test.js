@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { app, handler } = require("../api/server.js");
+const { app, handler } = require("../api/unifiedAccess.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
 const redis = require("../lib/redis");
