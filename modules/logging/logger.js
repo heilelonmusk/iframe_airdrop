@@ -4,6 +4,20 @@ const mongoose = require('mongoose');
 const LOG_RETENTION_DAYS = 30; // Auto-delete logs older than this
 const MONGO_URI = process.env.MONGO_URI;
 
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "HH:mm:ss" }),
+    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+  ),
+  transports: [
+    new winston.transports.Console(),
+    // Aggiungi altri transport se necessario (es. File)
+  ]
+});
+
 if (!MONGO_URI) {
   console.error("❌ ERROR: MONGO_URI is missing! Logging is disabled.");
   process.exit(1);
