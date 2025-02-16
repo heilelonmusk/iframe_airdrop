@@ -13,11 +13,32 @@ const winston = require("winston");
 const app = express();
 const router = express.Router();
 
-const redis = new Redis(process.env.REDIS_URL, {
+// ✅ Configurazione Redis con variabili d'ambiente corrette
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+
+if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
+  console.error("❌ ERROR: Redis environment variables are missing!");
+  process.exit(1);
+}
+
+const redis = new Redis({
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  password: REDIS_PASSWORD,
   tls: {}, // ✅ NECESSARIO per Upstash Redis
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
+});
+
+redis.on("connect", () => {
+  console.log("✅ Connected to Redis successfully!");
+});
+
+redis.on("error", (err) => {
+  console.error("❌ Redis connection error:", err.message);
 });
 
 // 📁 Assicurarsi che la cartella dei log esista (Usiamo /tmp/logs per Netlify)
@@ -44,7 +65,7 @@ const logger = winston.createLogger({
 });
 
 // ✅ Verifica delle variabili d'ambiente richieste
-const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
+const requiredEnvVars = ["MONGO_URI", "REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
 requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
     logger.error(`❌ Missing required environment variable: ${envVar}`);
@@ -56,8 +77,8 @@ requiredEnvVars.forEach((envVar) => {
 app.set("trust proxy", 1); // Imposta Express per fidarsi del proxy di Netlify
 
 const limiter = rateLimit({
-  windowMs: 60 * 1000, 
-  max: 100, 
+  windowMs: 60 * 1000,
+  max: 100,
   message: "Too many requests, please try again later.",
   keyGenerator: (req) => req.ip || req.headers["x-forwarded-for"] || "unknown-ip",
 });

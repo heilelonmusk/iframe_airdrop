@@ -7,11 +7,12 @@ const cors = require("cors");
 const timeout = require("connect-timeout");
 const { NlpManager } = require("node-nlp");
 const winston = require("winston");
+const Redis = require("ioredis");
 const fs = require("fs");
 const path = require("path");
 
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
-const logDir = (process.env.NODE_ENV === "development") ? "/tmp/logs" : path.join(__dirname, "../logs");
+const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
@@ -57,7 +58,7 @@ app.use(
   })
 );
 
-// ✅ MongoDB Connection
+// ✅ Connessione a MongoDB
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
   logger.error("❌ ERROR: MONGO_URI is missing! API will not function.");
@@ -78,6 +79,31 @@ if (!MONGO_URI) {
 // Ascolta eventuali errori nella connessione
 mongoose.connection.on("error", (err) => {
   logger.error("❌ Mongoose connection error:", err.message);
+});
+
+// ✅ Connessione a Redis
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+
+if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
+  logger.error("❌ ERROR: Redis environment variables are missing!");
+  process.exit(1);
+}
+
+const redis = new Redis({
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  password: REDIS_PASSWORD,
+  tls: {}, // ✅ NECESSARIO per Upstash Redis
+});
+
+redis.on("connect", () => {
+  logger.info("✅ Connected to Redis successfully!");
+});
+
+redis.on("error", (err) => {
+  logger.error("❌ Redis connection error:", err.message);
 });
 
 // Schema & Model per Knowledge Base
@@ -116,11 +142,6 @@ async function trainAndSaveNLP() {
   manager.addDocument("en", "hello", "greeting");
   manager.addDocument("en", "hi there", "greeting");
   manager.addDocument("en", "goodbye", "farewell");
-  manager.addDocument("en", "bye", "farewell");
-  manager.addDocument("en", "where can I find official channels?", "channels");
-  manager.addDocument("en", "how can I contact Helon?", "channels");
-  manager.addDocument("en", "help", "help");
-  manager.addDocument("en", "what can you do?", "help");
 
   await manager.train();
   const exportedModel = manager.export();
@@ -137,132 +158,55 @@ router.post("/logQuestion", async (req, res) => {
     logger.info(`📩 Received question: "${question}"`);
     const anonymousUser = userId || "anonymous";
 
-    // Cerca la risposta nel DB
     let storedAnswer = await Question.findOne({ question });
     if (storedAnswer) {
-      logger.info(`✅ Found answer in DB: ${JSON.stringify(storedAnswer.answer)}`);
-
-      let safeAnswer = storedAnswer.answer || "No answer found.";
-      let safeSource = storedAnswer.source || "Ultron AI";
-
-      if (typeof storedAnswer.answer === "object" && storedAnswer.answer !== null) {
-        safeAnswer = storedAnswer.answer.answer || JSON.stringify(storedAnswer.answer);
-        safeSource = storedAnswer.answer.source || storedAnswer.source || "Ultron AI";
-      }
-
-      return res.json({
-        answer: typeof safeAnswer === "string" ? safeAnswer : JSON.stringify(safeAnswer),
-        source: safeSource,
-      });
+      return res.json({ answer: storedAnswer.answer, source: storedAnswer.source });
     }
 
-    // Processa la richiesta con NLP
     const intentResult = await manager.process("en", question);
     let finalAnswer =
       intentResult.answer || (await generateResponse(question)) || "I'm not sure how to answer that yet.";
 
-    // Log della conversazione
     await logConversation({
       userId: anonymousUser,
       question,
-      answer: typeof finalAnswer === "string" ? finalAnswer : JSON.stringify(finalAnswer),
+      answer: finalAnswer,
       detectedIntent: intentResult.intent,
       confidence: intentResult.score,
       timestamp: new Date(),
     });
 
-    // Salva la nuova risposta nel DB
-    const newEntry = new Question({
-      question,
-      answer: typeof finalAnswer === "string" ? finalAnswer : { answer: finalAnswer, source: "Ultron AI" },
-      source: "Ultron AI",
-    });
+    const newEntry = new Question({ question, answer: finalAnswer, source: "Ultron AI" });
     await newEntry.save();
 
-    res.json({
-      answer: typeof finalAnswer === "string" ? finalAnswer : JSON.stringify(finalAnswer),
-      source: "Ultron AI",
-    });
+    res.json({ answer: finalAnswer, source: "Ultron AI" });
   } catch (error) {
     logger.error("❌ Error processing question:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// Endpoint Health Check con attesa per la connessione MongoDB
+// ✅ Health Check
 router.get("/health", async (req, res) => {
   try {
-    // Funzione per attendere che la connessione sia stabilita
-    const waitForConnection = async (retries = 5, delay = 1000) => {
-      for (let i = 0; i < retries; i++) {
-        if (mongoose.connection.readyState === 1) {
-          return true;
-        }
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-      return false;
-    };
-
-    const connected = await waitForConnection();
-    if (!connected) {
-      logger.error(`❌ Health check: MongoDB not connected (readyState: ${mongoose.connection.readyState})`);
-      return res.status(500).json({ error: "Service is unhealthy", mongoReadyState: mongoose.connection.readyState });
-    }
-
-    // Esegue un ping sul database
-    const admin = mongoose.connection.db.admin();
-    const pingResult = await admin.ping();
-    logger.info("Ping result: " + JSON.stringify(pingResult));
-    res.json({ status: "✅ Healthy", mongo: "Connected" });
+    await mongoose.connection.db.admin().ping();
+    await redis.ping();
+    res.json({ status: "✅ Healthy", mongo: "Connected", redis: "Connected" });
   } catch (error) {
     logger.error("❌ Health check failed:", error.message);
     res.status(500).json({ error: "Service is unhealthy" });
   }
 });
 
-// Nuovi endpoint: /fetch, /store, /download
+// ✅ Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", async (req, res) => {
   const { source, file, query } = req.query;
   if (source === "github") {
-    try {
-      const fileContent = `Contenuto simulato da GitHub per il file ${file}`;
-      return res.json({ data: fileContent });
-    } catch (error) {
-      return res.status(500).json({ error: error.message });
-    }
+    return res.json({ data: `Simulated content from GitHub for ${file}` });
   } else if (source === "mongodb") {
-    try {
-      const result = { key: query, value: "Dati simulati da MongoDB" };
-      return res.json({ data: result });
-    } catch (error) {
-      return res.status(500).json({ error: error.message });
-    }
+    return res.json({ data: { key: query, value: "Simulated MongoDB data" } });
   } else {
-    return res.status(400).json({ error: "Source non riconosciuto" });
-  }
-});
-
-router.post("/store", async (req, res) => {
-  try {
-    const { key, value } = req.body;
-    return res.json({ message: "Dati salvati correttamente" });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-router.get("/download", async (req, res) => {
-  const { source, file } = req.query;
-  if (source === "github") {
-    try {
-      const fileData = `Contenuto simulato del file ${file}`;
-      res.setHeader("Content-Disposition", `attachment; filename=${file}`);
-      return res.send(fileData);
-    } catch (error) {
-      return res.status(500).json({ error: error.message });
-    }
-  } else {
-    return res.status(404).json({ error: "File non trovato" });
+    return res.status(400).json({ error: "Unrecognized source" });
   }
 });
 
