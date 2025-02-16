@@ -22,8 +22,9 @@ const checkMongoDBProcesses = () => {
   try {
     const runningProcesses = execSync("lsof -i :27017 || pgrep mongod").toString();
     if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn("⚠️ MongoDB è già in esecuzione sulla porta 27017. Potrebbe interferire con i test.");
-      process.exit(1);
+      logger.warn("⚠️ MongoDB è già in esecuzione sulla porta 27017. Procediamo comunque con i test.");
+    } else {
+      logger.info("✅ Nessun processo MongoDB attivo. Procediamo con i test.");
     }
   } catch (error) {
     logger.info("✅ Nessun processo MongoDB attivo. Procediamo con i test.");
