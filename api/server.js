@@ -271,6 +271,17 @@ router.post("/logQuestion", async (req, res) => {
   }
 });
 
+router.post("/api/nlp", async (req, res) => {
+  const { question } = req.body;
+  if (!question) {
+    return res.status(400).json({ error: "Question is required" });
+  }
+  
+  // Esegui il processamento NLP
+  const intent = await getIntent(question);
+  return res.json({ answer: intent.answer });
+});
+
 // ✅ Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", async (req, res) => {
   const { source, file, query } = req.query;
