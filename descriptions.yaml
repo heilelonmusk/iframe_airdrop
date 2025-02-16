@@ -1,6 +1,7 @@
 descriptions:
   ./: Root directory containing the main project files, configurations, and essential
     documentation.
+  ./.babelrc: "\U0001F680 Add a description here"
   ./.env: "\U0001F680 Add a description here"
   ./.gitignore: Specifies files and folders ignored by Git (e.g., .env, logs, build
     artifacts) to maintain repository cleanliness.
