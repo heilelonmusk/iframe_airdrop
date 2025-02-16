@@ -24,13 +24,13 @@
      📄 airdrop_checker.js - JavaScript logic handling blockchain wallet verification and eligibility confirmation.
      📄 airdrop_checker.html - HTML page for UI rendering of the airdrop verification system.
   📁 tests/ - Contains all test scripts and debugging tools.
-     📄 test_netlify.sh - 🚀 Add a description here
-     📄 redis_test.js - 🚀 Add a description here
+     📄 test.transformer.js - 🚀 Add a description here
      📄 test.js - Primary test script validating API endpoints, chatbot functionality, and system responses.
      📄 unifiedAccess.test.js - 🚀 Add a description here
      📄 .gitkeep - Placeholder file ensuring Git tracks the `tests/` directory.
-     📄 test_transformer.js - Test suite validating AI-powered `transformer.js`, ensuring accurate NLP processing and text refinement.
-     📄 test_auto_update.sh - Shell script automating testing for `update_tree.py`, ensuring the repository structure remains updated.
+     📄 test.netlify.sh - 🚀 Add a description here
+     📄 redis.test.js - 🚀 Add a description here
+     📄 test.auto.update.sh - 🚀 Add a description here
   📁 script/ - Houses scripts for data updates, repository maintenance, and automation tasks.
      📄 update_csv_github.py - Automates updating CSV datasets in the GitHub repository.
      📄 update_whitelist.py - Script responsible for refreshing and maintaining the airdrop whitelist dataset.
