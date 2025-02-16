@@ -223,8 +223,11 @@ router.post("/logQuestion", async (req, res) => {
     if (storedAnswer) return res.json({ answer: storedAnswer.answer, source: storedAnswer.source });
 
     const intentResult = await manager.process("en", question);
-    const finalAnswer = intentResult.answer || "I'm not sure how to answer that yet.";
+    if (!intentResult.answer) {
+      return res.status(404).json({ error: "No answer available for this question." });
+    }
 
+    const finalAnswer = intentResult.answer;
     await new Question({ question, answer: finalAnswer, source: "Ultron AI" }).save();
     res.json({ answer: finalAnswer, source: "Ultron AI" });
   } catch (error) {
