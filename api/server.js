@@ -91,6 +91,8 @@ if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
   process.exit(1);
 }
 
+logger.info(`🔹 Connecting to Redis at ${REDIS_HOST}:${REDIS_PORT}...`);
+
 const redis = new Redis({
   host: REDIS_HOST,
   port: REDIS_PORT,
@@ -103,7 +105,11 @@ redis.on("connect", () => {
 });
 
 redis.on("error", (err) => {
-  logger.error("❌ Redis connection error:", err.message);
+  logger.error(`❌ Redis connection error: ${err.message}`);
+});
+
+redis.on("reconnecting", () => {
+  logger.warn("⚠️ Redis is reconnecting...");
 });
 
 // Schema & Model per Knowledge Base
