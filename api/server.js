@@ -15,7 +15,7 @@ const path = require("path");
 const port = process.env.PORT || 8889;
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 //logger.error("This is an error message");
-
+logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
 // Import dei moduli
 const { getIntent } = require("../modules/intent/intentRecognizer");
 const { generateResponse } = require("../modules/nlp/transformer");
@@ -107,7 +107,7 @@ const connectMongoDB = async () => {
       logger.warn("⚠️ Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
       try {
         await mongoose.disconnect();
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Attendi per permettere il reset
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Aspetta un secondo per il reset
         logger.info("✅ Forced disconnect successful.");
       } catch (err) {
         logger.error("❌ Error during forced disconnect: " + err.message);
@@ -116,16 +116,20 @@ const connectMongoDB = async () => {
 
     try {
       logger.info(`🔌 Attempting to connect to MongoDB (Attempt ${attempts + 1}/${MAX_RETRIES})...`);
+
       await mongoose.connect(process.env.MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        useNewUrlParser: true, // Non necessario per Mongoose 6+, ma aiuta per compatibilità
+        useUnifiedTopology: true, // Non necessario per Mongoose 6+, ma aiuta per compatibilità
+        serverSelectionTimeoutMS: 5000, // Timeout per evitare attese infinite
       });
 
       if (mongoose.connection.readyState === 1) {
         logger.info("📚 Connected to MongoDB successfully!");
+        
         mongoose.connection.on("error", (err) => logger.error("❌ MongoDB error:", err));
         mongoose.connection.on("disconnected", () => logger.warn("⚠️ MongoDB disconnected."));
         mongoose.connection.on("reconnected", () => logger.info("🔄 MongoDB reconnected!"));
+        
         return mongoose.connection;
       }
     } catch (err) {
@@ -140,6 +144,7 @@ const connectMongoDB = async () => {
   logger.error("🚨 Max retries reached. MongoDB connection failed.");
   throw new Error("MongoDB connection failed after multiple attempts.");
 };
+
 
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
