@@ -78,27 +78,37 @@ redis.on("end", () => {
 
 // ✅ Connessione a MongoDB con gestione della riconnessione
 console.log("🔹 MONGO_URI in Netlify:", process.env.MONGO_URI);
+
 const connectMongoDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 50000, // ⬅️ Aumenta il timeout
+      serverSelectionTimeoutMS: 50000, // ⬆️ Timeout aumentato per selezione del server
       socketTimeoutMS: 60000,
       connectTimeoutMS: 60000
     });
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
-    process.exit(1);
+
+    // 🛠 Riprova la connessione dopo 5 secondi invece di chiudere il processo
+    setTimeout(connectMongoDB, 5000);
   }
 };
+
+// 🔄 Avvia la connessione iniziale
 connectMongoDB();
 
-mongoose.connection.on("error", (err) => logger.error(`❌ Mongoose connection error: ${err.message}`));
+// ✅ Listener per gestione errori
+mongoose.connection.on("error", (err) => {
+  logger.error(`❌ Mongoose connection error: ${err.message}`);
+});
+
+// ✅ Listener per gestione disconnessione e riconnessione
 mongoose.connection.on("disconnected", async () => {
-  logger.warn("⚠️ MongoDB disconnected. Trying to reconnect...");
-  await connectMongoDB();  // <== AGGIUNTA RICONNESSIONE AUTOMATICA
+  logger.warn("⚠️ MongoDB disconnected. Trying to reconnect in 5s...");
+  setTimeout(connectMongoDB, 5000);  // ⏳ Aspetta prima di riconnettersi
 });
 
 // ✅ Health Check
