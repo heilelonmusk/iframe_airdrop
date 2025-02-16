@@ -292,8 +292,6 @@ router.post("/api/nlp", async (req, res) => {
   return res.json({ answer: intent.answer });
 });
 
-app.use("/", router);
-
 // ✅ Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", async (req, res) => {
   const { source, file, query } = req.query;
