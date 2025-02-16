@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const redis = require("../config/redis");
-const { logger } = require("../modules/logging/logger");
+const logger = require("../modules/logging/logger");
 logger.error("This is an error message");
 
 const app = express();
@@ -52,19 +52,19 @@ if (!fs.existsSync(logsDir)) {
   }
 }
 
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(
-      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
-    )
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: path.join(logsDir, "app.log") }),
-  ],
-});
+//const logger = winston.createLogger({
+//  level: "info",
+//  format: winston.format.combine(
+//    winston.format.timestamp(),
+//    winston.format.printf(
+//      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+//    )
+//  ),
+//  transports: [
+//    new winston.transports.Console(),
+//    new winston.transports.File({ filename: path.join(logsDir, "app.log") }),
+//  ],
+//});
 
 // === Verifica delle Variabili d'Ambiente Richieste ===
 const requiredEnvVars = [
