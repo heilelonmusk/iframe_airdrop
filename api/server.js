@@ -107,13 +107,13 @@ const questionSchema = new mongoose.Schema({
   source: { type: String, default: "Ultron AI" },
   createdAt: { type: Date, default: Date.now },
 });
-const Question = mongoose.model("Question", questionSchema);
+const Question = mongoose.models.Question || mongoose.model("Question", questionSchema);
 
 // Schema per NLP Model
 const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true },
 });
-const NLPModel = mongoose.model("NLPModel", NLPModelSchema);
+const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
 // Inizializza il modello NLP
 (async () => {
