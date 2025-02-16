@@ -6,7 +6,6 @@ const redis = require("../config/redis");
 const winston = require("winston");
 const { execSync } = require("child_process");
 const { logger } = require("../modules/logging/logger");
-logger.error("This is an error message");
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 

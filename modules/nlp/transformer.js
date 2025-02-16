@@ -2,7 +2,6 @@ require('dotenv').config();
 const OpenAI = require("openai");
 const mongoose = require("mongoose");
 const { logger } = require("../logging/logger");
-logger.error("This is an error message");
 
 // ✅ Load OpenAI API key
 const openai = new OpenAI({

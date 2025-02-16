@@ -3,7 +3,6 @@ require('dotenv').config();
 const axios = require('axios');
 const { ethers } = require("ethers");
 const { logger } = require("../modules/logging/logger");
-logger.error("This is an error message");
 
 // Load endpoints from environment variables
 const TENDERMINT_RPC_URL = process.env.TENDERMINT_RPC_URL;
