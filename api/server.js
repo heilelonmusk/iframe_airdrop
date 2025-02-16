@@ -307,14 +307,22 @@ if (!process.env.NETLIFY) {
   const server = app.listen(port, () => {
     logger.info(`🚀 Server running on port ${port}`);
   });
-
-  server.on("error", (err) => {
-    if (err.code === "EADDRINUSE") {
-      logger.error(`❌ Port ${port} is already in use!`);
-      process.exit(1);
-    } else {
-      throw err;
-    }
+  
+  // Aggiungere gestione della chiusura per liberare la porta
+  process.on("SIGTERM", () => {
+    logger.warn("⚠️ SIGTERM received. Closing server...");
+    server.close(() => {
+      logger.info("✅ Server closed. Exiting process.");
+      process.exit(0);
+    });
+  });
+  
+  process.on("SIGINT", () => {
+    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+    server.close(() => {
+      logger.info("✅ Server closed. Exiting process.");
+      process.exit(0);
+    });
   });
 }
 
