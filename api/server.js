@@ -19,6 +19,10 @@ const { logConversation } = require("../modules/logging/logger");
 
 const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
+if (!process.env.NETLIFY) {
+  app.listen(port, () => logger.info(`Server running on port ${port}`));
+}
+
 // Usa "/tmp/logs" in produzione, altrimenti "../logs"
 const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
@@ -77,28 +81,40 @@ redis.on("end", () => {
 });
 
 // ✅ Connessione a MongoDB con gestione della riconnessione
-let db;
+let isConnected = false; // Stato della connessione globale
 
 const connectMongoDB = async () => {
-  if (db) return db;  // Se è già connesso, riutilizza la connessione
-  
+  if (isConnected) {
+    logger.info("🔄 MongoDB already connected, reusing existing connection.");
+    return mongoose.connection;
+  }
+
   try {
-    db = await mongoose.connect(process.env.MONGO_URI, {
+    await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 50000, 
+      serverSelectionTimeoutMS: 50000,
       socketTimeoutMS: 60000,
       connectTimeoutMS: 60000
     });
+    isConnected = true;
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
+    isConnected = false;
   }
-  return db;
+  return mongoose.connection;
 };
 
-// 🔄 Avvia la connessione iniziale
+// ✅ Connessione iniziale
 connectMongoDB();
+
+setInterval(async () => {
+  if (mongoose.connection.readyState !== 1) {
+    logger.warn("⚠️ MongoDB disconnected. Reconnecting...");
+    await connectMongoDB();
+  }
+}, 30000);  // Controllo ogni 30 secondi
 
 mongoose.connection.on("disconnected", async () => {
   logger.warn("⚠️ MongoDB disconnected. Trying to reconnect...");
@@ -122,14 +138,20 @@ router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
 
-    const mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
-    logger.info(`🔹 MongoDB Status: ${mongoStatus}`);  // <== AGGIUNTA LOG DI DEBUG
+    let mongoStatus = "Disconnected";
+    try {
+      const admin = mongoose.connection.db.admin();
+      await admin.ping();
+      const collections = await mongoose.connection.db.listCollections().toArray();
+      mongoStatus = collections.length > 0 ? "Connected" : "Empty DB";
+    } catch (e) {
+      mongoStatus = "Disconnected";
+    }
+    logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
 
     let redisStatus = "Disconnected";
     if (redis.status === "ready") {
-      redisStatus = await redis.ping()
-        .then((res) => (res === "PONG" ? "Connected" : "Disconnected"))
-        .catch(() => "Disconnected");
+      redisStatus = await redis.ping().then((res) => (res === "PONG" ? "Connected" : "Disconnected")).catch(() => "Disconnected");
     }
 
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
@@ -182,16 +204,20 @@ async function trainAndSaveNLP() {
 // Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", async (req, res) => {
   try {
-    const { question, userId } = req.body;
+    const { question } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
+
     const storedAnswer = await Question.findOne({ question });
     if (storedAnswer) return res.json({ answer: storedAnswer.answer, source: storedAnswer.source });
+
     const intentResult = await manager.process("en", question);
     const finalAnswer = intentResult.answer || "I'm not sure how to answer that yet.";
+
     await new Question({ question, answer: finalAnswer, source: "Ultron AI" }).save();
     res.json({ answer: finalAnswer, source: "Ultron AI" });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    logger.error(`❌ Error processing question: ${error.message}`);
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 });
 
@@ -211,4 +237,5 @@ if (require.main === module) {
   app.listen(8889, () => logger.info("Server running on port 8889"));
 }
 
-module.exports = { app, handler: serverless(app) };
+module.exports = app;
+module.exports.handler = serverless(app);
