@@ -13,7 +13,7 @@ const winston = require("winston");
 const app = express();
 const router = express.Router();
 
-// ✅ Configurazione Redis con variabili d'ambiente corrette
+// === Configurazione Redis ===
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
@@ -27,7 +27,7 @@ const redis = new Redis({
   host: REDIS_HOST,
   port: REDIS_PORT,
   password: REDIS_PASSWORD,
-  tls: {}, // ✅ NECESSARIO per Upstash Redis
+  tls: {}, // NECESSARIO per Upstash Redis
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
@@ -41,7 +41,7 @@ redis.on("error", (err) => {
   console.error("❌ Redis connection error:", err.message);
 });
 
-// 📁 Assicurarsi che la cartella dei log esista (Usiamo /tmp/logs per Netlify)
+// === Logger e Directory dei Log ===
 const logsDir = "/tmp/logs";
 if (!fs.existsSync(logsDir)) {
   try {
@@ -51,12 +51,13 @@ if (!fs.existsSync(logsDir)) {
   }
 }
 
-// 🚀 Logger Winston
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+    winston.format.printf(
+      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
+    )
   ),
   transports: [
     new winston.transports.Console(),
@@ -64,8 +65,16 @@ const logger = winston.createLogger({
   ],
 });
 
-// ✅ Verifica delle variabili d'ambiente richieste
-const requiredEnvVars = ["MONGO_URI", "REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
+// === Verifica delle Variabili d'Ambiente Richieste ===
+const requiredEnvVars = [
+  "MONGO_URI",
+  "REDIS_HOST",
+  "REDIS_PORT",
+  "REDIS_PASSWORD",
+  "MY_GITHUB_OWNER",
+  "MY_GITHUB_REPO",
+  "MY_GITHUB_TOKEN",
+];
 requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
     logger.error(`❌ Missing required environment variable: ${envVar}`);
@@ -73,9 +82,8 @@ requiredEnvVars.forEach((envVar) => {
   }
 });
 
-// 🛡️ Rate Limiting
-app.set("trust proxy", 1); // Imposta Express per fidarsi del proxy di Netlify
-
+// === Middleware e Rate Limiting ===
+app.set("trust proxy", 1); // Fidarsi del proxy di Netlify
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 100,
@@ -86,7 +94,7 @@ app.use(limiter);
 app.use(cors());
 app.use(express.json());
 
-// 📌 Connessione a MongoDB
+// === Connessione a MongoDB ===
 mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
@@ -101,13 +109,14 @@ mongoose
     process.exit(1);
   });
 
+// === Schema e Modello per la Knowledge Base ===
 const KnowledgeSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true },
   value: mongoose.Schema.Types.Mixed,
 });
 const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
 
-// 🚀 Middleware cache Redis
+// === Middleware per Cache Redis ===
 const cacheMiddleware = async (req, res, next) => {
   const key = req.originalUrl;
   try {
@@ -132,12 +141,11 @@ const cacheMiddleware = async (req, res, next) => {
   next();
 };
 
-// 📌 API Health Check
+// === Endpoint: Health Check ===
 router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
 
-    // Test MongoDB
     let mongoStatus = "Disconnected";
     if (mongoose.connection.readyState === 1) {
       mongoStatus = "Connected";
@@ -145,13 +153,15 @@ router.get("/health", async (req, res) => {
       throw new Error("MongoDB not connected");
     }
 
-    // Test Redis
     let redisStatus = "Disconnected";
-    await redis.ping().then(() => {
-      redisStatus = "Connected";
-    }).catch(err => {
-      throw new Error("Redis not connected: " + err.message);
-    });
+    await redis
+      .ping()
+      .then(() => {
+        redisStatus = "Connected";
+      })
+      .catch((err) => {
+        throw new Error("Redis not connected: " + err.message);
+      });
 
     logger.info(`✅ MongoDB: ${mongoStatus}, Redis: ${redisStatus}`);
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
@@ -161,35 +171,52 @@ router.get("/health", async (req, res) => {
   }
 });
 
-// 📌 Recupero dati da GitHub o MongoDB
+// === Endpoint: Recupero Dati da GitHub o MongoDB ===
 router.get("/fetch", cacheMiddleware, async (req, res) => {
   const { source, file, query } = req.query;
   try {
-    if (!source) return res.status(400).json({ error: "Missing source parameter." });
+    if (!source)
+      return res.status(400).json({ error: "Missing source parameter." });
 
     if (source === "github") {
-      if (!file) return res.status(400).json({ error: "Missing file parameter." });
+      if (!file)
+        return res.status(400).json({ error: "Missing file parameter." });
       const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/${file}`;
       logger.info(`🔹 Fetching from GitHub: ${repoUrl}`);
-      const response = await axios.get(repoUrl, { headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` } });
-      if (!response.data.download_url) return res.status(404).json({ error: "GitHub API Error: File not found." });
-      const fileResponse = await axios.get(response.data.download_url);
+      // Imposta un timeout per evitare blocchi (5000ms)
+      const response = await axios.get(repoUrl, {
+        headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` },
+        timeout: 5000,
+      });
+      if (!response.data.download_url)
+        return res
+          .status(404)
+          .json({ error: "GitHub API Error: File not found." });
+      const fileResponse = await axios.get(response.data.download_url, {
+        timeout: 5000,
+      });
       return res.json({ file, content: fileResponse.data });
     }
 
     if (source === "mongodb") {
-      if (!query) return res.status(400).json({ error: "Missing query parameter." });
+      if (!query)
+        return res.status(400).json({ error: "Missing query parameter." });
       const data = await Knowledge.findOne({ key: query });
-      if (!data) return res.status(404).json({ error: "No data found in MongoDB" });
+      if (!data)
+        return res.status(404).json({ error: "No data found in MongoDB" });
       return res.json(data);
     }
 
     return res.status(400).json({ error: "Invalid source parameter." });
   } catch (error) {
     logger.error("❌ Fetch Error:", error.message);
-    res.status(500).json({ error: "Unexpected error fetching data", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Unexpected error fetching data", details: error.message });
   }
 });
 
+// === Esposizione dell'Endpoint Unified Access ===
 app.use("/.netlify/functions/unifiedAccess", router);
+
 module.exports = { app, handler: serverless(app) };
