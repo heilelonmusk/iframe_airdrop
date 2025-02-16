@@ -33,66 +33,22 @@ const logger = winston.createLogger({
 logger.info(`NODE_ENV = ${process.env.NODE_ENV}`);
 logger.info(`Log directory: ${logDir}`);
 
-const { initializeNLP, getIntent } = require("../modules/intent/intentRecognizer");
-const { loadNLPModel, saveNLPModel } = require("../modules/nlp/nlpModel");
-const { generateResponse } = require("../modules/nlp/transformer");
-const { logConversation } = require("../modules/logging/logger");
-
 const app = express();
 const router = express.Router();
-const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
 
 // Middleware
 app.use(cors({ origin: "https://helon.space", credentials: true }));
 app.use(express.json());
 app.use(timeout("10s"));
-
-// Rate Limiting
 app.set("trust proxy", 1);
 app.use(
   rateLimit({
-    windowMs: 60 * 1000, // 1 minuto
+    windowMs: 60 * 1000,
     max: 10,
     message: "Too many requests. Please try again later.",
     keyGenerator: (req) => req.headers["x-forwarded-for"]?.split(",")[0] || req.ip || "unknown-ip",
   })
 );
-
-// ✅ Connessione a MongoDB
-const MONGO_URI = process.env.MONGO_URI;
-if (!MONGO_URI) {
-  logger.error("❌ ERROR: MONGO_URI is missing! API will not function.");
-  process.exit(1);
-}
-
-const waitForMongoDB = async (retries = 10, delay = 1000) => {
-  for (let i = 0; i < retries; i++) {
-    if (mongoose.connection.readyState === 1) {
-      logger.info("✅ MongoDB connection established.");
-      return true;
-    }
-    logger.warn(`⏳ MongoDB connection not ready (attempt ${i + 1}/${retries}). Retrying...`);
-    await new Promise((resolve) => setTimeout(resolve, delay));
-  }
-  return false;
-};
-
-(async () => {
-  try {
-    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000 });
-    const connected = await waitForMongoDB();
-    if (!connected) throw new Error("MongoDB connection timeout");
-    logger.info("📚 Connected to MongoDB");
-  } catch (err) {
-    logger.error("❌ MongoDB connection error:", err.message);
-    process.exit(1);
-  }
-})();
-
-// Ascolta eventuali errori nella connessione
-mongoose.connection.on("error", (err) => {
-  logger.error("❌ Mongoose connection error:", err.message);
-});
 
 // ✅ Connessione a Redis
 const REDIS_HOST = process.env.REDIS_HOST;
@@ -105,7 +61,6 @@ if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
 }
 
 logger.info(`🔹 Connecting to Redis at ${REDIS_HOST}:${REDIS_PORT}...`);
-
 const redis = new Redis({
   host: REDIS_HOST,
   port: REDIS_PORT,
@@ -124,6 +79,80 @@ redis.on("error", (err) => {
 redis.on("reconnecting", () => {
   logger.warn("⚠️ Redis is reconnecting...");
 });
+
+// ✅ Connessione a MongoDB
+const MONGO_URI = process.env.MONGO_URI;
+if (!MONGO_URI) {
+  logger.error("❌ ERROR: MONGO_URI is missing! API will not function.");
+  process.exit(1);
+}
+
+const waitForMongoDB = async (retries = 10, delay = 2000) => {
+  for (let i = 0; i < retries; i++) {
+    if (mongoose.connection.readyState === 1) {
+      logger.info("✅ MongoDB connection established.");
+      return true;
+    }
+    logger.warn(`⏳ MongoDB connection not ready (attempt ${i + 1}/${retries}). Retrying...`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  return false;
+};
+
+(async () => {
+  try {
+    await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000, socketTimeoutMS: 60000 });
+    const connected = await waitForMongoDB();
+    if (!connected) throw new Error("MongoDB connection timeout");
+    logger.info("📚 Connected to MongoDB");
+  } catch (err) {
+    logger.error("❌ MongoDB connection error:", err.message);
+    process.exit(1);
+  }
+})();
+
+// Ascolta eventuali errori nella connessione
+mongoose.connection.on("error", (err) => {
+  logger.error("❌ Mongoose connection error:", err.message);
+});
+
+// ✅ Health Check
+router.get("/health", async (req, res) => {
+  try {
+    logger.info("🔹 Health check started...");
+
+    // Test MongoDB
+    let mongoStatus = "Disconnected";
+    if (mongoose.connection.readyState === 1) {
+      mongoStatus = "Connected";
+    } else {
+      throw new Error("MongoDB not connected");
+    }
+
+    // Test Redis
+    let redisStatus = "Disconnected";
+    try {
+      const pingResult = await redis.ping();
+      logger.info(`🔹 Redis Ping Result: ${pingResult}`);
+      if (pingResult === "PONG") {
+        redisStatus = "Connected";
+      } else {
+        throw new Error(`Unexpected Redis ping response: ${pingResult}`);
+      }
+    } catch (err) {
+      throw new Error("Redis connection failed: " + err.message);
+    }
+
+    logger.info(`✅ Health check passed! MongoDB: ${mongoStatus}, Redis: ${redisStatus}`);
+    res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
+
+  } catch (error) {
+    logger.error(`❌ Health check failed: ${error.message}`);
+    res.status(500).json({ error: "Service is unhealthy", details: error.message });
+  }
+});
+
+app.use("/.netlify/functions/server", router);
 
 // Schema & Model per Knowledge Base
 const questionSchema = new mongoose.Schema({
