@@ -312,3 +312,29 @@
 [2025-02-16T12:28:44.465Z] INFO: Redis ping result: PONG
 [2025-02-16T12:28:44.824Z] INFO: Final mongoose.connection.readyState: 1
 [2025-02-16T12:28:44.828Z] ERROR: ❌ Error initializing NLP model: logger is not defined
+[2025-02-16T12:57:19.236Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T12:57:19.274Z] INFO: 🔹 Health check started...
+[2025-02-16T12:57:19.275Z] INFO: Current mongoose.connection.readyState: 2
+[2025-02-16T12:57:19.275Z] WARN: ⚠️ MongoDB not connected (state 2), attempting to reconnect...
+[2025-02-16T12:57:19.276Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T12:57:19.417Z] INFO: ✅ Connected to Redis successfully!
+[2025-02-16T12:57:19.868Z] INFO: Forced disconnect successful. ReadyState is now: 0
+[2025-02-16T12:57:19.874Z] INFO: Forced disconnect successful. ReadyState is now: 2
+[2025-02-16T12:57:19.876Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T12:57:20.519Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T12:57:20.879Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T12:57:20.882Z] INFO: After reconnect attempt, mongoose.connection.readyState: 1
+[2025-02-16T12:57:20.884Z] INFO: Performing MongoDB ping command...
+[2025-02-16T12:57:20.956Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T12:57:20.960Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T12:57:20.962Z] INFO: Performing Redis ping...
+[2025-02-16T12:57:21.020Z] INFO: Redis ping result: PONG
+[2025-02-16T12:57:21.036Z] INFO: 🔹 Health check started...
+[2025-02-16T12:57:21.039Z] INFO: Current mongoose.connection.readyState: 1
+[2025-02-16T12:57:21.041Z] INFO: Performing MongoDB ping command...
+[2025-02-16T12:57:21.240Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T12:57:21.246Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T12:57:21.248Z] INFO: Performing Redis ping...
+[2025-02-16T12:57:21.300Z] INFO: Redis ping result: PONG
+[2025-02-16T12:57:21.526Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T12:57:21.533Z] ERROR: ❌ Error initializing NLP model: logger.error is not a function

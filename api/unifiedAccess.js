@@ -14,14 +14,14 @@ const app = express();
 const router = express.Router();
 
 // === Configurazione Redis ===
-const REDIS_HOST = process.env.REDIS_HOST;
-const REDIS_PORT = process.env.REDIS_PORT;
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+//const REDIS_HOST = process.env.REDIS_HOST;
+//const REDIS_PORT = process.env.REDIS_PORT;
+//const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
 
-if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
-  console.error("❌ ERROR: Redis environment variables are missing!");
-  process.exit(1);
-}
+//if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
+//  console.error("❌ ERROR: Redis environment variables are missing!");
+//  process.exit(1);
+//}
 
 //const redis = new Redis({
 //  host: REDIS_HOST,
@@ -33,13 +33,13 @@ if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
 //  retryStrategy: (times) => Math.min(times * 100, 2000),
 // });
 
-redis.on("connect", () => {
-  console.log("✅ Connected to Redis successfully!");
-});
+//redis.on("connect", () => {
+//  console.log("✅ Connected to Redis successfully!");
+//});
 
-redis.on("error", (err) => {
-  console.error("❌ Redis connection error:", err.message);
-});
+//redis.on("error", (err) => {
+//  console.error("❌ Redis connection error:", err.message);
+//});
 
 // === Logger e Directory dei Log ===
 const logsDir = "/tmp/logs";

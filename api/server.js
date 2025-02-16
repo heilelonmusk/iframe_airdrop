@@ -81,12 +81,12 @@ app.use(
 //  }
 // });
 
-redis.on("connect", () => logger.info("✅ Connected to Redis successfully!"));
-redis.on("error", (err) => logger.error(`❌ Redis connection error: ${err.message}`));
-redis.on("end", () => {
-  logger.warn("⚠️ Redis connection closed. Reconnecting...");
-  setTimeout(() => redis.connect(), 5000);
-});
+//redis.on("connect", () => logger.info("✅ Connected to Redis successfully!"));
+//redis.on("error", (err) => logger.error(`❌ Redis connection error: ${err.message}`));
+//redis.on("end", () => {
+//  logger.warn("⚠️ Redis connection closed. Reconnecting...");
+//  setTimeout(() => redis.connect(), 5000);
+//});
 
 // Funzione per connettersi a MongoDB con gestione forzata se rimane in stato "connecting"
 const connectMongoDB = async () => {
