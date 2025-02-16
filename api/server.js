@@ -77,9 +77,9 @@ redis.on("end", () => {
 });
 
 // ✅ Connessione a MongoDB con gestione della riconnessione
-console.log("🔹 MONGO_URI in Netlify:", process.env.MONGO_URI);
-
 const connectMongoDB = async () => {
+  console.log("🔹 MONGO_URI in Netlify:", process.env.MONGO_URI);
+  mongoose.set('debug', true); // Logga le query su MongoDB
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
@@ -91,6 +91,7 @@ const connectMongoDB = async () => {
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
+  
 
     // 🛠 Riprova la connessione dopo 5 secondi invece di chiudere il processo
     setTimeout(connectMongoDB, 5000);
