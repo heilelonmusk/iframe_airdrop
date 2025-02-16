@@ -285,5 +285,4 @@ if (require.main === module && !process.env.NETLIFY) {
   app.listen(port, () => logger.info(`Server running on port ${port}`));
 }
 
-module.exports = app;
-module.exports.handler = serverless(app);
+module.exports = { app, handler: serverless(app), redis };

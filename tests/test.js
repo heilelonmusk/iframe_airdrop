@@ -79,7 +79,7 @@ describe("🔍 API Tests", () => {
     }
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     logger.info("✅ All tests completed.");
   });
 

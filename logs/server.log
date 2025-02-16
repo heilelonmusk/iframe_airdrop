@@ -189,3 +189,29 @@
 [2025-02-16T11:39:04.948Z] INFO: Redis ping result: PONG
 [2025-02-16T11:39:05.309Z] INFO: Final mongoose.connection.readyState: 1
 [2025-02-16T11:39:05.394Z] INFO: 🧠 NLP Model Loaded from DB
+[2025-02-16T11:47:36.164Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T11:47:36.267Z] INFO: 🔹 Health check started...
+[2025-02-16T11:47:36.268Z] INFO: Current mongoose.connection.readyState: 2
+[2025-02-16T11:47:36.269Z] WARN: ⚠️ MongoDB not connected (state 2), attempting to reconnect...
+[2025-02-16T11:47:36.270Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T11:47:36.569Z] INFO: ✅ Connected to Redis successfully!
+[2025-02-16T11:47:37.220Z] INFO: Forced disconnect successful. ReadyState is now: 0
+[2025-02-16T11:47:37.224Z] INFO: Forced disconnect successful. ReadyState is now: 2
+[2025-02-16T11:47:37.225Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T11:47:37.808Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T11:47:38.228Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T11:47:38.234Z] INFO: After reconnect attempt, mongoose.connection.readyState: 1
+[2025-02-16T11:47:38.236Z] INFO: Performing MongoDB ping command...
+[2025-02-16T11:47:38.310Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T11:47:38.315Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T11:47:38.317Z] INFO: Performing Redis ping...
+[2025-02-16T11:47:38.365Z] INFO: Redis ping result: PONG
+[2025-02-16T11:47:38.381Z] INFO: 🔹 Health check started...
+[2025-02-16T11:47:38.383Z] INFO: Current mongoose.connection.readyState: 1
+[2025-02-16T11:47:38.387Z] INFO: Performing MongoDB ping command...
+[2025-02-16T11:47:38.446Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T11:47:38.449Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T11:47:38.451Z] INFO: Performing Redis ping...
+[2025-02-16T11:47:38.496Z] INFO: Redis ping result: PONG
+[2025-02-16T11:47:38.813Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T11:47:38.816Z] ERROR: ❌ Error initializing NLP model: logger is not defined

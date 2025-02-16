@@ -102,6 +102,7 @@ afterAll(async () => {
   // Attendi brevemente per consentire la chiusura dei socket residui
   await new Promise(resolve => setTimeout(resolve, 1000));
   
+  // (Opzionale) Log degli active handles per debug
   setTimeout(() => {
     console.log("Active handles:", process._getActiveHandles());
     process.exit(0);
