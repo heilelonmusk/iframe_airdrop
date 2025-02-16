@@ -65,11 +65,24 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
+const waitForMongoDB = async (retries = 10, delay = 1000) => {
+  for (let i = 0; i < retries; i++) {
+    if (mongoose.connection.readyState === 1) {
+      logger.info("✅ MongoDB connection established.");
+      return true;
+    }
+    logger.warn(`⏳ MongoDB connection not ready (attempt ${i + 1}/${retries}). Retrying...`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  return false;
+};
+
 (async () => {
   try {
     await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000 });
+    const connected = await waitForMongoDB();
+    if (!connected) throw new Error("MongoDB connection timeout");
     logger.info("📚 Connected to MongoDB");
-    logger.info(`Mongoose readyState: ${mongoose.connection.readyState}`);
   } catch (err) {
     logger.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
