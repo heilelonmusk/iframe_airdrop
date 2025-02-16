@@ -210,7 +210,11 @@ router.get("/health", async (req, res) => {
   }
 });
 
-app.use("/.netlify/functions/server", router);
+app.use("/.netlify/functions/server", router); // Netlify usa questa route
+
+if (!process.env.NETLIFY) {
+  app.listen(port, () => logger.info(`🚀 Server running on port ${port}`));
+}
 
 // Schema & Model per Knowledge Base
 const questionSchema = new mongoose.Schema({
