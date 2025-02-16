@@ -101,15 +101,21 @@ const connectMongoDB = async () => {
 // 🔄 Avvia la connessione iniziale
 connectMongoDB();
 
-// ✅ Listener per gestione errori
+mongoose.connection.on("disconnected", async () => {
+  logger.warn("⚠️ MongoDB disconnected. Trying to reconnect...");
+  setTimeout(connectMongoDB, 5000);  // Prova a riconnetterti dopo 5 secondi
+});
+
 mongoose.connection.on("error", (err) => {
   logger.error(`❌ Mongoose connection error: ${err.message}`);
 });
 
-// ✅ Listener per gestione disconnessione e riconnessione
-mongoose.connection.on("disconnected", async () => {
-  logger.warn("⚠️ MongoDB disconnected. Trying to reconnect in 5s...");
-  setTimeout(connectMongoDB, 5000);  // ⏳ Aspetta prima di riconnettersi
+mongoose.connection.on("close", () => {
+  logger.warn("⚠️ MongoDB connection closed!");
+});
+
+mongoose.connection.on("reconnected", () => {
+  logger.info("✅ MongoDB reconnected!");
 });
 
 // ✅ Health Check
