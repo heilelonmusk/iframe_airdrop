@@ -28,22 +28,22 @@ const logDir = process.env.NODE_ENV === "development" ? "/tmp/logs" : path.join(
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({
-      filename: path.join(logDir, "server.log"),
-      maxsize: 1024 * 1024 * 5, // Max 5MB
-      maxFiles: 3,
-      tailable: true
-    }),
-  ],
-});
+//const logger = winston.createLogger({
+//  level: "info",
+//  format: winston.format.combine(
+//    winston.format.timestamp(),
+//    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)
+//  ),
+//  transports: [
+//    new winston.transports.Console(),
+//    new winston.transports.File({
+//      filename: path.join(logDir, "server.log"),
+//      maxsize: 1024 * 1024 * 5, // Max 5MB
+//      maxFiles: 3,
+//      tailable: true
+//    }),
+//  ],
+// });
 
 // Crea l'app Express e il router
 const app = express();
