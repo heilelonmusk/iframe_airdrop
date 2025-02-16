@@ -1,4 +1,6 @@
+const path = require('path');
 module.exports = {
+  
   entry: './api/server.js',
   target: 'node',
   mode: process.env.NODE_ENV || 'production',
