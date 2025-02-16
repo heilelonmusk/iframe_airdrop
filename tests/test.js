@@ -80,7 +80,29 @@ describe("🔍 API Tests", () => {
   });
 
   afterAll(async () => {
-    logger.info("✅ All tests completed.");
+    logger.info("✅ Chiusura connessioni a MongoDB...");
+    await mongoose.connection.close();
+    logger.info("✅ MongoDB connection closed.");
+    
+    logger.info("✅ Chiusura connessioni a Redis...");
+    try {
+      await redis.quit();
+      logger.info("✅ Redis connection closed with quit().");
+    } catch (quitError) {
+      logger.warn("⚠️ Errore durante redis.quit():", quitError.message);
+    }
+    // Forza la disconnessione completa dei socket Redis
+    redis.disconnect();
+    logger.info("✅ Redis disconnected via disconnect().");
+    
+    // Attendi brevemente per consentire la chiusura dei socket residui
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // (Opzionale) Log degli active handles per debug
+    setTimeout(() => {
+      console.log("Active handles:", process._getActiveHandles());
+      process.exit(0);
+    }, 2000);
   });
 
   // Health Check Test
@@ -136,4 +158,7 @@ describe("🔍 API Tests", () => {
     expect(response.statusCode).toBe(404);
     logger.warn("⚠️ Endpoint sconosciuto ha restituito 404 come previsto.");
   });
+
+  
+
 });
