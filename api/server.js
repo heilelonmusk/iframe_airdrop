@@ -72,14 +72,14 @@ redis.on("end", () => {
   setTimeout(() => redis.connect(), 5000);
 });
 
-// ✅ Connessione a MongoDB
+// ✅ Connessione a MongoDB con gestione della riconnessione
 const connectMongoDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 10000, socketTimeoutMS: 60000 });
     logger.info("📚 Connected to MongoDB");
   } catch (err) {
     logger.error(`❌ MongoDB connection error: ${err.message}`);
-    process.exit(1);
+    setTimeout(connectMongoDB, 5000); // Riprova la connessione dopo 5 secondi
   }
 };
 connectMongoDB();
