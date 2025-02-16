@@ -14,6 +14,7 @@
      📄 webpack.config.js - 🚀 Add a description here
      📄 netlify_test.log - 🚀 Add a description here
      📄 README.md - Primary repository documentation, detailing project purpose, architecture, functionality, and contribution guidelines.
+     📄 babel.config.js - 🚀 Add a description here
      📄 .gitignore - Specifies files and folders ignored by Git (e.g., .env, logs, build artifacts) to maintain repository cleanliness.
      📄 package-lock.json - Lock file for npm dependencies, ensuring version consistency across different environments.
      📄 package.json - Defines project dependencies, scripts, and metadata for backend and frontend packages.
