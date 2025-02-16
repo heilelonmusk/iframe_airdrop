@@ -320,4 +320,4 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
 // === Esposizione dell'Endpoint Unified Access ===
 app.use("/.netlify/functions/unifiedAccess", router);
 
-module.exports = { app, handler: serverless(app) };
+module.exports = { app, handler: serverless(app), redis };

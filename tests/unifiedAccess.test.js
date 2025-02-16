@@ -3,7 +3,7 @@ const request = require("supertest");
 const mongoose = require("mongoose");
 const { app } = require("../api/unifiedAccess"); // Assicurati che unifiedAccess.js esporti { app, handler }
 const winston = require("winston");
-const Redis = require("ioredis");
+const { redis } = require("../api/unifiedAccess");
 const { execSync } = require("child_process");
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
@@ -76,10 +76,10 @@ beforeAll(async () => {
       socketTimeoutMS: 45000,
     });
     logger.info("✅ Connessione a MongoDB riuscita.");
-    // Attendi un attimo per essere sicuri che la connessione sia stabile
+    // Attendi un attimo per assicurarti che la connessione sia stabile
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Aggiungi i listener qui:
+    // Aggiungi i listener per il monitoraggio della connessione
     mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
     mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
     mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
@@ -96,6 +96,7 @@ beforeAll(async () => {
   }
 });
 
+// Teardown dopo tutti i test
 afterAll(async () => {
   logger.info("✅ Chiusura connessioni a MongoDB...");
   await mongoose.connection.close();
@@ -113,7 +114,7 @@ afterAll(async () => {
   logger.info("✅ Redis disconnected via disconnect().");
   
   // Attendi brevemente per consentire la chiusura dei socket residui
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // Log degli handle attivi (per debug) e forzatura dell'uscita
   setTimeout(() => {
