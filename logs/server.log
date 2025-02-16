@@ -113,3 +113,29 @@
 [2025-02-16T10:31:44.080Z] INFO: Forced disconnect successful. ReadyState is now: 0
 [2025-02-16T10:31:44.084Z] INFO: Forced disconnect successful. ReadyState is now: 2
 [2025-02-16T10:31:44.085Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T10:40:56.728Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T10:40:56.762Z] INFO: 🔹 Health check started...
+[2025-02-16T10:40:56.762Z] INFO: Current mongoose.connection.readyState: 2
+[2025-02-16T10:40:56.763Z] WARN: ⚠️ MongoDB not connected (state 2), attempting to reconnect...
+[2025-02-16T10:40:56.763Z] WARN: Mongoose connection is stuck in 'connecting' state. Forcing disconnect...
+[2025-02-16T10:40:56.903Z] INFO: ✅ Connected to Redis successfully!
+[2025-02-16T10:40:57.423Z] INFO: Forced disconnect successful. ReadyState is now: 0
+[2025-02-16T10:40:57.427Z] INFO: Forced disconnect successful. ReadyState is now: 2
+[2025-02-16T10:40:57.428Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T10:40:58.112Z] INFO: 📚 Connected to MongoDB
+[2025-02-16T10:40:58.430Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T10:40:58.430Z] INFO: After reconnect attempt, mongoose.connection.readyState: 1
+[2025-02-16T10:40:58.431Z] INFO: Performing MongoDB ping command...
+[2025-02-16T10:40:58.492Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T10:40:58.494Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T10:40:58.495Z] INFO: Performing Redis ping...
+[2025-02-16T10:40:58.552Z] INFO: Redis ping result: PONG
+[2025-02-16T10:40:58.566Z] INFO: 🔹 Health check started...
+[2025-02-16T10:40:58.567Z] INFO: Current mongoose.connection.readyState: 1
+[2025-02-16T10:40:58.568Z] INFO: Performing MongoDB ping command...
+[2025-02-16T10:40:58.624Z] INFO: MongoDB ping result: {"ok":1}
+[2025-02-16T10:40:58.625Z] INFO: 🔹 MongoDB Status: Connected
+[2025-02-16T10:40:58.625Z] INFO: Performing Redis ping...
+[2025-02-16T10:40:58.680Z] INFO: Redis ping result: PONG
+[2025-02-16T10:40:59.115Z] INFO: Final mongoose.connection.readyState: 1
+[2025-02-16T10:40:59.248Z] INFO: 🧠 NLP Model Loaded from DB
