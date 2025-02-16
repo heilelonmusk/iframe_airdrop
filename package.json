@@ -33,7 +33,7 @@
     "kerberos": "^2.2.1",
     "mongodb": "^6.13.0",
     "mongodb-client-encryption": "^6.2.0",
-    "mongoose": "^8.10.0",
+    "mongoose": "^8.10.1",
     "node-nlp": "^5.0.0-alpha.5",
     "openai": "^4.84.0",
     "patch-package": "^8.0.0",
