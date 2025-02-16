@@ -58,7 +58,7 @@ checkEnvVariables();
 checkRedisProcess();
 
 // ✅ Connessione a Redis con TLS (necessario per Upstash)
-// Convertiamo REDIS_PORT in numero e impostiamo family: 4 e rejectUnauthorized: false
+// Convertiamo REDIS_PORT in numero, impostiamo family: 4 e rejectUnauthorized: false
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: Number(process.env.REDIS_PORT),
@@ -73,12 +73,34 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err));
 
-// ✅ Test per Redis
+// Aspettiamo che Redis sia pronto prima di inviare comandi
+const waitForReady = () => {
+  return new Promise((resolve, reject) => {
+    if (redis.status === "ready") {
+      resolve();
+    } else {
+      // Attende il primo evento "ready" o timeout dopo 5 secondi
+      const readyHandler = () => {
+        clearTimeout(timeoutId);
+        resolve();
+      };
+      const timeoutId = setTimeout(() => {
+        reject(new Error("Timeout waiting for Redis ready"));
+      }, 5000);
+      redis.once("ready", readyHandler);
+    }
+  });
+};
+
 (async () => {
   try {
+    logger.info("🔹 Attesa che Redis sia pronto...");
+    await waitForReady();
+    logger.info("🔹 Redis status: " + redis.status);
+
     logger.info("🔹 Controllo connessione Redis...");
     const isConnected = await redis.ping().catch((err) => {
-      logger.error("Ping error:", err);
+      logger.error("Ping error:", err.message);
       return null;
     });
     if (isConnected !== "PONG") {
@@ -128,7 +150,6 @@ redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err));
     } else {
       logger.error("❌ Errore nell'eliminazione della chiave.");
     }
-
   } catch (error) {
     logger.error("❌ Test Redis fallito:", error.message);
   } finally {
