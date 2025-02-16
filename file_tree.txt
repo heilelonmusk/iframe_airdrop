@@ -23,6 +23,8 @@
   📁 iframe/ - Module managing airdrop verification via blockchain wallet interactions.
      📄 airdrop_checker.js - JavaScript logic handling blockchain wallet verification and eligibility confirmation.
      📄 airdrop_checker.html - HTML page for UI rendering of the airdrop verification system.
+  📁 config/ - 🚀 Add a description here
+     📄 redis.js - 🚀 Add a description here
   📁 tests/ - Contains all test scripts and debugging tools.
      📄 test.transformer.js - 🚀 Add a description here
      📄 test.js - Primary test script validating API endpoints, chatbot functionality, and system responses.
@@ -71,8 +73,6 @@
      📄 retry_pending_workflows.yml - Auto-retries any pending GitHub Actions workflows that may have stalled or failed.
      📄 retry_cancelled.yml - GitHub workflow to automatically restart any canceled workflows, ensuring task completion.
      📄 update_csv.yml - Automates updating CSV-based data files within the repository.
-  📁 lib/ - 🚀 Add a description here
-     📄 redis.js - 🚀 Add a description here
   📁 api/ - Backend API module managing chatbot logic, data retrieval, and integrations with external systems.
      📄 seedKnowledge.js - Initial population script that seeds MongoDB with structured knowledge base data for the chatbot.
      📄 server.js - The central Express.js server file handling API requests, routing, and middleware execution.

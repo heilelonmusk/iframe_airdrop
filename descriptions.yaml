@@ -89,6 +89,8 @@ descriptions:
   build/: "\U0001F680 Add a description here"
   build/server.bundle.js: "\U0001F680 Add a description here"
   build/server.bundle.js.LICENSE.txt: "\U0001F680 Add a description here"
+  config/: "\U0001F680 Add a description here"
+  config/redis.js: "\U0001F680 Add a description here"
   data/: Stores persistent data files, including whitelist and AI-related knowledge
     bases.
   data/.gitkeep: Placeholder file ensuring Git tracks the `data/` directory structure.
