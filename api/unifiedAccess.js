@@ -9,6 +9,8 @@ const path = require("path");
 const rateLimit = require("express-rate-limit");
 const redis = require("../lib/redis");
 const winston = require("winston");
+const { logger } = require("../modules/logging/logger");
+logger.error("This is an error message");
 
 const app = express();
 const router = express.Router();

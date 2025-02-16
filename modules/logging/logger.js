@@ -10,10 +10,7 @@ if (!MONGO_URI) {
 }
 
 // Connessione a MongoDB per il logging
-mongoose.connect(MONGO_URI, { 
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(MONGO_URI, { })
   .then(() => console.log("📜 Connected to MongoDB for logging"))
   .catch(err => {
     console.error("❌ MongoDB connection error:", err);
@@ -88,4 +85,8 @@ async function cleanupOldLogs() {
 const intervalId = setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
 intervalId.unref();
 
-module.exports = { logConversation, getFrequentQuestions };
+module.exports = { 
+  logger, 
+  logConversation, 
+  getFrequentQuestions 
+};
