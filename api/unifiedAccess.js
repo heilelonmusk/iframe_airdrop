@@ -1,15 +1,56 @@
 require("dotenv").config();
-const request = require("supertest");
-const mongoose = require("mongoose");
-const { handler } = require("../api/unifiedAccess"); // Import del handler dalla funzione unifiedAccess
 const express = require("express");
-const winston = require("winston");
+const serverless = require("serverless-http");
+const axios = require("axios");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+const rateLimit = require("express-rate-limit");
 const Redis = require("ioredis");
-const { execSync } = require("child_process");
+const winston = require("winston");
 
-jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
+const app = express();
+const router = express.Router();
 
-// 🚀 Configurazione del Logger con Winston
+// === Configurazione Redis ===
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+
+if (!REDIS_HOST || !REDIS_PORT || !REDIS_PASSWORD) {
+  console.error("❌ ERROR: Redis environment variables are missing!");
+  process.exit(1);
+}
+
+const redis = new Redis({
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  password: REDIS_PASSWORD,
+  tls: {}, // NECESSARIO per Upstash Redis
+  enableOfflineQueue: false,
+  connectTimeout: 5000,
+  retryStrategy: (times) => Math.min(times * 100, 2000),
+});
+
+redis.on("connect", () => {
+  console.log("✅ Connected to Redis successfully!");
+});
+
+redis.on("error", (err) => {
+  console.error("❌ Redis connection error:", err.message);
+});
+
+// === Logger e Directory dei Log ===
+const logsDir = "/tmp/logs";
+if (!fs.existsSync(logsDir)) {
+  try {
+    fs.mkdirSync(logsDir, { recursive: true });
+  } catch (err) {
+    console.error("❌ Error creating logs directory:", err.message);
+  }
+}
+
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -18,169 +59,164 @@ const logger = winston.createLogger({
       ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
     )
   ),
-  transports: [new winston.transports.Console()],
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: path.join(logsDir, "app.log") }),
+  ],
 });
 
-// 🚀 Verifica processi attivi sulla porta 5000
-const checkActiveProcesses = () => {
-  try {
-    const runningProcesses = execSync("lsof -i :5000").toString();
-    if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn("⚠️ Un altro processo è attivo sulla porta 5000. Questo potrebbe interferire con i test.");
-      // Non usiamo process.exit qui; logghiamo solo un avviso.
-    }
-  } catch (error) {
-    logger.info("✅ Nessun processo attivo sulla porta 5000. Procediamo con i test.");
-  }
-};
-
-// ✅ Verifica delle variabili d'ambiente richieste
-const checkEnvVariables = () => {
-  const requiredEnvVars = [
-    "MONGO_URI",
-    "REDIS_HOST",
-    "REDIS_PORT",
-    "REDIS_PASSWORD",
-    "MY_GITHUB_OWNER",
-    "MY_GITHUB_REPO",
-    "MY_GITHUB_TOKEN"
-  ];
-  requiredEnvVars.forEach((envVar) => {
-    if (!process.env[envVar]) {
-      logger.error(`❌ Variabile d'ambiente mancante: ${envVar}`);
-      process.exit(1);
-    }
-  });
-};
-
-// 🚀 Configurazione di Redis
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD,
-  tls: { rejectUnauthorized: false }, // Necessario per Upstash
-  enableOfflineQueue: false,
-  connectTimeout: 5000,
-  retryStrategy: (times) => Math.min(times * 100, 2000),
-});
-redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
-redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
-
-// 📌 Helper per simulare richieste API
-const simulateRequest = async (method, path, body = null) => {
-  const event = {
-    httpMethod: method,
-    path: `/.netlify/functions/unifiedAccess${path}`,
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : null,
-    isBase64Encoded: false,
-  };
-  return await handler(event, {});
-};
-
-// Setup prima di tutti i test
-let server;
-beforeAll(async () => {
-  checkActiveProcesses();
-  checkEnvVariables();
-
-  logger.info("✅ Connessione al database di test...");
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
-    logger.info("✅ Connessione a MongoDB riuscita.");
-  } catch (error) {
-    logger.error("❌ Errore di connessione a MongoDB:", error.message);
+// === Verifica delle Variabili d'Ambiente Richieste ===
+const requiredEnvVars = [
+  "MONGO_URI",
+  "REDIS_HOST",
+  "REDIS_PORT",
+  "REDIS_PASSWORD",
+  "MY_GITHUB_OWNER",
+  "MY_GITHUB_REPO",
+  "MY_GITHUB_TOKEN",
+];
+requiredEnvVars.forEach((envVar) => {
+  if (!process.env[envVar]) {
+    logger.error(`❌ Missing required environment variable: ${envVar}`);
     process.exit(1);
   }
-
-  try {
-    await redis.ping();
-    logger.info("✅ Redis connesso con successo.");
-  } catch (error) {
-    logger.warn("⚠️ Connessione Redis fallita:", error.message);
-  }
-
-  // Avvio di un server di test su porta 5000
-  const testApp = express();
-  testApp.use("/.netlify/functions/unifiedAccess", handler);
-  server = testApp.listen(5000, () =>
-    logger.info("🔹 Server di test avviato sulla porta 5000")
-  );
 });
 
-// Teardown dopo tutti i test
-afterAll(async () => {
-  logger.info("✅ Chiusura connessioni a MongoDB e Redis...");
-  await mongoose.connection.close();
-  await redis.quit();
-  if (server && server.address()) {
-    await new Promise((resolve, reject) => {
-      server.close((err) => (err ? reject(err) : resolve()));
-    });
-    logger.info("🔹 Server di test chiuso.");
-  }
+// === Middleware e Rate Limiting ===
+app.set("trust proxy", 1); // Fidarsi del proxy di Netlify
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: "Too many requests, please try again later.",
+  keyGenerator: (req) => req.ip || req.headers["x-forwarded-for"] || "unknown-ip",
 });
+app.use(limiter);
+app.use(cors());
+app.use(express.json());
 
-// Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
-afterEach(async () => {
-  logger.info("🗑️ Pulizia del database di test...");
-  try {
-    await mongoose.connection.db.collection("knowledges").deleteMany({});
-  } catch (error) {
-    logger.error("❌ Errore durante la pulizia della collezione 'knowledges':", error.message);
-  }
-  try {
-    await redis.flushdb();
-  } catch (error) {
-    logger.error("❌ Errore durante la pulizia di Redis:", error.message);
-  }
-});
-
-// Test di base (Sanity Check): Health Check
-test("GET /health - Controllo stato servizio", async () => {
-  const response = await simulateRequest("GET", "/health");
-  expect(response.statusCode).toBe(200);
-  const body = JSON.parse(response.body);
-  expect(body).toMatchObject({
-    status: "✅ Healthy",
-    mongo: "Connected",
-    redis: "Connected",
+// === Connessione a MongoDB ===
+mongoose
+  .connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  })
+  .then(() => {
+    logger.info("✅ MongoDB Connected Successfully");
+  })
+  .catch((err) => {
+    logger.error(`❌ MongoDB Connection Error: ${err.message}`);
+    logger.error("🔹 Connection String Used:", process.env.MONGO_URI);
+    process.exit(1);
   });
+
+// === Schema e Modello per la Knowledge Base ===
+const KnowledgeSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  value: mongoose.Schema.Types.Mixed,
+});
+const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
+
+// === Middleware per Cache Redis ===
+const cacheMiddleware = async (req, res, next) => {
+  const key = req.originalUrl;
+  try {
+    const cachedData = await redis.get(key);
+    if (cachedData) {
+      logger.info(`🔹 Serving from Redis cache: ${key}`);
+      return res.json(JSON.parse(cachedData));
+    }
+  } catch (error) {
+    logger.warn("⚠️ Redis error, proceeding without cache:", error.message);
+  }
+
+  res.sendResponse = res.json;
+  res.json = (body) => {
+    if (!res.headersSent) {
+      redis.setex(key, 60, JSON.stringify(body)).catch((err) => {
+        logger.warn("⚠️ Failed to store response in Redis cache:", err.message);
+      });
+      res.sendResponse(body);
+    }
+  };
+  next();
+};
+
+// === Endpoint: Health Check ===
+router.get("/health", async (req, res) => {
+  try {
+    logger.info("🔹 Health check started...");
+
+    let mongoStatus = "Disconnected";
+    if (mongoose.connection.readyState === 1) {
+      mongoStatus = "Connected";
+    } else {
+      throw new Error("MongoDB not connected");
+    }
+
+    let redisStatus = "Disconnected";
+    await redis
+      .ping()
+      .then(() => {
+        redisStatus = "Connected";
+      })
+      .catch((err) => {
+        throw new Error("Redis not connected: " + err.message);
+      });
+
+    logger.info(`✅ MongoDB: ${mongoStatus}, Redis: ${redisStatus}`);
+    res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
+  } catch (error) {
+    logger.error(`❌ Health check failed: ${error.message}`);
+    res.status(500).json({ error: "Service is unhealthy", details: error.message });
+  }
 });
 
-// Test: Redis deve rispondere al PING
-test("Redis deve essere connesso", async () => {
-  const redisPing = await redis.ping();
-  expect(redisPing).toBe("PONG");
+// === Endpoint: Recupero Dati da GitHub o MongoDB ===
+router.get("/fetch", cacheMiddleware, async (req, res) => {
+  const { source, file, query } = req.query;
+  try {
+    if (!source)
+      return res.status(400).json({ error: "Missing source parameter." });
+
+    if (source === "github") {
+      if (!file)
+        return res.status(400).json({ error: "Missing file parameter." });
+      const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/${file}`;
+      logger.info(`🔹 Fetching from GitHub: ${repoUrl}`);
+      // Imposta un timeout per evitare blocchi (5000ms)
+      const response = await axios.get(repoUrl, {
+        headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` },
+        timeout: 5000,
+      });
+      if (!response.data.download_url)
+        return res
+          .status(404)
+          .json({ error: "GitHub API Error: File not found." });
+      const fileResponse = await axios.get(response.data.download_url, {
+        timeout: 5000,
+      });
+      return res.json({ file, content: fileResponse.data });
+    }
+
+    if (source === "mongodb") {
+      if (!query)
+        return res.status(400).json({ error: "Missing query parameter." });
+      const data = await Knowledge.findOne({ key: query });
+      if (!data)
+        return res.status(404).json({ error: "No data found in MongoDB" });
+      return res.json(data);
+    }
+
+    return res.status(400).json({ error: "Invalid source parameter." });
+  } catch (error) {
+    logger.error("❌ Fetch Error:", error.message);
+    res
+      .status(500)
+      .json({ error: "Unexpected error fetching data", details: error.message });
+  }
 });
 
-// Test principali API: Fetch da GitHub
-test("GET /fetch (GitHub) - Recupero file da GitHub", async () => {
-  const response = await simulateRequest("GET", "/fetch?source=github&file=README.md");
-  expect(response.statusCode).toBe(200);
-  const body = JSON.parse(response.body);
-  expect(body).toHaveProperty("file");
-  expect(body).toHaveProperty("content");
-});
+// === Esposizione dell'Endpoint Unified Access ===
+app.use("/.netlify/functions/unifiedAccess", router);
 
-// Test principali API: Fetch da MongoDB
-test("GET /fetch (MongoDB) - Recupero dati da MongoDB", async () => {
-  // Crea un documento di test nella collezione "knowledges"
-  const Knowledge = mongoose.models.Knowledge || mongoose.model(
-    "Knowledge",
-    new mongoose.Schema({
-      key: { type: String, required: true, unique: true },
-      value: mongoose.Schema.Types.Mixed,
-    })
-  );
-  await Knowledge.create({ key: "test_key", value: "Test Value" });
-
-  const response = await simulateRequest("GET", "/fetch?source=mongodb&query=test_key");
-  expect(response.statusCode).toBe(200);
-  const body = JSON.parse(response.body);
-  expect(body).toHaveProperty("key", "test_key");
-  expect(body).toHaveProperty("value", "Test Value");
-});
+module.exports = { app, handler: serverless(app) };
