@@ -97,26 +97,29 @@ const connectMongoDB = async () => {
   }
   
   // Se rimane in "connecting" (stato 2), forziamo la disconnessione e attendiamo che lo stato diventi 0 (disconnesso)
-  if (mongoose.connection.readyState === 2) {
-    logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
-    try {
-      await mongoose.disconnect();
-      // Attende finché lo stato non diventa 0
-      await new Promise(resolve => {
-        const checkState = () => {
-          if (mongoose.connection.readyState === 0) {
-            resolve();
-          } else {
-            setTimeout(checkState, 100);
-          }
-        };
-        checkState();
-      });
-      logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
-    } catch (err) {
-      logger.error("Error during forced disconnect: " + err.message);
-    }
+if (mongoose.connection.readyState === 2) {
+  logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
+  try {
+    await mongoose.disconnect();
+    // Attende finché lo stato non diventa 0, con un timeout massimo di 5000ms
+    await new Promise((resolve, reject) => {
+      const start = Date.now();
+      const checkState = () => {
+        if (mongoose.connection.readyState === 0) {
+          resolve();
+        } else if (Date.now() - start > 5000) {
+          reject(new Error("Timeout waiting for mongoose to disconnect."));
+        } else {
+          setTimeout(checkState, 100);
+        }
+      };
+      checkState();
+    });
+    logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
+  } catch (err) {
+    logger.error("Error during forced disconnect: " + err.message);
   }
+}
   
   // Ora tenta di connettersi
   try {
