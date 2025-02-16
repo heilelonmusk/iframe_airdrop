@@ -141,38 +141,49 @@ router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
 
-    // Se la connessione non è attiva, tentiamo di riconnetterci
-    if (mongoose.connection.readyState !== 1) {
-      logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
+    // Log dello stato corrente della connessione MongoDB
+    const currentState = mongoose.connection.readyState;
+    logger.info(`Current mongoose.connection.readyState: ${currentState}`);
+
+    if (currentState !== 1) {
+      logger.warn(`⚠️ MongoDB not connected (state ${currentState}), attempting to reconnect...`);
       await connectMongoDB();
+      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${mongoose.connection.readyState}`);
     }
 
     let mongoStatus = "Disconnected";
     try {
       if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
-        logger.info("mongoose.connection.readyState: " + mongoose.connection.readyState);
-        // Utilizza il comando ping direttamente
-        const result = await mongoose.connection.db.command({ ping: 1 });
-        logger.info("MongoDB ping result: " + JSON.stringify(result));
-        if (result && result.ok === 1) {
+        logger.info("Performing MongoDB ping command...");
+        const pingResult = await mongoose.connection.db.command({ ping: 1 });
+        logger.info("MongoDB ping result: " + JSON.stringify(pingResult));
+        if (pingResult && pingResult.ok === 1) {
           mongoStatus = "Connected";
+        } else {
+          logger.warn("MongoDB ping did not return an ok result");
         }
+      } else {
+        logger.warn("mongoose.connection.readyState is not 1 or mongoose.connection.db is not available");
       }
-    } catch (e) {
-      logger.error("MongoDB ping error: " + e.message);
+    } catch (pingError) {
+      logger.error("MongoDB ping error: " + pingError.message);
       mongoStatus = "Disconnected";
     }
     logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
 
     let redisStatus = "Disconnected";
-    if (redis.status === "ready") {
-      redisStatus = await redis
-        .ping()
-        .then((res) => (res === "PONG" ? "Connected" : "Disconnected"))
-        .catch((e) => {
-          logger.error("Redis ping error: " + e.message);
-          return "Disconnected";
-        });
+    try {
+      if (redis.status === "ready") {
+        logger.info("Performing Redis ping...");
+        const redisPing = await redis.ping();
+        logger.info("Redis ping result: " + redisPing);
+        redisStatus = redisPing === "PONG" ? "Connected" : "Disconnected";
+      } else {
+        logger.warn(`Redis status not ready: ${redis.status}`);
+      }
+    } catch (redisError) {
+      logger.error("Redis ping error: " + redisError.message);
+      redisStatus = "Disconnected";
     }
 
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
