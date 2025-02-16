@@ -4,9 +4,9 @@ const { NLPModel } = require("../modules/nlp/nlpModel");
 const winston = require("winston");
 const { execSync } = require("child_process");
 
-jest.setTimeout(30000); // Evita blocchi sui test lunghi
+jest.setTimeout(30000); // ⏳ Evita blocchi sui test lunghi
 
-// 🚀 Winston Logger Setup
+// 🚀 **Configurazione del Logger**
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -29,101 +29,120 @@ const checkMongoDBProcesses = () => {
   }
 };
 
-// ✅ **Before all tests: Verifica e connessione a MongoDB**
-beforeAll(async () => {
-  checkMongoDBProcesses();
-  
-  logger.info("✅ Connecting to MongoDB for Transformer Tests...");
+// ✅ **Verifica variabili d’ambiente**
+const checkEnvVariables = () => {
   if (!process.env.MONGO_URI) {
-    logger.error("❌ MONGO_URI not set in .env file.");
+    logger.error("❌ MONGO_URI non è definito nel file .env");
     process.exit(1);
   }
+};
 
+// ✅ **Setup prima dei test**
+beforeAll(async () => {
+  checkMongoDBProcesses();
+  checkEnvVariables();
+
+  logger.info("✅ Connessione a MongoDB per i test NLP...");
   try {
     await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     });
-    logger.info("✅ MongoDB Connected Successfully");
+    logger.info("✅ Connessione a MongoDB riuscita.");
   } catch (error) {
-    logger.error("❌ MongoDB Connection Error:", error.message);
+    logger.error("❌ Errore di connessione a MongoDB:", error.message);
     process.exit(1);
   }
 });
 
-// ✅ **After all tests: Close MongoDB Connection**
+// ✅ **Chiusura connessione dopo i test**
 afterAll(async () => {
-  logger.info("✅ Closing MongoDB connection...");
+  logger.info("✅ Chiusura connessione a MongoDB...");
   if (mongoose.connection.readyState !== 0) {
     await mongoose.connection.close();
-    logger.info("✅ MongoDB connection closed.");
+    logger.info("✅ Connessione a MongoDB chiusa.");
   } else {
-    logger.warn("⚠️ MongoDB was already disconnected.");
+    logger.warn("⚠️ MongoDB era già disconnesso.");
   }
 });
 
 // ✅ **Test se il modello NLP è caricato correttamente**
-test("🔍 NLPModel should load from MongoDB", async () => {
+test("🔍 NLPModel deve essere caricato da MongoDB", async () => {
   try {
     if (!NLPModel || typeof NLPModel.findOne !== "function") {
-      throw new Error("❌ NLPModel is not defined or does not have findOne method.");
+      throw new Error("❌ NLPModel non è definito o non ha il metodo findOne.");
     }
 
     const savedModel = await NLPModel.findOne({});
     expect(savedModel).toBeTruthy();
-    
+
     if (savedModel) {
-      logger.info("✅ NLP Model loaded from MongoDB");
+      logger.info("✅ NLP Model caricato correttamente da MongoDB.");
     } else {
-      logger.warn("⚠️ No NLP Model found in MongoDB. Training required.");
+      logger.warn("⚠️ Nessun NLP Model trovato in MongoDB. Potrebbe essere necessario addestrarlo.");
     }
   } catch (error) {
-    logger.error("❌ Error retrieving NLP Model:", error.message);
+    logger.error("❌ Errore nel recupero di NLP Model:", error.message);
     throw error;
   }
 });
 
 // ✅ **Test se il modello NLP elabora correttamente il testo**
-test("💬 NLPModel should process text correctly", async () => {
+test("💬 NLPModel deve elaborare correttamente il testo", async () => {
   try {
     const mockInput = "What is Helon?";
     const expectedOutput = "Helon is a decentralized AI ecosystem.";
 
     if (!NLPModel || typeof NLPModel.processText !== "function") {
-      throw new Error("❌ NLPModel.processText is not a function");
+      throw new Error("❌ NLPModel.processText non è una funzione valida.");
     }
 
     const modelResponse = await NLPModel.processText(mockInput);
     expect(modelResponse).toBeDefined();
     expect(typeof modelResponse).toBe("string");
 
-    // Il confronto deve essere più flessibile, evitando errori di minimi cambiamenti di output.
+    // ✅ Il confronto è più flessibile, evita errori dovuti a minimi cambiamenti di output.
     expect(modelResponse.toLowerCase()).toContain("helon");
 
-    logger.info("✅ NLPModel processed text correctly.");
+    logger.info("✅ NLPModel ha elaborato il testo correttamente.");
   } catch (error) {
-    logger.error("❌ NLPModel processing test failed:", error.message);
+    logger.error("❌ Test fallito: NLPModel non ha elaborato il testo correttamente:", error.message);
     throw error;
   }
 });
 
 // ✅ **Test per verificare comportamento con input vuoto**
-test("🚨 NLPModel should return an error for empty input", async () => {
+test("🚨 NLPModel deve gestire correttamente input vuoto", async () => {
   try {
     const response = await NLPModel.processText("");
     expect(response).toBe(null);
-    logger.warn("⚠️ NLPModel correctly handled empty input.");
+    logger.warn("⚠️ NLPModel ha correttamente gestito input vuoto.");
   } catch (error) {
-    logger.error("❌ NLPModel failed on empty input:", error.message);
+    logger.error("❌ NLPModel ha fallito la gestione di input vuoto:", error.message);
   }
 });
 
-// ✅ **Cleanup: Rimozione dati di test da MongoDB**
+// ✅ **Test per input non valido**
+test("🚨 NLPModel deve gestire input non valido", async () => {
+  try {
+    const invalidInputs = [null, undefined, 12345, {}, []];
+
+    for (const input of invalidInputs) {
+      const response = await NLPModel.processText(input);
+      expect(response).toBe(null);
+      logger.warn(`⚠️ NLPModel ha correttamente gestito input non valido: ${JSON.stringify(input)}`);
+    }
+  } catch (error) {
+    logger.error("❌ NLPModel ha fallito la gestione di input non valido:", error.message);
+  }
+});
+
+// ✅ **Cleanup dopo ogni test**
 afterEach(async () => {
   try {
-    logger.info("🗑️ Cleaning up test database...");
+    logger.info("🗑️ Pulizia database dopo i test...");
     await mongoose.connection.db.collection("nlpmodels").deleteMany({});
   } catch (error) {
-    logger.error("❌ Error cleaning up test database:", error.message);
+    logger.error("❌ Errore nella pulizia del database:", error.message);
   }
 });

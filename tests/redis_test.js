@@ -36,102 +36,100 @@ const checkRedisProcess = () => {
   }
 };
 
-// ✅ Ensure Redis URL is set
-if (!process.env.REDIS_URL) {
-  logger.error("❌ Missing REDIS_URL environment variable");
-  process.exit(1);
-}
-
-// 🚀 Connect to Redis con TLS (necessario per Upstash)
-let redis;
-try {
-  const redis = new Redis(process.env.REDIS_URL, {
-    tls: {}, // ✅ NECESSARIO per Upstash Redis
-    enableOfflineQueue: false,
-    connectTimeout: 5000,
-    retryStrategy: (times) => Math.min(times * 100, 2000),
+// ✅ **Verifica delle Variabili d'Ambiente**
+const checkEnvVariables = () => {
+  const requiredEnvVars = ["REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD"];
+  requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+      logger.error(`❌ Variabile d'ambiente mancante: ${envVar}`);
+      process.exit(1);
+    }
   });
+};
 
-  redis.on("connect", () => {
-    logger.info("✅ Connected to Redis successfully!");
-  });
+// ✅ **Connessione a Redis con TLS (necessario per Upstash)**
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+  tls: {}, // ✅ NECESSARIO per Upstash Redis
+  enableOfflineQueue: false,
+  connectTimeout: 5000,
+  retryStrategy: (times) => Math.min(times * 100, 2000),
+});
 
-  redis.on("error", (err) => {
-    logger.error("❌ Redis connection error:", err.message);
-  });
-} catch (error) {
-  logger.error("❌ Critical Error: Unable to initialize Redis client.", error.message);
-  process.exit(1);
-}
+redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
+redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-// ✅ Redis Test Operations
+// ✅ **Test per Redis**
 (async () => {
   try {
+    checkEnvVariables();
     checkRedisProcess();
 
-    logger.info("🔹 Checking Redis connection...");
+    logger.info("🔹 Controllo connessione Redis...");
     const isConnected = await redis.ping().catch(() => null);
     if (isConnected !== "PONG") {
-      throw new Error("Redis is not responding.");
+      throw new Error("Redis non sta rispondendo.");
     }
 
     // 🗑️ Pulizia iniziale
-    logger.info("🗑️ Cleaning up Redis before tests...");
+    logger.info("🗑️ Pulizia Redis prima dei test...");
     try {
       await redis.flushdb();
     } catch (cleanupError) {
-      logger.warn("⚠️ Unable to flush Redis before test. It may not be fully connected.");
+      logger.warn("⚠️ Impossibile eseguire flush su Redis prima del test.");
     }
 
-    // 🔹 Impostazione Chiave
-    logger.info("🔹 Setting test key in Redis...");
+    // 🔹 Impostazione Chiave di Test
+    logger.info("🔹 Inserimento chiave di test in Redis...");
     const startTime = Date.now();
     await redis.set("test_key", "Hello Redis!", "EX", 60);
 
-    // 🔹 Recupero Chiave
-    logger.info("🔹 Retrieving test key from Redis...");
+    // 🔹 Recupero Chiave di Test
+    logger.info("🔹 Recupero chiave di test da Redis...");
     const value = await redis.get("test_key");
     const latency = Date.now() - startTime;
 
     if (value) {
-      logger.info(`✅ Retrieved value: ${value} (Latency: ${latency}ms)`);
+      logger.info(`✅ Chiave recuperata con successo: ${value} (Latenza: ${latency}ms)`);
     } else {
-      logger.warn("⚠️ Retrieved null value, key might have expired.");
+      logger.warn("⚠️ Valore nullo ricevuto. La chiave potrebbe essere scaduta.");
     }
 
     // 🔹 Verifica Persistenza
-    logger.info("🔹 Checking key persistence...");
+    logger.info("🔹 Controllo persistenza chiave...");
     const exists = await redis.exists("test_key");
     if (exists) {
-      logger.info("✅ Key exists in Redis.");
+      logger.info("✅ La chiave è presente in Redis.");
     } else {
-      logger.warn("⚠️ Key does not exist in Redis.");
+      logger.warn("⚠️ La chiave non esiste in Redis.");
     }
 
-    // 🔹 Test Eliminazione Chiave
-    logger.info("🔹 Deleting test key...");
+    // 🔹 Eliminazione Chiave
+    logger.info("🔹 Eliminazione chiave di test...");
     await redis.del("test_key");
 
     const deletedCheck = await redis.get("test_key");
     if (!deletedCheck) {
-      logger.info("✅ Key successfully deleted.");
+      logger.info("✅ Chiave eliminata correttamente.");
     } else {
-      logger.error("❌ Key deletion failed.");
+      logger.error("❌ Errore nell'eliminazione della chiave.");
     }
 
   } catch (error) {
-    logger.error("❌ Redis test failed:", error.message);
+    logger.error("❌ Test Redis fallito:", error.message);
   } finally {
     // 🗑️ Cleanup finale
-    logger.info("🗑️ Final cleanup of Redis...");
+    logger.info("🗑️ Pulizia finale di Redis...");
     try {
       await redis.flushdb();
-      logger.info("✅ Redis cleaned successfully.");
+      logger.info("✅ Redis ripulito con successo.");
     } catch (cleanupError) {
-      logger.warn("⚠️ Redis cleanup failed:", cleanupError.message);
+      logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
     }
 
     await redis.quit();
-    logger.info("🔹 Redis connection closed.");
+    logger.info("🔹 Connessione Redis chiusa.");
   }
 })();

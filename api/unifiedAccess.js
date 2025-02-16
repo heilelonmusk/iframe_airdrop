@@ -14,6 +14,7 @@ const app = express();
 const router = express.Router();
 
 const redis = new Redis(process.env.REDIS_URL, {
+  tls: {}, // ✅ NECESSARIO per Upstash Redis
   enableOfflineQueue: false,
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),

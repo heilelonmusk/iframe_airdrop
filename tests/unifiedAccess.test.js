@@ -34,7 +34,7 @@ const checkActiveProcesses = () => {
 
 // 🚀 **Verifica delle Variabili d'Ambiente**
 const checkEnvVariables = () => {
-  const requiredEnvVars = ["MONGO_URI", "REDIS_URL", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
+  const requiredEnvVars = ["MONGO_URI", "REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD", "MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
   requiredEnvVars.forEach((envVar) => {
     if (!process.env[envVar]) {
       logger.error(`❌ Variabile d'ambiente mancante: ${envVar}`);
@@ -44,18 +44,18 @@ const checkEnvVariables = () => {
 };
 
 // 🚀 **Connessione a Redis con Strategia di Retry**
-let redis;
-try {
-  const redis = new Redis(process.env.REDIS_URL, {
-    tls: {}, // ✅ NECESSARIO per Upstash Redis
-    enableOfflineQueue: false,
-    connectTimeout: 5000,
-    retryStrategy: (times) => Math.min(times * 100, 2000),
-  });
-} catch (error) {
-  logger.warn("⚠️ Connessione Redis fallita. Simuliamo Redis per i test.");
-  redis = { ping: async () => "PONG", get: async () => null, setex: async () => null, del: async () => null };
-}
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+  tls: {}, // ✅ NECESSARIO per Upstash Redis
+  enableOfflineQueue: false,
+  connectTimeout: 5000,
+  retryStrategy: (times) => Math.min(times * 100, 2000),
+});
+
+redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
+redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
 // 📌 **Helper per simulare richieste API**
 const simulateRequest = async (method, path, body = null) => {

@@ -59,7 +59,7 @@
     "webpack-node-externals": "^3.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "23.7.0"
   },
   "author": "Helon.Space Dev Team",
   "license": "MIT"

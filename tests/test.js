@@ -3,9 +3,9 @@ const { handler } = require("../api/server.js");
 const winston = require("winston");
 const { execSync } = require("child_process");
 
-jest.setTimeout(15000); // Evita blocchi nei test lunghi
+jest.setTimeout(20000); // ⏳ Evita blocchi nei test lunghi
 
-// 🚀 Winston Logger Setup
+// 🚀 **Configurazione del Logger**
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -28,6 +28,17 @@ const checkActiveProcesses = () => {
   }
 };
 
+// ✅ **Verifica variabili d’ambiente**
+const checkEnvVariables = () => {
+  const requiredEnvVars = ["MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
+  requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+      logger.error(`❌ Variabile d'ambiente mancante: ${envVar}`);
+      process.exit(1);
+    }
+  });
+};
+
 // ✅ **Setup degli Eventi API**
 describe("🔍 API Tests", () => {
   let healthEvent;
@@ -35,6 +46,7 @@ describe("🔍 API Tests", () => {
 
   beforeAll(async () => {
     checkActiveProcesses();
+    checkEnvVariables();
     logger.info("🛠 Setting up API tests...");
 
     healthEvent = {
@@ -45,9 +57,7 @@ describe("🔍 API Tests", () => {
     logQuestionEvent = {
       httpMethod: "POST",
       path: "/.netlify/functions/server/logQuestion",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: "What is Helon?" }),
       isBase64Encoded: false,
     };
@@ -112,5 +122,17 @@ describe("🔍 API Tests", () => {
     const response = await handler(invalidEvent, {});
     expect(response.statusCode).toBe(400);
     logger.warn("⚠️ logQuestion correctly handled missing input.");
+  });
+
+  // ✅ **Test Endpoint Inesistente**
+  test("❌ Unknown endpoint should return 404", async () => {
+    const unknownEvent = {
+      httpMethod: "GET",
+      path: "/.netlify/functions/server/unknownEndpoint",
+    };
+
+    const response = await handler(unknownEvent, {});
+    expect(response.statusCode).toBe(404);
+    logger.warn("⚠️ Unknown endpoint correctly returned 404.");
   });
 });
