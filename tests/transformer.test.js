@@ -19,7 +19,7 @@ jest.setTimeout(30000); // Evita blocchi nei test lunghi
 //});
 
 if (!process.env.CI && !process.env.NETLIFY && process.env.NODE_ENV !== "production") {
-  checkMongoDBProcesses();
+  console.log("ℹ️ Skipping MongoDB process check in production.");
 }
 
 // 🚀 Verifica se ci sono processi MongoDB attivi sulla porta 27017
