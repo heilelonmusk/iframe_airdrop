@@ -1,10 +1,13 @@
 [build.environment]
- NODE_ENV = "development"
+NODE_ENV = "development"
 NODE_VERSION = "23.7.0"
 
 [context.production.environment]
 MONGO_URI = "mongodb+srv://heilelon:aPrisse3100%21s@heilelon.6ifty.mongodb.net/heilelonDB?retryWrites=true&w=majority&appName=heilelon"
 MAX_RETRIES = "5"
+MY_GITHUB_OWNER = "heilelonmusk"
+MY_GITHUB_REPO = "iframe_airdrop"
+MY_GITHUB_TOKEN ="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"
 
 # 🚀 Netlify Build Settings
 [build]
@@ -29,9 +32,10 @@ MAX_RETRIES = "5"
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
+    Cache-Control = "max-age=60, public"
     X-Debug-Mode = "true"
     X-Powered-By = "Netlify"
+    Server-Timing = "total;desc=\"Total API Response Time\""
 
 [[headers]]
   for = "/static/*"
