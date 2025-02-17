@@ -76,19 +76,6 @@ describe("🔍 API Tests", () => {
     }
   });
 
-  afterAll(async () => {
-    logger.info("🗑️ Pulizia finale di Redis...");
-    try {
-      await mongoose.connection.close();
-      await redis.flushdb();
-      await redis.quit();
-      logger.info("✅ Redis ripulito e connessione chiusa.");
-    } catch (error) {
-      logger.warn("⚠️ Errore durante la chiusura di Redis:", error.message);
-      redis.disconnect();
-    }
-  });
-
   // Health Check Test
   test("🛠 Health check should return status 200", async () => {
     const response = await handler(healthEvent, {});
@@ -164,6 +151,4 @@ describe("🔍 API Tests", () => {
       }
     }
   });
-
-
 });

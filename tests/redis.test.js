@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 const mongoose = require("mongoose");
-
+const { logger } = require("../modules/logging/logger");
 logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
 
 beforeAll(async () => {

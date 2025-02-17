@@ -88,35 +88,7 @@ beforeEach(async () => {
   }
 });
 
-// ✅ Teardown dopo tutti i test
-afterAll(async () => {
-  logger.info("🗑️ Pulizia finale di Redis...");
-  
-  try {
-    if (redis.status === "ready") {
-      logger.info("✅ Redis ripulito con successo.");
-    } else {
-      logger.warn("⚠️ Redis non è nello stato 'ready', saltando flushdb.");
-    }
-  } catch (cleanupError) {
-    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
-  } finally {
-    try {
-      await redis.quit();
-      logger.info("🔹 Connessione Redis chiusa.");
-    } catch (quitError) {
-      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-      redis.disconnect();
-    }
-  }
 
-
-  if (server) {
-    server.close(() => {
-      logger.info("🛑 Express server closed after tests.");
-    });
-  }
-});
 
 // ✅ Suite di test API
 describe("Unified Access API Tests", () => {
@@ -166,5 +138,35 @@ describe("Unified Access API Tests", () => {
     expect(response.body).toHaveProperty("key", "test_key");
     expect(response.body).toHaveProperty("value", "Test Value");
   });
+
+// ✅ Teardown dopo tutti i test
+afterAll(async () => {
+  logger.info("🗑️ Pulizia finale di Redis...");
+  
+  try {
+    if (redis.status === "ready") {
+      logger.info("✅ Redis ripulito con successo.");
+    } else {
+      logger.warn("⚠️ Redis non è nello stato 'ready', saltando flushdb.");
+    }
+  } catch (cleanupError) {
+    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
+  } finally {
+    try {
+      await redis.quit();
+      logger.info("🔹 Connessione Redis chiusa.");
+    } catch (quitError) {
+      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+      redis.disconnect();
+    }
+  }
+
+
+  if (server) {
+    server.close(() => {
+      logger.info("🛑 Express server closed after tests.");
+    });
+  }
+});
 
 });
