@@ -10,11 +10,13 @@ logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.e
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
-if (!nlpInstance) {
-  console.warn("⚠️ No existing NLP Model found. Training a new one...");
-  const newModel = await trainNLPModel();
-  await newModel.save();
-}
+(async () => {
+  if (!nlpInstance)
+    console.warn("⚠️ No existing NLP Model found. Training a new one...");
+    const newModel = await trainNLPModel();
+    await newModel.save();
+  
+  });
 
 // ✅ Verifica delle variabili d'ambiente richieste
 const checkEnvVariables = () => {

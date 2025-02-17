@@ -9,11 +9,13 @@ const { processText } = require("../modules/nlp/nlpModel");
 
 jest.setTimeout(30000); // Evita blocchi nei test lunghi
 
-if (!nlpInstance) {
-  console.warn("⚠️ No existing NLP Model found. Training a new one...");
-  const newModel = await trainNLPModel();
-  await newModel.save();
-}
+(async () => {
+  if (!nlpInstance)
+    console.warn("⚠️ No existing NLP Model found. Training a new one...");
+    const newModel = await trainNLPModel();
+    await newModel.save();
+  
+  });
 
 // 🚀 Configurazione del Logger
 //const logger = winston.createLogger({
