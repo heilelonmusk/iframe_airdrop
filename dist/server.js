@@ -27,7 +27,6 @@ var _require2 = require("../modules/nlp/nlpModel"),
 var redis = require("../config/redis");
 var fs = require("fs");
 var path = require("path");
-var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8891;
 var _require3 = require("../modules/logging/logger"),
   logger = _require3.logger,
   logConversation = _require3.logConversation,
@@ -67,11 +66,64 @@ var _require5 = require("../modules/nlp/transformer"),
 // });
 
 // Crea l'app Express e il router
+
 var app = express();
-var router = express.Router();
 app.get("/", function (req, res) {
-  res.send("✅ API is running on Netlify!");
+  res.send("Hello from Serverless API!");
 });
+var router = express.Router();
+app.use(/*#__PURE__*/function () {
+  var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(req, res, next) {
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          if (!(mongoose.connection.readyState !== 1)) {
+            _context.next = 5;
+            break;
+          }
+          logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
+          _context.next = 5;
+          return connectMongoDB();
+        case 5:
+          if (global.nlpModelCache) {
+            _context.next = 9;
+            break;
+          }
+          _context.next = 8;
+          return NLPModel.findOne();
+        case 8:
+          global.nlpModelCache = _context.sent;
+        case 9:
+          req.nlpInstance = global.nlpModelCache;
+          if (req.nlpInstance) {
+            _context.next = 12;
+            break;
+          }
+          return _context.abrupt("return", res.status(500).json({
+            error: "❌ No NLP Model found in database. Train the model first."
+          }));
+        case 12:
+          next();
+          _context.next = 19;
+          break;
+        case 15:
+          _context.prev = 15;
+          _context.t0 = _context["catch"](0);
+          logger.error("❌ Error loading NLP Model:", _context.t0.message);
+          return _context.abrupt("return", res.status(500).json({
+            error: "Internal Server Error"
+          }));
+        case 19:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 15]]);
+  }));
+  return function (_x, _x2, _x3) {
+    return _ref.apply(this, arguments);
+  };
+}());
 
 // Middleware
 app.set("trust proxy", true);
@@ -117,64 +169,44 @@ app.use(rateLimit({
 //  setTimeout(() => redis.connect(), 5000);
 //});
 
-var MAX_RETRIES = 5;
-var RETRY_DELAY = 2000; // 2 secondi
-
+var mongoURI = process.env.MONGO_URI;
+if (!mongoURI || !mongoURI.startsWith("mongodb")) {
+  logger.error("❌ MONGO_URI non valido o non definito. Controlla le variabili d'ambiente.");
+  process.exit(1); // Interrompe l'app se MONGO_URI è errato
+}
 var connectMongoDB = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
     var attempts;
-    return _regeneratorRuntime().wrap(function _callee$(_context) {
-      while (1) switch (_context.prev = _context.next) {
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
         case 0:
           attempts = 0;
         case 1:
           if (!(attempts < MAX_RETRIES)) {
-            _context.next = 41;
+            _context2.next = 28;
             break;
           }
           if (!(mongoose.connection.readyState === 1)) {
-            _context.next = 5;
+            _context2.next = 5;
             break;
           }
           logger.info("🔄 MongoDB already connected, reusing existing connection.");
-          return _context.abrupt("return", mongoose.connection);
+          return _context2.abrupt("return", mongoose.connection);
         case 5:
-          if (!(mongoose.connection.readyState === 2)) {
-            _context.next = 18;
-            break;
-          }
-          logger.warn("⚠️ MongoDB connection is stuck in 'connecting' state. Forcing disconnect...");
-          _context.prev = 7;
-          _context.next = 10;
-          return mongoose.disconnect();
-        case 10:
-          _context.next = 12;
-          return new Promise(function (resolve) {
-            return setTimeout(resolve, 1000);
-          });
-        case 12:
-          logger.info("✅ Forced disconnect successful.");
-          _context.next = 18;
-          break;
-        case 15:
-          _context.prev = 15;
-          _context.t0 = _context["catch"](7);
-          logger.error("❌ Error during forced disconnect: " + _context.t0.message);
-        case 18:
-          _context.prev = 18;
+          _context2.prev = 5;
           logger.info("\uD83D\uDD0C Attempting to connect to MongoDB (Attempt ".concat(attempts + 1, "/").concat(MAX_RETRIES, ")..."));
-          _context.next = 22;
-          return mongoose.connect(process.env.MONGO_URI, {
+          _context2.next = 9;
+          return mongoose.connect(mongoURI, {
             serverSelectionTimeoutMS: 3000,
             connectTimeoutMS: 10000,
             socketTimeoutMS: 45000
           });
-        case 22:
-          _context.next = 24;
+        case 9:
+          _context2.next = 11;
           return mongoose.connection.asPromise();
-        case 24:
+        case 11:
           if (!(mongoose.connection.readyState === 1)) {
-            _context.next = 30;
+            _context2.next = 17;
             break;
           }
           logger.info("📚 Connected to MongoDB successfully!");
@@ -187,154 +219,167 @@ var connectMongoDB = /*#__PURE__*/function () {
           mongoose.connection.on("reconnected", function () {
             return logger.info("🔄 MongoDB reconnected!");
           });
-          return _context.abrupt("return", mongoose.connection);
-        case 30:
-          _context.next = 35;
+          return _context2.abrupt("return", mongoose.connection);
+        case 17:
+          _context2.next = 22;
           break;
-        case 32:
-          _context.prev = 32;
-          _context.t1 = _context["catch"](18);
-          logger.error("\u274C MongoDB connection error: ".concat(_context.t1.message));
-        case 35:
+        case 19:
+          _context2.prev = 19;
+          _context2.t0 = _context2["catch"](5);
+          logger.error("\u274C MongoDB connection error: ".concat(_context2.t0.message));
+        case 22:
           attempts++;
           logger.warn("\uD83D\uDD01 Retrying connection in ".concat(RETRY_DELAY / 1000, " seconds..."));
-          _context.next = 39;
+          _context2.next = 26;
           return new Promise(function (resolve) {
             return setTimeout(resolve, RETRY_DELAY);
           });
-        case 39:
-          _context.next = 1;
+        case 26:
+          _context2.next = 1;
           break;
-        case 41:
+        case 28:
           logger.error("🚨 Max retries reached. MongoDB connection failed.");
           throw new Error("MongoDB connection failed after multiple attempts.");
-        case 43:
+        case 30:
         case "end":
-          return _context.stop();
+          return _context2.stop();
       }
-    }, _callee, null, [[7, 15], [18, 32]]);
+    }, _callee2, null, [[5, 19]]);
   }));
   return function connectMongoDB() {
-    return _ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
 router.get("/health", /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
-    var currentState, mongoStatus, pingResult, redisStatus, redisPing;
-    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-      while (1) switch (_context2.prev = _context2.next) {
+  var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
+    var mongoStatus, pingResult, redisStatus, redisPing;
+    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
         case 0:
-          _context2.prev = 0;
+          _context3.prev = 0;
           logger.info("🔹 Health check started...");
 
-          // Log dello stato iniziale della connessione
-          currentState = mongoose.connection.readyState;
-          logger.info("Current mongoose.connection.readyState: ".concat(currentState));
-
-          // Se non è 1, tentiamo la riconnessione
-          if (!(currentState !== 1)) {
-            _context2.next = 10;
+          // Controllo e riconnessione a MongoDB se necessario
+          mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+          if (!(mongoose.connection.readyState !== 1)) {
+            _context3.next = 9;
             break;
           }
-          logger.warn("\u26A0\uFE0F MongoDB not connected (state ".concat(currentState, "), attempting to reconnect..."));
-          _context2.next = 8;
+          logger.warn("\u26A0\uFE0F MongoDB not connected (state ".concat(mongoose.connection.readyState, "), attempting to reconnect..."));
+          _context3.next = 7;
           return connectMongoDB();
-        case 8:
-          currentState = mongoose.connection.readyState;
-          logger.info("After reconnect attempt, mongoose.connection.readyState: ".concat(currentState));
-        case 10:
-          mongoStatus = "Disconnected";
-          _context2.prev = 11;
+        case 7:
+          mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+          logger.info("After reconnect attempt, mongoose.connection.readyState: ".concat(mongoose.connection.readyState));
+        case 9:
+          _context3.prev = 9;
           if (!(mongoose.connection.readyState === 1 && mongoose.connection.db)) {
-            _context2.next = 21;
+            _context3.next = 19;
             break;
           }
           logger.info("Performing MongoDB ping command...");
-          _context2.next = 16;
+          _context3.next = 14;
           return mongoose.connection.db.command({
             ping: 1
           });
-        case 16:
-          pingResult = _context2.sent;
+        case 14:
+          pingResult = _context3.sent;
           logger.info("MongoDB ping result: " + JSON.stringify(pingResult));
-          if (pingResult && pingResult.ok === 1) {
-            mongoStatus = "Connected";
-          } else {
+          if (!pingResult || pingResult.ok !== 1) {
             logger.warn("MongoDB ping did not return an ok result");
+            mongoStatus = "Disconnected";
           }
-          _context2.next = 22;
+          _context3.next = 20;
           break;
-        case 21:
+        case 19:
           logger.warn("mongoose.connection.readyState is not 1 or mongoose.connection.db is not available");
-        case 22:
-          _context2.next = 28;
+        case 20:
+          _context3.next = 26;
           break;
-        case 24:
-          _context2.prev = 24;
-          _context2.t0 = _context2["catch"](11);
-          logger.error("MongoDB ping error: " + _context2.t0.message);
+        case 22:
+          _context3.prev = 22;
+          _context3.t0 = _context3["catch"](9);
+          logger.error("MongoDB ping error: " + _context3.t0.message);
           mongoStatus = "Disconnected";
-        case 28:
+        case 26:
           logger.info("\uD83D\uDD39 MongoDB Status: ".concat(mongoStatus));
+
+          // Ping di Redis
           redisStatus = "Disconnected";
-          _context2.prev = 30;
+          _context3.prev = 28;
           if (!(redis.status === "ready")) {
-            _context2.next = 40;
+            _context3.next = 38;
             break;
           }
           logger.info("Performing Redis ping...");
-          _context2.next = 35;
+          _context3.next = 33;
           return redis.ping();
-        case 35:
-          redisPing = _context2.sent;
+        case 33:
+          redisPing = _context3.sent;
           logger.info("Redis ping result: " + redisPing);
           redisStatus = redisPing === "PONG" ? "Connected" : "Disconnected";
-          _context2.next = 41;
+          _context3.next = 39;
           break;
-        case 40:
+        case 38:
           logger.warn("Redis status not ready: ".concat(redis.status));
-        case 41:
-          _context2.next = 47;
+        case 39:
+          _context3.next = 45;
           break;
-        case 43:
-          _context2.prev = 43;
-          _context2.t1 = _context2["catch"](30);
-          logger.error("Redis ping error: " + _context2.t1.message);
+        case 41:
+          _context3.prev = 41;
+          _context3.t1 = _context3["catch"](28);
+          logger.error("Redis ping error: " + _context3.t1.message);
           redisStatus = "Disconnected";
-        case 47:
+        case 45:
           res.json({
             status: "✅ Healthy",
             mongo: mongoStatus,
             redis: redisStatus
           });
-          _context2.next = 54;
+          _context3.next = 52;
           break;
-        case 50:
-          _context2.prev = 50;
-          _context2.t2 = _context2["catch"](0);
-          logger.error("\u274C Health check failed: ".concat(_context2.t2.message));
+        case 48:
+          _context3.prev = 48;
+          _context3.t2 = _context3["catch"](0);
+          logger.error("\u274C Health check failed: ".concat(_context3.t2.message));
           res.status(500).json({
             error: "Service is unhealthy",
-            details: _context2.t2.message
+            details: _context3.t2.message
           });
-        case 54:
+        case 52:
         case "end":
-          return _context2.stop();
+          return _context3.stop();
       }
-    }, _callee2, null, [[0, 50], [11, 24], [30, 43]]);
+    }, _callee3, null, [[0, 48], [9, 22], [28, 41]]);
   }));
-  return function (_x, _x2) {
-    return _ref2.apply(this, arguments);
+  return function (_x4, _x5) {
+    return _ref3.apply(this, arguments);
   };
 }());
-app.use("/.netlify/functions/server", router); // Netlify usa questa route
+app.use("/.netlify/functions/server", router);
 
-var server;
-if (!process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  server = app.listen(port, function () {
-    logger.info("\uD83D\uDE80 Server running on port ".concat(port));
+// Avvia il server solo se non è in ambiente serverless
+if (!process.env.NETLIFY) {
+  var server = app.listen(port, function () {
+    logger.info("\uD83D\uDE80 Server running on port ".concat(server.address().port));
+  });
+
+  // Gestione della chiusura per evitare porte bloccate
+  process.on("SIGTERM", function () {
+    logger.warn("⚠️ SIGTERM received. Closing server...");
+    server.close(function () {
+      logger.info("✅ Server closed. Exiting process.");
+      process.exit(0);
+    });
+  });
+  process.on("SIGINT", function () {
+    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+    server.close(function () {
+      logger.info("✅ Server closed. Exiting process.");
+      process.exit(0);
+    });
   });
 }
 
@@ -375,90 +420,90 @@ var Question = mongoose.models.Question || mongoose.model("Question", questionSc
 //}
 
 // Inizializza il modello NLP
-_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4() {
   var savedModel;
-  return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-    while (1) switch (_context3.prev = _context3.next) {
+  return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+    while (1) switch (_context4.prev = _context4.next) {
       case 0:
-        _context3.prev = 0;
-        _context3.next = 3;
+        _context4.prev = 0;
+        _context4.next = 3;
         return connectMongoDB();
       case 3:
-        _context3.next = 5;
+        _context4.next = 5;
         return loadNLPModel();
       case 5:
-        savedModel = _context3.sent;
+        savedModel = _context4.sent;
         if (!savedModel) {
-          _context3.next = 11;
+          _context4.next = 11;
           break;
         }
         manager["import"](savedModel);
         logger.info("🧠 NLP Model Loaded from DB");
-        _context3.next = 13;
+        _context4.next = 13;
         break;
       case 11:
-        _context3.next = 13;
+        _context4.next = 13;
         return trainAndSaveNLP();
       case 13:
-        _context3.next = 18;
+        _context4.next = 18;
         break;
       case 15:
-        _context3.prev = 15;
-        _context3.t0 = _context3["catch"](0);
-        logger.error("❌ Error initializing NLP model:", _context3.t0);
+        _context4.prev = 15;
+        _context4.t0 = _context4["catch"](0);
+        logger.error("❌ Error initializing NLP model:", _context4.t0);
       case 18:
       case "end":
-        return _context3.stop();
+        return _context4.stop();
     }
-  }, _callee3, null, [[0, 15]]);
+  }, _callee4, null, [[0, 15]]);
 }))();
 
 // Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", /*#__PURE__*/function () {
-  var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
+  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
     var question, storedAnswer, intentResult, finalAnswer;
-    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-      while (1) switch (_context4.prev = _context4.next) {
+    return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+      while (1) switch (_context5.prev = _context5.next) {
         case 0:
-          _context4.prev = 0;
+          _context5.prev = 0;
           question = req.body.question;
           if (question) {
-            _context4.next = 4;
+            _context5.next = 4;
             break;
           }
-          return _context4.abrupt("return", res.status(400).json({
+          return _context5.abrupt("return", res.status(400).json({
             error: "Question is required"
           }));
         case 4:
-          _context4.next = 6;
+          _context5.next = 6;
           return Question.findOne({
             question: question
           });
         case 6:
-          storedAnswer = _context4.sent;
+          storedAnswer = _context5.sent;
           if (!storedAnswer) {
-            _context4.next = 9;
+            _context5.next = 9;
             break;
           }
-          return _context4.abrupt("return", res.json({
+          return _context5.abrupt("return", res.json({
             answer: storedAnswer.answer,
             source: storedAnswer.source
           }));
         case 9:
-          _context4.next = 11;
+          _context5.next = 11;
           return manager.process("en", question);
         case 11:
-          intentResult = _context4.sent;
+          intentResult = _context5.sent;
           if (intentResult.answer) {
-            _context4.next = 14;
+            _context5.next = 14;
             break;
           }
-          return _context4.abrupt("return", res.status(404).json({
+          return _context5.abrupt("return", res.status(404).json({
             error: "No answer available for this question."
           }));
         case 14:
           finalAnswer = intentResult.answer;
-          _context4.next = 17;
+          _context5.next = 17;
           return new Question({
             question: question,
             answer: finalAnswer,
@@ -469,97 +514,108 @@ router.post("/logQuestion", /*#__PURE__*/function () {
             answer: finalAnswer,
             source: "Ultron AI"
           });
-          _context4.next = 24;
+          _context5.next = 24;
           break;
         case 20:
-          _context4.prev = 20;
-          _context4.t0 = _context4["catch"](0);
-          logger.error("\u274C Error processing question: ".concat(_context4.t0.message));
+          _context5.prev = 20;
+          _context5.t0 = _context5["catch"](0);
+          logger.error("\u274C Error processing question: ".concat(_context5.t0.message));
           res.status(500).json({
             error: "Server error",
-            details: _context4.t0.message
+            details: _context5.t0.message
           });
         case 24:
         case "end":
-          return _context4.stop();
-      }
-    }, _callee4, null, [[0, 20]]);
-  }));
-  return function (_x3, _x4) {
-    return _ref4.apply(this, arguments);
-  };
-}());
-router.post("/api/nlp", /*#__PURE__*/function () {
-  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
-    var question, intent;
-    return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-      while (1) switch (_context5.prev = _context5.next) {
-        case 0:
-          question = req.body.question;
-          if (question) {
-            _context5.next = 3;
-            break;
-          }
-          return _context5.abrupt("return", res.status(400).json({
-            error: "Question is required"
-          }));
-        case 3:
-          _context5.next = 5;
-          return getIntent(question);
-        case 5:
-          intent = _context5.sent;
-          return _context5.abrupt("return", res.json({
-            answer: intent.answer
-          }));
-        case 7:
-        case "end":
           return _context5.stop();
       }
-    }, _callee5);
+    }, _callee5, null, [[0, 20]]);
   }));
-  return function (_x5, _x6) {
+  return function (_x6, _x7) {
     return _ref5.apply(this, arguments);
+  };
+}());
+
+// Endpoint per NLP
+router.post("/api/nlp", /*#__PURE__*/function () {
+  var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
+    var question, response;
+    return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+      while (1) switch (_context6.prev = _context6.next) {
+        case 0:
+          _context6.prev = 0;
+          question = req.body.question;
+          if (question) {
+            _context6.next = 4;
+            break;
+          }
+          return _context6.abrupt("return", res.status(400).json({
+            error: "Question is required"
+          }));
+        case 4:
+          _context6.next = 6;
+          return req.nlpInstance.processText(question);
+        case 6:
+          response = _context6.sent;
+          return _context6.abrupt("return", res.json({
+            answer: response
+          }));
+        case 10:
+          _context6.prev = 10;
+          _context6.t0 = _context6["catch"](0);
+          logger.error("\u274C Error processing NLP request: ".concat(_context6.t0.message));
+          return _context6.abrupt("return", res.status(500).json({
+            error: "Server error",
+            details: _context6.t0.message
+          }));
+        case 14:
+        case "end":
+          return _context6.stop();
+      }
+    }, _callee6, null, [[0, 10]]);
+  }));
+  return function (_x8, _x9) {
+    return _ref6.apply(this, arguments);
   };
 }());
 
 // ✅ Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", /*#__PURE__*/function () {
-  var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
+  var _ref7 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
     var _req$query, source, file, query;
-    return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-      while (1) switch (_context6.prev = _context6.next) {
+    return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+      while (1) switch (_context7.prev = _context7.next) {
         case 0:
           _req$query = req.query, source = _req$query.source, file = _req$query.file, query = _req$query.query;
           if (!(source === "github")) {
-            _context6.next = 5;
+            _context7.next = 5;
             break;
           }
-          return _context6.abrupt("return", res.json({
+          return _context7.abrupt("return", res.json({
             data: "Simulated content from GitHub for ".concat(file)
           }));
         case 5:
           if (!(source === "mongodb")) {
-            _context6.next = 9;
+            _context7.next = 9;
             break;
           }
-          return _context6.abrupt("return", res.json({
+          return _context7.abrupt("return", res.json({
             data: {
               key: query,
               value: "Simulated MongoDB data"
             }
           }));
         case 9:
-          return _context6.abrupt("return", res.status(400).json({
+          return _context7.abrupt("return", res.status(400).json({
             error: "Unrecognized source"
           }));
         case 10:
         case "end":
-          return _context6.stop();
+          return _context7.stop();
       }
-    }, _callee6);
+    }, _callee7);
   }));
-  return function (_x7, _x8) {
-    return _ref6.apply(this, arguments);
+  return function (_x10, _x11) {
+    return _ref7.apply(this, arguments);
   };
 }());
 if (!process.env.NETLIFY) {
@@ -568,15 +624,15 @@ if (!process.env.NETLIFY) {
   });
 
   // Aggiungere gestione della chiusura per liberare la porta
-  process.on("SIGTERM", function () {
-    logger.warn("⚠️ SIGTERM received. Closing server...");
+  process.on("SIGINT", function () {
+    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
     _server.close(function () {
       logger.info("✅ Server closed. Exiting process.");
       process.exit(0);
     });
   });
-  process.on("SIGINT", function () {
-    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+  process.on("SIGTERM", function () {
+    logger.warn("⚠️ SIGTERM received. Closing server...");
     _server.close(function () {
       logger.info("✅ Server closed. Exiting process.");
       process.exit(0);
