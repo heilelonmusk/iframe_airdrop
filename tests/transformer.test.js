@@ -4,6 +4,7 @@ const { loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpMode
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 const redis = require("../config/redis")
+const { processText } = require("../modules/nlp/nlpModel");
 
 jest.setTimeout(30000); // Evita blocchi nei test lunghi
 
