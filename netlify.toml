@@ -20,14 +20,6 @@ MONGO_URI="mongodb+srv://heilelon:aPrisse3100!s@heilelon.6ifty.mongodb.net/heile
   port = 0        # Porta su cui Netlify Dev gira il proxy
   autoLaunch = false
 
-# ✅ Pass Environment Variables to Build (imposta i valori in Netlify senza virgolette)
-[context.production.environment]
-  MONGO_URI = "$MONGO_URI"
-  REDIS_URL = "$REDIS_URL"
-  MY_GITHUB_OWNER = "$MY_GITHUB_OWNER"
-  MY_GITHUB_REPO = "$MY_GITHUB_REPO"
-  MY_GITHUB_TOKEN = "$MY_GITHUB_TOKEN"
-
 # ✅ Security & CORS Headers
 [[headers]]
   for = "/api/*"
