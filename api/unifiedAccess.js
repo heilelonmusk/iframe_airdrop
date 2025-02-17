@@ -3,12 +3,11 @@ const express = require("express");
 const serverless = require("serverless-http");
 const axios = require("axios");
 const mongoose = require("mongoose");
-
+const { redis, quitRedis, cacheMiddleware } = require("../config/redis");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-const { redis, quitRedis } = require("../config/redis");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 const app = express();
@@ -97,7 +96,7 @@ app.use(express.json());
 
 // === Connessione a MongoDB ===
 // Funzione per connettersi a MongoDB con gestione forzata se rimane in stato "connecting"
-const connectMongoDB = async () => {
+const { connectMongoDB } = async () => {
   // Se già connesso (stato 1), restituisci la connessione attiva
   if (mongoose.connection.readyState === 1) {
     logger.info("🔄 MongoDB already connected, reusing existing connection.");
@@ -186,21 +185,6 @@ router.get("/health", async (req, res) => {
       mongoStatus = "Disconnected";
     }
     logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
-
-    let redisStatus = "Disconnected";
-    try {
-      if (redis.status === "ready") {
-        logger.info("Performing Redis ping...");
-        const redisPing = await redis.ping();
-        logger.info("Redis ping result: " + redisPing);
-        redisStatus = redisPing === "PONG" ? "Connected" : "Disconnected";
-      } else {
-        logger.warn(`Redis status not ready: ${redis.status}`);
-      }
-    } catch (redisError) {
-      logger.error("Redis ping error: " + redisError.message);
-      redisStatus = "Disconnected";
-    }
 
     res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
   } catch (error) {
@@ -311,5 +295,22 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
 
 // === Esposizione dell'Endpoint Unified Access ===
 app.use("/.netlify/functions/unifiedAccess", router);
+
+// Aggiungere gestione della chiusura per liberare la porta
+process.on("SIGINT", () => {
+  logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+  server.close(() => {
+    logger.info("✅ Server closed. Exiting process.");
+    process.exit(0);
+  });
+});
+
+process.on("SIGTERM", () => {
+  logger.warn("⚠️ SIGTERM received. Closing server...");
+  server.close(() => {
+    logger.info("✅ Server closed. Exiting process.");
+    process.exit(0);
+  });
+});
 
 module.exports = { app, handler: serverless(app), redis };

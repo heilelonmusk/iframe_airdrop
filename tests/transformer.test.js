@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema} = require('../modules/nlp/nlpModel');
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
-const redis = require("../config/redis")
+const { redis, quitRedis, cacheMiddleware } = require("../config/redis");
 const { processText } = require("../modules/nlp/nlpModel");
 
 jest.setTimeout(30000); // Evita blocchi nei test lunghi
@@ -85,7 +85,7 @@ afterAll(async () => {
     logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
   } finally {
     try {
-      await redis.quit();
+      await quitRedis();
       logger.info("🔹 Connessione Redis chiusa.");
     } catch (quitError) {
       logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);

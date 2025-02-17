@@ -3,7 +3,7 @@ require("dotenv").config();
 const { app, handler } = require("../api/unifiedAccess.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { redis, quitRedis } = require("../config/redis");
+const { redis, quitRedis, cacheMiddleware } = require("../config/redis");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);

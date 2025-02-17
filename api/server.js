@@ -9,7 +9,7 @@ const { NlpManager } = require('node-nlp');
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 const { trainAndSaveNLP, loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpModel");
 //const winston = require("winston");
-const { redis, quitRedis } = require("../config/redis");
+const { redis, quitRedis, cacheMiddleware } = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
 const { logger } = require("../modules/logging/logger");
@@ -106,7 +106,7 @@ if (!process.env.NETLIFY) {
 });
 
 // Connessione MongoDB con retry
-const connectMongoDB = async () => {
+const { connectMongoDB } = async () => {
   let attempts = 0;
 
   while (attempts < MAX_RETRIES) {
