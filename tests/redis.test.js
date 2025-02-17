@@ -23,7 +23,7 @@ if (!fs.existsSync(logsDir)) {
 }
 
 // 🚀 Winston Logger Setup
-const logger = winston.createLogger({
+({
   level: "info",
   format: winston.format.combine(
     winston.format.timestamp(),
