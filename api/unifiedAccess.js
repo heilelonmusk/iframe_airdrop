@@ -8,7 +8,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-const redis = require("../config/redis");
+const { redis, quitRedis } = require("../config/redis");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 const app = express();
@@ -218,30 +218,6 @@ const KnowledgeSchema = new mongoose.Schema({
 });
 const Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
 
-// === Middleware per Cache Redis ===
-const cacheMiddleware = async (req, res, next) => {
-  const key = req.originalUrl;
-  try {
-    const cachedData = await redis.get(key);
-    if (cachedData) {
-      logger.info(`🔹 Serving from Redis cache: ${key}`);
-      return res.json(JSON.parse(cachedData));
-    }
-  } catch (error) {
-    logger.warn("⚠️ Redis error, proceeding without cache:", error.message);
-  }
-
-  res.sendResponse = res.json;
-  res.json = (body) => {
-    if (!res.headersSent) {
-      redis.setex(key, 60, JSON.stringify(body)).catch((err) => {
-        logger.warn("⚠️ Failed to store response in Redis cache:", err.message);
-      });
-      res.sendResponse(body);
-    }
-  };
-  next();
-};
 
 // === Endpoint: Health Check ===
 router.get("/health", async (req, res) => {

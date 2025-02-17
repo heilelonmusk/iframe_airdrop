@@ -3,7 +3,7 @@ require("dotenv").config();
 const { app, handler } = require("../api/unifiedAccess.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
-const redis = require("../config/redis");
+const { redis, quitRedis } = require("../config/redis");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
 logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
@@ -104,15 +104,9 @@ describe("Unified Access API Tests", () => {
     });
   });
 
-  // Test: Redis deve rispondere al PING
-  test("Redis deve essere connesso", async () => {
-    const redisPing = await redis.ping();
-    expect(redisPing).toBe("PONG");
-  });
-
   // Test principali API: Fetch da GitHub
   test("GET /fetch (GitHub) - Recupero file da GitHub", async () => {
-    const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/README.md`;
+    const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`;
     logger.info(`🔹 Test Fetch da GitHub: ${repoUrl}`);
 
     const response = await request(app).get("/.netlify/functions/unifiedAccess/fetch?source=github&file=README.md");
@@ -157,7 +151,7 @@ afterAll(async () => {
       logger.info("🔹 Connessione Redis chiusa.");
     } catch (quitError) {
       logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-      redis.disconnect();
+      quitRedis();
     }
   }
 

@@ -1,8 +1,9 @@
 require("dotenv").config();
-const { app, handler, redis} = require("../api/server.js");
+const { app, handler} = require("../api/server.js");
 //const winston = require("winston");
 const { execSync } = require("child_process");
 const mongoose = require("mongoose");
+const { redis, quitRedis } = require("../config/redis");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 //logger.error("This is an error message");
 const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, processText } = require('../modules/nlp/nlpModel');
@@ -147,7 +148,7 @@ describe("🔍 API Tests", () => {
         logger.info("🔹 Connessione Redis chiusa.");
       } catch (quitError) {
         logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-        redis.disconnect();
+        quitRedis();
       }
     }
   });

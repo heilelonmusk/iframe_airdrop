@@ -1,5 +1,5 @@
 require("dotenv").config();
-const redis = require("../config/redis");
+const { redis, quitRedis } = require("../config/redis");
 const winston = require("winston");
 const fs = require("fs");
 const path = require("path");
@@ -75,9 +75,6 @@ checkRedisProcess();
 //  retryStrategy: (times) => Math.min(times * 100, 2000),
 //  family: 4,
 // });
-
-redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
-redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err));
 
 // Aspettiamo che Redis sia pronto prima di inviare comandi
 const waitForReady = () => {
@@ -164,7 +161,7 @@ afterAll(async () => {
       logger.info("🔹 Connessione Redis chiusa.");
     } catch (quitError) {
       logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-      redis.disconnect();
+      quitRedis();
     }
   }
 });

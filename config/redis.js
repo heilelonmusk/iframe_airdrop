@@ -25,6 +25,37 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
+// Test: Redis deve rispondere al PING
+test("Redis deve essere connesso", async () => {
+  const redisPing = await redis.ping();
+  expect(redisPing).toBe("PONG");
+});
+
+// === Middleware per Cache Redis ===
+const cacheMiddleware = async (req, res, next) => {
+  const key = req.originalUrl;
+  try {
+    const cachedData = await redis.get(key);
+    if (cachedData) {
+      logger.info(`🔹 Serving from Redis cache: ${key}`);
+      return res.json(JSON.parse(cachedData));
+    }
+  } catch (error) {
+    logger.warn("⚠️ Redis error, proceeding without cache:", error.message);
+  }
+
+  res.sendResponse = res.json;
+  res.json = (body) => {
+    if (!res.headersSent) {
+      redis.setex(key, 60, JSON.stringify(body)).catch((err) => {
+        logger.warn("⚠️ Failed to store response in Redis cache:", err.message);
+      });
+      res.sendResponse(body);
+    }
+  };
+  next();
+};
+
 /**
  * 🔹 Chiude correttamente la connessione Redis
  */
