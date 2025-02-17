@@ -1,6 +1,5 @@
 [build.environment]
  NODE_ENV = "development"
-NETLIFY_DISABLE_LAMBDA_FUNCTIONS = "true"
 NODE_VERSION = "23.7.0"
 
 [context.production.environment]
@@ -8,7 +7,7 @@ MONGO_URI="mongodb+srv://heilelon:aPrisse3100!s@heilelon.6ifty.mongodb.net/heile
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm run buid"
+  command = "npm run build"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
