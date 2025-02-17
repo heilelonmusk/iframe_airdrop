@@ -150,22 +150,23 @@ test("🚨 NLPModel should return an error for undefined input", async () => {
   }
 });
 
-// Cleanup: Rimozione dati di test dalla collezione "nlpmodels" dopo ogni test
+// Cleanup: Rimozione del database di test dopo ogni test
 afterEach(async () => {
   try {
-    logger.info("🗑️ Cleaning up test database...");
-    await mongoose.connection.db.collection("nlpmodels").deleteMany({});
+    if (mongoose.connection.readyState !== 1) {
+      logger.warn("⚠️ MongoDB non è connesso. Tentiamo di riconnetterci...");
+      await mongoose.connect(process.env.MONGO_URI, {
+        serverSelectionTimeoutMS: 5000,
+      });
+    }
+
+    if (mongoose.connection.db) {
+      await mongoose.connection.db.dropDatabase();
+      logger.info("🗑️ Database di test pulito con successo.");
+    } else {
+      logger.warn("⚠️ Connessione a MongoDB presente, ma 'db' non è definito.");
+    }
   } catch (error) {
-    logger.error("❌ Error cleaning up test database:", error.message);
+    logger.warn("⚠️ Errore nella pulizia del database, procediamo comunque:", error.message);
   }
-});
-afterAll(async () => {
-  if (server) {
-    server.close(() => {
-      logger.info("🛑 Express server closed after tests.");
-    });
-  }
-  await mongoose.connection.close();
-  await redis.quit();
-  redis.disconnect();
 });
