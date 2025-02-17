@@ -19,6 +19,10 @@ jest.setTimeout(20000); // Evita blocchi nei test lunghi
 //  transports: [new winston.transports.Console()],
 //});
 
+if (!process.env.CI && !process.env.NETLIFY && process.env.NODE_ENV !== "production") {
+  checkActiveProcesses();
+}
+
 // Verifica processi attivi sulle porte 5000 o 8889
 const checkActiveProcesses = () => {
   try {

@@ -21,15 +21,32 @@ jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 //  transports: [new winston.transports.Console()],
 //});
 
-// 🚀 Controllo processi attivi sulla porta 5000 (solo log)
+if (!process.env.NETLIFY && process.env.NODE_ENV !== "production") {
+  checkActiveProcesses();
+}
+
+const os = require("os");
+
+// 🚀 Controllo processi attivi sulla porta di test
 const checkActiveProcesses = () => {
+  const testPort = process.env.PORT || 5000; // Usa la porta configurata, se esiste
+
   try {
-    const runningProcesses = execSync("lsof -i :5000").toString();
+    let command;
+    if (os.platform() === "win32") {
+      // Comando per Windows
+      command = `netstat -ano | findstr :${testPort}`;
+    } else {
+      // Comando per macOS/Linux
+      command = `lsof -i :${testPort}`;
+    }
+
+    const runningProcesses = execSync(command).toString();
     if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn("⚠️ Un altro processo è attivo sulla porta 5000. Questo potrebbe interferire con i test.");
+      logger.warn(`⚠️ Un altro processo è attivo sulla porta ${testPort}. Questo potrebbe interferire con i test.`);
     }
   } catch (error) {
-    logger.info("✅ Nessun processo attivo sulla porta 5000. Procediamo con i test.");
+    logger.info(`✅ Nessun processo attivo sulla porta ${testPort}. Procediamo con i test.`);
   }
 };
 

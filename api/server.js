@@ -12,7 +12,6 @@ const { trainAndSaveNLP, loadNLPModel, saveNLPModel, NLPModel } = require("../mo
 const redis = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
-const port = process.env.PORT || 0;
 const {logger, logConversation, getFrequentQuestions} = require("../modules/logging/logger");
 //logger.error("This is an error message");
 logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
@@ -53,10 +52,20 @@ const router = express.Router();
 
 app.use(async (req, res, next) => {
   try {
-    req.nlpInstance = await NLPModel.findOne();
+    if (mongoose.connection.readyState !== 1) {
+      logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
+      await connectMongoDB();
+    }
+
+    if (!global.nlpModelCache) {
+      global.nlpModelCache = await NLPModel.findOne();
+    }
+
+    req.nlpInstance = global.nlpModelCache;
     if (!req.nlpInstance) {
       return res.status(500).json({ error: "❌ No NLP Model found in database. Train the model first." });
     }
+
     next();
   } catch (error) {
     logger.error("❌ Error loading NLP Model:", error.message);
@@ -159,6 +168,8 @@ const connectMongoDB = async () => {
   logger.error("🚨 Max retries reached. MongoDB connection failed.");
   throw new Error("MongoDB connection failed after multiple attempts.");
 };
+
+
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
 router.get("/health", async (req, res) => {
