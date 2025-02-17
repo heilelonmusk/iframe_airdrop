@@ -431,7 +431,7 @@ router.get("/fetch", cacheMiddleware, /*#__PURE__*/function () {
           }));
         case 4:
           if (!(source === "github")) {
-            _context5.next = 18;
+            _context5.next = 29;
             break;
           }
           if (file) {
@@ -442,81 +442,102 @@ router.get("/fetch", cacheMiddleware, /*#__PURE__*/function () {
             error: "Missing file parameter."
           }));
         case 7:
-          repoUrl = "https://api.github.com/repos/".concat(process.env.MY_GITHUB_OWNER, "/").concat(process.env.MY_GITHUB_REPO, "/contents/").concat(file);
+          // Log per verificare il valore delle variabili d'ambiente
+          logger.info("\uD83D\uDD39 GitHub Owner: \"".concat(process.env.MY_GITHUB_OWNER, "\""));
+          logger.info("\uD83D\uDD39 GitHub Repo: \"".concat(process.env.MY_GITHUB_REPO, "\""));
+
+          // Controlla se le variabili sono effettivamente valorizzate
+          if (!(!process.env.MY_GITHUB_OWNER || !process.env.MY_GITHUB_REPO)) {
+            _context5.next = 11;
+            break;
+          }
+          return _context5.abrupt("return", res.status(500).json({
+            error: "Missing GitHub environment variables"
+          }));
+        case 11:
+          repoUrl = "https://api.github.com/repos/".concat(process.env.MY_GITHUB_OWNER.trim(), "/").concat(process.env.MY_GITHUB_REPO.trim(), "/contents/").concat(file);
           logger.info("\uD83D\uDD39 Fetching from GitHub: ".concat(repoUrl));
-          // Imposta un timeout per evitare blocchi (5000ms)
-          _context5.next = 11;
+          _context5.prev = 13;
+          _context5.next = 16;
           return axios.get(repoUrl, {
             headers: {
               Authorization: "token ".concat(process.env.MY_GITHUB_TOKEN)
             },
             timeout: 5000
           });
-        case 11:
+        case 16:
           response = _context5.sent;
           if (response.data.download_url) {
-            _context5.next = 14;
+            _context5.next = 19;
             break;
           }
           return _context5.abrupt("return", res.status(404).json({
             error: "GitHub API Error: File not found."
           }));
-        case 14:
-          _context5.next = 16;
+        case 19:
+          _context5.next = 21;
           return axios.get(response.data.download_url, {
             timeout: 5000
           });
-        case 16:
+        case 21:
           fileResponse = _context5.sent;
           return _context5.abrupt("return", res.json({
             file: file,
             content: fileResponse.data
           }));
-        case 18:
+        case 25:
+          _context5.prev = 25;
+          _context5.t0 = _context5["catch"](13);
+          logger.error("❌ Fetch Error:", _context5.t0.message);
+          return _context5.abrupt("return", res.status(500).json({
+            error: "Unexpected error fetching data",
+            details: _context5.t0.message
+          }));
+        case 29:
           if (!(source === "mongodb")) {
-            _context5.next = 27;
+            _context5.next = 38;
             break;
           }
           if (query) {
-            _context5.next = 21;
+            _context5.next = 32;
             break;
           }
           return _context5.abrupt("return", res.status(400).json({
             error: "Missing query parameter."
           }));
-        case 21:
-          _context5.next = 23;
+        case 32:
+          _context5.next = 34;
           return Knowledge.findOne({
             key: query
           });
-        case 23:
+        case 34:
           data = _context5.sent;
           if (data) {
-            _context5.next = 26;
+            _context5.next = 37;
             break;
           }
           return _context5.abrupt("return", res.status(404).json({
             error: "No data found in MongoDB"
           }));
-        case 26:
+        case 37:
           return _context5.abrupt("return", res.json(data));
-        case 27:
+        case 38:
           return _context5.abrupt("return", res.status(400).json({
             error: "Invalid source parameter."
           }));
-        case 30:
-          _context5.prev = 30;
-          _context5.t0 = _context5["catch"](1);
-          logger.error("❌ Fetch Error:", _context5.t0.message);
+        case 41:
+          _context5.prev = 41;
+          _context5.t1 = _context5["catch"](1);
+          logger.error("❌ Fetch Error:", _context5.t1.message);
           res.status(500).json({
             error: "Unexpected error fetching data",
-            details: _context5.t0.message
+            details: _context5.t1.message
           });
-        case 34:
+        case 45:
         case "end":
           return _context5.stop();
       }
-    }, _callee5, null, [[1, 30]]);
+    }, _callee5, null, [[1, 41], [13, 25]]);
   }));
   return function (_x8, _x9) {
     return _ref5.apply(this, arguments);
