@@ -1,4 +1,4 @@
-  📁 node_modules/  [Hidden, 25490 files omitted] - External dependencies
+  📁 node_modules/  [Hidden, 25491 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 .netlifyignore - 🚀 Add a description here
      📄 connectMongoDB.js - 🚀 Add a description here
@@ -66,8 +66,6 @@
      📄 server.log - 🚀 Add a description here
   📁 .netlify/ - 🚀 Add a description here
      📄 netlify.toml - 🚀 Add a description here
-  📁 .netlify/v1/ - 🚀 Add a description here
-  📁 .netlify/v1/functions/ - 🚀 Add a description here
   📁 .netlify/blobs-serve/ - 🚀 Add a description here
   📁 .netlify/functions-internal/ - 🚀 Add a description here
   📁 .netlify/functions/ - 🚀 Add a description here
