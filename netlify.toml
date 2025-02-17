@@ -7,7 +7,6 @@ MONGO_URI = "mongodb+srv://heilelon:aPrisse3100%21s@heilelon.6ifty.mongodb.net/h
 MAX_RETRIES = "5"
 MY_GITHUB_OWNER = "heilelonmusk"
 MY_GITHUB_REPO = "iframe_airdrop"
-MY_GITHUB_TOKEN ="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"
 
 # 🚀 Netlify Build Settings
 [build]
