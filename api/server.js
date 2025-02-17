@@ -134,23 +134,40 @@ const connectMongoDB = async () => {
 
 app.use(async (req, res, next) => {
   try {
+    // ✅ Verifica che MongoDB sia connesso
     if (mongoose.connection.readyState !== 1) {
+      logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
       await connectMongoDB();
     }
 
+    // ✅ Se il modello NLP non è in cache, lo carica dal database
     if (!global.nlpModelCache) {
-      global.nlpModelCache = await NLPModel.findOne();
+      logger.info("🔄 Loading NLP Model from database...");
+      const modelData = await loadNLPModel();
+
+      if (modelData) {
+        const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
+        manager.import(modelData); // Importa i dati del modello
+        global.nlpModelCache = manager;
+        logger.info("✅ NLP Model loaded into global cache.");
+      } else {
+        logger.warn("⚠️ No NLP Model found in database, training a new one...");
+        await trainAndSaveNLP();
+        global.nlpModelCache = await loadNLPModel();
+      }
     }
 
-    req.nlpInstance = global.nlpModelCache;
-    if (!req.nlpInstance) {
+    // ✅ Se ancora non esiste, ritorna un errore
+    if (!global.nlpModelCache) {
+      logger.error("❌ No NLP Model found in database. Train the model first.");
       return res.status(500).json({ error: "❌ No NLP Model found in database. Train the model first." });
     }
 
+    req.nlpInstance = global.nlpModelCache;
     next();
   } catch (error) {
     logger.error("❌ Error loading NLP Model:", error.message);
-    return res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 });
 
@@ -286,7 +303,6 @@ router.post("/api/nlp", async (req, res) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const response = await req.nlpInstance.processText(question);
     return res.json({ answer: response });
   } catch (error) {
     logger.error(`❌ Error processing NLP request: ${error.message}`);
