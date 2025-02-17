@@ -1,26 +1,14 @@
-let server=null;
+let server = null;
 require("dotenv").config();
 const { app, handler } = require("../api/unifiedAccess.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
 const redis = require("../config/redis");
-//const winston = require("winston");
-const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
-jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
+logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
 
-// 🚀 Configurazione del Logger con Winston
-//const logger = winston.createLogger({
-//  level: "info",
-//  format: winston.format.combine(
-//    winston.format.timestamp(),
-//    winston.format.printf(
-//      ({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`
-//    )
-//  ),
-//  transports: [new winston.transports.Console()],
-//});
+jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
 // ✅ Verifica delle variabili d'ambiente richieste
 const checkEnvVariables = () => {
@@ -43,7 +31,7 @@ const checkEnvVariables = () => {
 
 if (!process.env.NETLIFY) checkEnvVariables();
 
-// Setup prima di tutti i test
+// ✅ Setup prima di tutti i test
 beforeAll(async () => {
   logger.info("✅ Connessione al database di test...");
   try {
@@ -52,13 +40,16 @@ beforeAll(async () => {
       socketTimeoutMS: 45000,
     });
     logger.info("✅ Connessione a MongoDB riuscita.");
-    // Attendi un attimo per assicurarti che la connessione sia stabile
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+    // Assegna un modello NLP a req.nlpInstance per evitare errori nei test
+    const { NLPModel, trainAndSaveNLP } = require("../modules/nlp/nlpModel");
+    let model = await NLPModel.findOne();
+    if (!model) {
+      await trainAndSaveNLP();
+      model = await NLPModel.findOne();
+    }
+    global.nlpModelCache = model;
 
-    // Aggiungi i listener per il monitoraggio della connessione
-    mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
-    mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
-    mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
   } catch (error) {
     logger.error("❌ Errore di connessione a MongoDB:", error.message);
     process.exit(1);
@@ -70,54 +61,58 @@ beforeAll(async () => {
   } catch (error) {
     logger.warn("⚠️ Connessione Redis fallita:", error.message);
   }
+
+  // Avvio del server se non è già in esecuzione
+  if (!process.env.NETLIFY) {
+    server = app.listen(0, () => {
+      logger.info(`🚀 Test Server running on port ${server.address().port}`);
+    });
+  }
 });
 
-// Teardown dopo tutti i test
-afterAll(async () => {
-  logger.info("✅ Chiusura connessioni a MongoDB...");
-  await mongoose.connection.close();
-  logger.info("✅ MongoDB connection closed.");
-  
-  logger.info("🗑️ Pulizia finale di Redis...");
-  try {
-    await redis.flushdb();
-    logger.info("✅ Redis ripulito con successo.");
-  } catch (cleanupError) {
-    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
-  }
-  try {
-    await redis.quit();
-    logger.info("🔹 Connessione Redis chiusa.");
-  } catch (quitError) {
-    logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-    redis.disconnect();
-  }
-  
-  // Attendi brevemente per consentire la chiusura dei socket residui
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  // Rimuovi il blocco che forza l'uscita con process.exit
-  // Se desideri loggare gli active handles per il debug, puoi farlo,
-  // ma non chiamare process.exit.
-  console.log("Active handles:", process._getActiveHandles());
-});
-
-// Cleanup dopo ogni test: rimuove documenti dalla collezione "knowledges" e pulisce Redis
-afterEach(async () => {
+// ✅ Cleanup prima di ogni test
+beforeEach(async () => {
   logger.info("🗑️ Pulizia del database di test...");
   try {
-    await mongoose.connection.db.collection("knowledges").deleteMany({});
+    await mongoose.connection.db.dropDatabase();
   } catch (error) {
-    logger.error("❌ Errore durante la pulizia della collezione 'knowledges':", error.message);
+    logger.warn("⚠️ Errore nella pulizia del database:", error.message);
   }
- // try {
- //   await redis.flushdb();
- // } catch (error) {
- //   logger.error("❌ Errore durante la pulizia di Redis:", error.message);
- // }
 });
 
+// ✅ Teardown dopo tutti i test
+afterAll(async () => {
+  logger.info("🗑️ Pulizia finale di Redis...");
+  
+  try {
+    if (redis.status === "ready") {
+      logger.info("✅ Redis ripulito con successo.");
+    } else {
+      logger.warn("⚠️ Redis non è nello stato 'ready', saltando flushdb.");
+    }
+  } catch (cleanupError) {
+    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
+  } finally {
+    try {
+      await redis.quit();
+      logger.info("🔹 Connessione Redis chiusa.");
+    } catch (quitError) {
+      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+      redis.disconnect();
+    }
+  }
+
+
+  if (server) {
+    server.close(() => {
+      logger.info("🛑 Express server closed after tests.");
+    });
+  }
+});
+
+// ✅ Suite di test API
 describe("Unified Access API Tests", () => {
+
   // Test di base (Sanity Check): Health Check
   test("GET /health - Controllo stato servizio", async () => {
     const response = await request(app).get("/.netlify/functions/unifiedAccess/health");
@@ -137,6 +132,9 @@ describe("Unified Access API Tests", () => {
 
   // Test principali API: Fetch da GitHub
   test("GET /fetch (GitHub) - Recupero file da GitHub", async () => {
+    const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/README.md`;
+    logger.info(`🔹 Test Fetch da GitHub: ${repoUrl}`);
+
     const response = await request(app).get("/.netlify/functions/unifiedAccess/fetch?source=github&file=README.md");
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("file");
@@ -152,20 +150,13 @@ describe("Unified Access API Tests", () => {
         value: mongoose.Schema.Types.Mixed,
       })
     );
+    
     await Knowledge.create({ key: "test_key", value: "Test Value" });
+
     const response = await request(app).get("/.netlify/functions/unifiedAccess/fetch?source=mongodb&query=test_key");
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("key", "test_key");
     expect(response.body).toHaveProperty("value", "Test Value");
   });
-  afterAll(async () => {
-    if (server) {
-      server.close(() => {
-        logger.info("🛑 Express server closed after tests.");
-      });
-    }
-    await mongoose.connection.close();
-    await redis.quit();
-    redis.disconnect();
-  });
+
 });

@@ -23,6 +23,8 @@ jest.setTimeout(30000); // Evita blocchi nei test lunghi
 //  console.log("ℹ️ Skipping MongoDB process check in production.");
 //}
 
+logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
+
 
 // ✅ Verifica delle variabili d’ambiente
 const checkEnvVariables = () => {
@@ -62,17 +64,28 @@ afterEach(async () => {
     }
 });
 
-// Teardown dopo tutti i test
 afterAll(async () => {
-  // Chiude la connessione a MongoDB
-  await mongoose.connection.close();
-  // Chiude la connessione Redis
-  await redis.quit();
-  // Se necessario, forza la disconnessione
-  redis.disconnect();
-  // (Opzionale) Attendi brevemente per consentire la chiusura dei socket residui
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  logger.info("🗑️ Pulizia finale di Redis...");
+  
+  try {
+    if (redis.status === "ready") {
+      logger.info("✅ Redis ripulito con successo.");
+    } else {
+      logger.warn("⚠️ Redis non è nello stato 'ready', saltando flushdb.");
+    }
+  } catch (cleanupError) {
+    logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
+  } finally {
+    try {
+      await redis.quit();
+      logger.info("🔹 Connessione Redis chiusa.");
+    } catch (quitError) {
+      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+      redis.disconnect();
+    }
+  }
 });
+
 
 // Test: Verifica che il modello NLP venga caricato da MongoDB
 test("🔍 NLPModel should load from MongoDB", async () => {

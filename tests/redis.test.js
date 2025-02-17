@@ -6,6 +6,8 @@ const path = require("path");
 const { execSync } = require("child_process");
 const mongoose = require("mongoose");
 
+logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
+
 // 📁 Assicuriamoci che la cartella dei log esista
 const logsDir = "/tmp/logs";
 if (!fs.existsSync(logsDir)) {

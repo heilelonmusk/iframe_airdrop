@@ -189,12 +189,15 @@ router.get("/health", async (req, res) => {
 
 app.use("/.netlify/functions/server", router);
 
-if (!process.env.NETLIFY) {
-  const port = process.env.PORT || 3000;
-  const server = app.listen(port, () => {
-    logger.info(`🚀 Server running on port ${port}`);
-  });
+const port = process.env.PORT || 3000; // Imposta un valore di default
+console.log(`🚀 Server running on port ${port}`);
 
+if (!process.env.NETLIFY) {
+  const server = app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${server.address().port}`);
+  });
+  
+  // Gestione della chiusura
   process.on("SIGTERM", () => {
     logger.warn("⚠️ SIGTERM received. Closing server...");
     server.close(() => {

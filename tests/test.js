@@ -9,6 +9,7 @@ const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, p
 
 jest.setTimeout(20000); // Evita blocchi nei test lunghi
 
+logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
 //Configurazione del Logger con un formato leggermente più conciso
 //const logger = winston.createLogger({
 //  level: "info",
@@ -68,14 +69,16 @@ describe("🔍 API Tests", () => {
   });
 
   afterAll(async () => {
-   // Chiude la connessione a MongoDB
-  await mongoose.connection.close();
-  // Chiude la connessione Redis
-  await redis.quit();
-  // Se necessario, forza la disconnessione
-  redis.disconnect();
-  // (Opzionale) Attendi brevemente per consentire la chiusura dei socket residui
-  await new Promise(resolve => setTimeout(resolve, 1000));
+    logger.info("🗑️ Pulizia finale di Redis...");
+    try {
+      await mongoose.connection.close();
+      await redis.flushdb();
+      await redis.quit();
+      logger.info("✅ Redis ripulito e connessione chiusa.");
+    } catch (error) {
+      logger.warn("⚠️ Errore durante la chiusura di Redis:", error.message);
+      redis.disconnect();
+    }
   });
 
   // Health Check Test
@@ -132,16 +135,27 @@ describe("🔍 API Tests", () => {
     logger.warn("⚠️ Endpoint sconosciuto ha restituito 404 come previsto.");
   });
 
-  (async () => {
+  afterAll(async () => {
+    logger.info("🗑️ Pulizia finale di Redis...");
+    
     try {
-        await connectMongoDB();
-        console.log("✅ Test MongoDB connection successful!");
-        process.exit(0);
-    } catch (error) {
-        console.error("❌ Test failed:", error);
-        process.exit(1);
+      if (redis.status === "ready") {
+        logger.info("✅ Redis ripulito con successo.");
+      } else {
+        logger.warn("⚠️ Redis non è nello stato 'ready', saltando flushdb.");
+      }
+    } catch (cleanupError) {
+      logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
+    } finally {
+      try {
+        await redis.quit();
+        logger.info("🔹 Connessione Redis chiusa.");
+      } catch (quitError) {
+        logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+        redis.disconnect();
+      }
     }
-})();
-  
+  });
+
 
 });
