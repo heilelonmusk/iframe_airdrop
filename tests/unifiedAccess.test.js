@@ -7,6 +7,8 @@ const redis = require("../config/redis");
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 
+let server = null;
+
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
 // 🚀 Configurazione del Logger con Winston
@@ -20,31 +22,6 @@ jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 //  ),
 //  transports: [new winston.transports.Console()],
 //});
-
-const os = require("os");
-
-// 🚀 Controllo processi attivi sulla porta di test
-const checkActiveProcesses = () => {
-  const testPort = process.env.PORT || 5000; // Usa la porta configurata, se esiste
-
-  try {
-    let command;
-    if (os.platform() === "win32") {
-      // Comando per Windows
-      command = `netstat -ano | findstr :${testPort}`;
-    } else {
-      // Comando per macOS/Linux
-      command = `lsof -i :${testPort}`;
-    }
-
-    const runningProcesses = execSync(command).toString();
-    if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn(`⚠️ Un altro processo è attivo sulla porta ${testPort}. Questo potrebbe interferire con i test.`);
-    }
-  } catch (error) {
-    logger.info(`✅ Nessun processo attivo sulla porta ${testPort}. Procediamo con i test.`);
-  }
-};
 
 // ✅ Verifica delle variabili d'ambiente richieste
 const checkEnvVariables = () => {
@@ -65,7 +42,7 @@ const checkEnvVariables = () => {
   });
 };
 
-checkActiveProcesses();
+if (!process.env.NETLIFY) checkActiveProcesses();
 checkEnvVariables();
 
 // Setup prima di tutti i test

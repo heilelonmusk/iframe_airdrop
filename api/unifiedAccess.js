@@ -281,24 +281,39 @@ router.get("/fetch", cacheMiddleware, async (req, res) => {
       return res.status(400).json({ error: "Missing source parameter." });
 
     if (source === "github") {
-      if (!file)
-        return res.status(400).json({ error: "Missing file parameter." });
-      const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/contents/${file}`;
+      if (!file) return res.status(400).json({ error: "Missing file parameter." });
+  
+      // Log per verificare il valore delle variabili d'ambiente
+      logger.info(`🔹 GitHub Owner: "${process.env.MY_GITHUB_OWNER}"`);
+      logger.info(`🔹 GitHub Repo: "${process.env.MY_GITHUB_REPO}"`);
+      
+      // Controlla se le variabili sono effettivamente valorizzate
+      if (!process.env.MY_GITHUB_OWNER || !process.env.MY_GITHUB_REPO) {
+          return res.status(500).json({ error: "Missing GitHub environment variables" });
+      }
+  
+      const repoUrl = `https://api.github.com/repos/${process.env.MY_GITHUB_OWNER.trim()}/${process.env.MY_GITHUB_REPO.trim()}/contents/${file}`;
       logger.info(`🔹 Fetching from GitHub: ${repoUrl}`);
-      // Imposta un timeout per evitare blocchi (5000ms)
-      const response = await axios.get(repoUrl, {
-        headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` },
-        timeout: 5000,
-      });
-      if (!response.data.download_url)
-        return res
-          .status(404)
-          .json({ error: "GitHub API Error: File not found." });
-      const fileResponse = await axios.get(response.data.download_url, {
-        timeout: 5000,
-      });
-      return res.json({ file, content: fileResponse.data });
-    }
+  
+      try {
+          // Imposta un timeout per evitare blocchi (5000ms)
+          const response = await axios.get(repoUrl, {
+              headers: { Authorization: `token ${process.env.MY_GITHUB_TOKEN}` },
+              timeout: 5000,
+          });
+  
+          if (!response.data.download_url) {
+              return res.status(404).json({ error: "GitHub API Error: File not found." });
+          }
+  
+          const fileResponse = await axios.get(response.data.download_url, { timeout: 5000 });
+          return res.json({ file, content: fileResponse.data });
+  
+      } catch (error) {
+          logger.error("❌ Fetch Error:", error.message);
+          return res.status(500).json({ error: "Unexpected error fetching data", details: error.message });
+      }
+  }
 
     if (source === "mongodb") {
       if (!query)
