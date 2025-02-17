@@ -8,10 +8,9 @@ MAX_RETRIES = "5"
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm install"
+  command = "npm run build && npm test"
   functions = "api"
   publish = "./"
-  ignore = "git diff --quiet HEAD^ HEAD"
 
 # 🛠️ Local Development Settings
 #[dev]
