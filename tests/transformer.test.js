@@ -1,7 +1,7 @@
 let server=null;
 require("dotenv").config();
 const mongoose = require("mongoose");
-const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema} = require('../modules/nlp/nlpModel');
+const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, nlprocessText} = require('../modules/nlp/nlpModel');
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 const { redis, quitRedis, cacheMiddleware } = require("../config/redis");
@@ -134,7 +134,7 @@ test("💬 NLPModel should process text correctly", async () => {
 // Test: Verifica comportamento con input vuoto
 test("🚨 NLPModel should return an error for empty input", async () => {
   try {
-    const response = await NLPModel.processText("");
+    const response = await nlprocessText("");
     expect(response).toBe(null);
     logger.warn("⚠️ NLPModel correctly handled empty input.");
   } catch (error) {
@@ -146,7 +146,7 @@ test("🚨 NLPModel should return an error for empty input", async () => {
 // Test: Verifica comportamento con input null
 test("🚨 NLPModel should return an error for null input", async () => {
   try {
-    const response = await NLPModel.processText(null);
+    const response = await nlprocessText(null);
     expect(response).toBe(null);
     logger.warn("⚠️ NLPModel correctly handled null input.");
   } catch (error) {
@@ -158,7 +158,7 @@ test("🚨 NLPModel should return an error for null input", async () => {
 // Test: Verifica comportamento con input undefined
 test("🚨 NLPModel should return an error for undefined input", async () => {
   try {
-    const response = await NLPModel.processText(undefined);
+    const response = await nlprocessText(undefined);
     expect(response).toBe(null);
     logger.warn("⚠️ NLPModel correctly handled undefined input.");
   } catch (error) {

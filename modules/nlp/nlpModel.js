@@ -11,11 +11,11 @@ const NLPModelSchema = new mongoose.Schema({
 const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
 // ✅ Definizione del metodo `processText`
-NlpManager.prototype.processText = async function (text) {
+nlprocessText = async function (text) {
   try {
     const nlpInstance = await NLPModel.findOne();
 if (nlpInstance) {
-  const response = await nlpInstance.processText(input);
+  const response = await nlprocessText(input);
 };
     if (!text) throw new Error("Text cannot be empty or null.");
     const response = await this.process("en", text);
@@ -88,4 +88,4 @@ async function getOrTrainNLPModel() {
   }
 })();
 
-module.exports = { loadNLPModel, saveNLPModel, trainAndSaveNLP, getOrTrainNLPModel, NLPModel };
+module.exports = { loadNLPModel, saveNLPModel, trainAndSaveNLP, getOrTrainNLPModel, NLPModel, nlprocessText };
