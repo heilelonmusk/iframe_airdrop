@@ -13,7 +13,7 @@ const redis = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8891;
-const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
+const {logger, logConversation, getFrequentQuestions} = require("../modules/logging/logger");
 //logger.error("This is an error message");
 logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
 // Import dei moduli
@@ -51,13 +51,17 @@ const { generateResponse } = require("../modules/nlp/transformer");
 const app = express();
 const router = express.Router();
 
-const nlpInstance = await NLPModel.findOne();
-if (!nlpInstance) {
-  throw new Error("❌ No NLP Model found in database. Train the model first.");
-}
-
-app.get("/", (req, res) => {
-  res.send("✅ API is running on Netlify!");
+app.use(async (req, res, next) => {
+  try {
+    req.nlpInstance = await NLPModel.findOne();
+    if (!req.nlpInstance) {
+      return res.status(500).json({ error: "❌ No NLP Model found in database. Train the model first." });
+    }
+    next();
+  } catch (error) {
+    logger.error("❌ Error loading NLP Model:", error.message);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 // Middleware
@@ -161,28 +165,25 @@ router.get("/health", async (req, res) => {
   try {
     logger.info("🔹 Health check started...");
 
-    // Log dello stato iniziale della connessione
-    let currentState = mongoose.connection.readyState;
-    logger.info(`Current mongoose.connection.readyState: ${currentState}`);
+    // Controllo e riconnessione a MongoDB se necessario
+    let mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
     
-    // Se non è 1, tentiamo la riconnessione
-    if (currentState !== 1) {
-      logger.warn(`⚠️ MongoDB not connected (state ${currentState}), attempting to reconnect...`);
+    if (mongoose.connection.readyState !== 1) {
+      logger.warn(`⚠️ MongoDB not connected (state ${mongoose.connection.readyState}), attempting to reconnect...`);
       await connectMongoDB();
-      currentState = mongoose.connection.readyState;
-      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${currentState}`);
+      mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${mongoose.connection.readyState}`);
     }
 
-    let mongoStatus = "Disconnected";
+    // Ping di MongoDB
     try {
       if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
         logger.info("Performing MongoDB ping command...");
         const pingResult = await mongoose.connection.db.command({ ping: 1 });
         logger.info("MongoDB ping result: " + JSON.stringify(pingResult));
-        if (pingResult && pingResult.ok === 1) {
-          mongoStatus = "Connected";
-        } else {
+        if (!pingResult || pingResult.ok !== 1) {
           logger.warn("MongoDB ping did not return an ok result");
+          mongoStatus = "Disconnected";
         }
       } else {
         logger.warn("mongoose.connection.readyState is not 1 or mongoose.connection.db is not available");
@@ -191,8 +192,10 @@ router.get("/health", async (req, res) => {
       logger.error("MongoDB ping error: " + pingError.message);
       mongoStatus = "Disconnected";
     }
+
     logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
 
+    // Ping di Redis
     let redisStatus = "Disconnected";
     try {
       if (redis.status === "ready") {
@@ -215,12 +218,29 @@ router.get("/health", async (req, res) => {
   }
 });
 
-app.use("/.netlify/functions/server", router); // Netlify usa questa route
+app.use("/.netlify/functions/server", router);
 
-let server;
-if (!process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  server = app.listen(port, () => {
+// Avvia il server solo se non è in ambiente serverless
+if (!process.env.NETLIFY) {
+  const server = app.listen(port, () => {
     logger.info(`🚀 Server running on port ${port}`);
+  });
+
+  // Gestione della chiusura per evitare porte bloccate
+  process.on("SIGTERM", () => {
+    logger.warn("⚠️ SIGTERM received. Closing server...");
+    server.close(() => {
+      logger.info("✅ Server closed. Exiting process.");
+      process.exit(0);
+    });
+  });
+
+  process.on("SIGINT", () => {
+    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+    server.close(() => {
+      logger.info("✅ Server closed. Exiting process.");
+      process.exit(0);
+    });
   });
 }
 
@@ -289,23 +309,15 @@ router.post("/logQuestion", async (req, res) => {
   }
 });
 
+// Endpoint per NLP
 router.post("/api/nlp", async (req, res) => {
-  const { question } = req.body;
-
-  if (!question) {
-    return res.status(400).json({ error: "Question is required" });
-  }
-
   try {
-    // Recupera un'istanza del modello NLP
-    const nlpInstance = await NLPModel.findOne();
-    if (!nlpInstance) {
-      return res.status(404).json({ error: "❌ No NLP Model found in database. Train the model first." });
+    const { question } = req.body;
+    if (!question) {
+      return res.status(400).json({ error: "Question is required" });
     }
 
-    // Esegui il processamento NLP con il metodo corretto
-    const response = await nlpInstance.processText(question);
-
+    const response = await req.nlpInstance.processText(question);
     return res.json({ answer: response });
   } catch (error) {
     logger.error(`❌ Error processing NLP request: ${error.message}`);
