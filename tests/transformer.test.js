@@ -58,7 +58,6 @@ beforeAll(() => {
 
 // Setup prima di tutti i test
 beforeAll(async () => {
-  checkMongoDBProcesses();
   checkEnvVariables();
 
   logger.info("✅ Connecting to MongoDB for Transformer Tests...");
@@ -181,4 +180,5 @@ afterAll(async () => {
   }
   await mongoose.connection.close();
   await redis.quit();
+  redis.disconnect();
 });

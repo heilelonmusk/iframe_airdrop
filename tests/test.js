@@ -152,6 +152,16 @@ describe("🔍 API Tests", () => {
     logger.warn("⚠️ Endpoint sconosciuto ha restituito 404 come previsto.");
   });
 
+  (async () => {
+    try {
+        await connectMongoDB();
+        console.log("✅ Test MongoDB connection successful!");
+        process.exit(0);
+    } catch (error) {
+        console.error("❌ Test failed:", error);
+        process.exit(1);
+    }
+})();
   
 
 });

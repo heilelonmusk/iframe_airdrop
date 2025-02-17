@@ -21,10 +21,6 @@ jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 //  transports: [new winston.transports.Console()],
 //});
 
-if (!process.env.NETLIFY && process.env.NODE_ENV !== "production") {
-  checkActiveProcesses();
-}
-
 const os = require("os");
 
 // 🚀 Controllo processi attivi sulla porta di test
@@ -186,5 +182,15 @@ describe("Unified Access API Tests", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty("key", "test_key");
     expect(response.body).toHaveProperty("value", "Test Value");
+  });
+  afterAll(async () => {
+    if (server) {
+      server.close(() => {
+        logger.info("🛑 Express server closed after tests.");
+      });
+    }
+    await mongoose.connection.close();
+    await redis.quit();
+    redis.disconnect();
   });
 });

@@ -12,14 +12,13 @@ const { trainAndSaveNLP, loadNLPModel, saveNLPModel, NLPModel } = require("../mo
 const redis = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
-const {logger, logConversation, getFrequentQuestions} = require("../modules/logging/logger");
+const { logger } = require("../modules/logging/logger");
 //logger.error("This is an error message");
 logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
 // Import dei moduli
-const { getIntent } = require("../modules/intent/intentRecognizer");
-const { generateResponse } = require("../modules/nlp/transformer");
+//const { getIntent } = require("../modules/intent/intentRecognizer");
+//const { generateResponse } = require("../modules/nlp/transformer");
 //const { logConversation } = require("../modules/logging/logger");
-const port = process.env.PORT || 0; // 0 permette al sistema di scegliere automaticamente
 console.log(`🚀 Server running on port ${port}`);
 
 // Inizializza il manager NLP
@@ -50,33 +49,7 @@ console.log(`🚀 Server running on port ${port}`);
 // Crea l'app Express e il router
 
 const app = express();
-app.get("/", (req, res) => {
-  res.send("Hello from Serverless API!");
-});
 const router = express.Router();
-
-app.use(async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
-      await connectMongoDB();
-    }
-
-    if (!global.nlpModelCache) {
-      global.nlpModelCache = await NLPModel.findOne();
-    }
-
-    req.nlpInstance = global.nlpModelCache;
-    if (!req.nlpInstance) {
-      return res.status(500).json({ error: "❌ No NLP Model found in database. Train the model first." });
-    }
-
-    next();
-  } catch (error) {
-    logger.error("❌ Error loading NLP Model:", error.message);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 
 // Middleware
 app.set("trust proxy", true);
@@ -126,106 +99,95 @@ if (!mongoURI || !mongoURI.startsWith("mongodb")) {
   process.exit(1); // Interrompe l'app se MONGO_URI è errato
 }
 
+// Connessione MongoDB con retry
 const connectMongoDB = async () => {
   let attempts = 0;
 
   while (attempts < MAX_RETRIES) {
     if (mongoose.connection.readyState === 1) {
-      logger.info("🔄 MongoDB already connected, reusing existing connection.");
-      return mongoose.connection;
+      logger.info("🔄 MongoDB already connected.");
+      return;
     }
 
     try {
-      logger.info(`🔌 Attempting to connect to MongoDB (Attempt ${attempts + 1}/${MAX_RETRIES})...`);
-      await mongoose.connect(mongoURI, {
-        serverSelectionTimeoutMS: 3000,
-        connectTimeoutMS: 10000,
-        socketTimeoutMS: 45000
-      });
-
-      await mongoose.connection.asPromise();
-
-      if (mongoose.connection.readyState === 1) {
-        logger.info("📚 Connected to MongoDB successfully!");
-        
-        mongoose.connection.on("error", (err) => logger.error("❌ MongoDB error:", err));
-        mongoose.connection.on("disconnected", () => logger.warn("⚠️ MongoDB disconnected."));
-        mongoose.connection.on("reconnected", () => logger.info("🔄 MongoDB reconnected!"));
-        
-        return mongoose.connection;
-      }
+      await mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+      logger.info("📚 Connected to MongoDB successfully!");
+      return;
     } catch (err) {
       logger.error(`❌ MongoDB connection error: ${err.message}`);
     }
 
     attempts++;
-    logger.warn(`🔁 Retrying connection in ${RETRY_DELAY / 1000} seconds...`);
+    logger.warn(`🔁 Retrying in ${RETRY_DELAY / 1000} seconds...`);
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
   }
 
   logger.error("🚨 Max retries reached. MongoDB connection failed.");
-  throw new Error("MongoDB connection failed after multiple attempts.");
+  throw new Error("MongoDB connection failed.");
 };
 
-// Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
-router.get("/health", async (req, res) => {
+app.use(async (req, res, next) => {
   try {
-    logger.info("🔹 Health check started...");
-
-    // Controllo e riconnessione a MongoDB se necessario
-    let mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
-    
     if (mongoose.connection.readyState !== 1) {
-      logger.warn(`⚠️ MongoDB not connected (state ${mongoose.connection.readyState}), attempting to reconnect...`);
       await connectMongoDB();
-      mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
-      logger.info(`After reconnect attempt, mongoose.connection.readyState: ${mongoose.connection.readyState}`);
     }
 
-    // Ping di MongoDB
-    try {
-      if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
-        logger.info("Performing MongoDB ping command...");
-        const pingResult = await mongoose.connection.db.command({ ping: 1 });
-        logger.info("MongoDB ping result: " + JSON.stringify(pingResult));
-        if (!pingResult || pingResult.ok !== 1) {
-          logger.warn("MongoDB ping did not return an ok result");
-          mongoStatus = "Disconnected";
-        }
-      } else {
-        logger.warn("mongoose.connection.readyState is not 1 or mongoose.connection.db is not available");
-      }
-    } catch (pingError) {
-      logger.error("MongoDB ping error: " + pingError.message);
-      mongoStatus = "Disconnected";
+    if (!global.nlpModelCache) {
+      global.nlpModelCache = await NLPModel.findOne();
     }
 
-    logger.info(`🔹 MongoDB Status: ${mongoStatus}`);
-
-    // Ping di Redis
-    let redisStatus = "Disconnected";
-    try {
-      if (redis.status === "ready") {
-        logger.info("Performing Redis ping...");
-        const redisPing = await redis.ping();
-        logger.info("Redis ping result: " + redisPing);
-        redisStatus = redisPing === "PONG" ? "Connected" : "Disconnected";
-      } else {
-        logger.warn(`Redis status not ready: ${redis.status}`);
-      }
-    } catch (redisError) {
-      logger.error("Redis ping error: " + redisError.message);
-      redisStatus = "Disconnected";
+    req.nlpInstance = global.nlpModelCache;
+    if (!req.nlpInstance) {
+      return res.status(500).json({ error: "❌ No NLP Model found in database. Train the model first." });
     }
 
-    res.json({ status: "✅ Healthy", mongo: mongoStatus, redis: redisStatus });
+    next();
   } catch (error) {
-    logger.error(`❌ Health check failed: ${error.message}`);
-    res.status(500).json({ error: "Service is unhealthy", details: error.message });
+    logger.error("❌ Error loading NLP Model:", error.message);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+// Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
+router.get("/health", async (req, res) => {
+  let mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectMongoDB();
+      mongoStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+    }
+  } catch (error) {
+    logger.error("MongoDB health check failed:", error.message);
+  }
+
+  res.json({ status: "✅ Healthy", mongo: mongoStatus });
+});
+
 app.use("/.netlify/functions/server", router);
+
+if (!process.env.NETLIFY) {
+  const port = process.env.PORT || 3000;
+  const server = app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${port}`);
+  });
+
+  process.on("SIGTERM", () => {
+    logger.warn("⚠️ SIGTERM received. Closing server...");
+    server.close(() => {
+      logger.info("✅ Server closed.");
+      process.exit(0);
+    });
+  });
+
+  process.on("SIGINT", () => {
+    logger.warn("⚠️ SIGINT received. Closing server...");
+    server.close(() => {
+      logger.info("✅ Server closed.");
+      process.exit(0);
+    });
+  });
+}
 
 // Avvia il server solo se non è in ambiente serverless
 if (!process.env.NETLIFY) {
@@ -343,11 +305,6 @@ router.get("/fetch", async (req, res) => {
     return res.status(400).json({ error: "Unrecognized source" });
   }
 });
-
-if (!process.env.NETLIFY) {
-  const server = app.listen(port, () => {
-    logger.info(`🚀 Server running on port ${port}`);
-  });
   
   // Aggiungere gestione della chiusura per liberare la porta
   process.on("SIGINT", () => {
@@ -365,7 +322,7 @@ if (!process.env.NETLIFY) {
       process.exit(0);
     });
   });
-}
+
 
 afterAll(async () => {
   await redis.quit();
