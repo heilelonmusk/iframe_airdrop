@@ -3,21 +3,21 @@
 NODE_VERSION = "23.7.0"
 
 [context.production.environment]
-MONGO_URI="mongodb+srv://heilelon:aPrisse3100!s@heilelon.6ifty.mongodb.net/heilelonDB?retryWrites=true&w=majority&appName=heilelon"
+MONGO_URI=mongodb+srv://heilelon:aPrisse3100%21s@heilelon.6ifty.mongodb.net/heilelonDB?retryWrites=true&w=majority&appName=heilelon
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm run build"
+  command = "npm run build && npm start""
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
 
 # 🛠️ Local Development Settings
-[dev]
-  command = "npm start"
-  framework = "#custom"
-  port = 0        # Porta su cui Netlify Dev gira il proxy
-  autoLaunch = false
+#[dev]
+#  command = "npm start"
+#  framework = "#custom"
+#  port = 0        # Porta su cui Netlify Dev gira il proxy
+#  autoLaunch = false
 
 # ✅ Security & CORS Headers
 [[headers]]
@@ -57,7 +57,7 @@ MONGO_URI="mongodb+srv://heilelon:aPrisse3100!s@heilelon.6ifty.mongodb.net/heile
 # 🔒 Enforce HTTPS
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/server"
+  to = "/"
   status = 200
 
 # 🔧 Redirect Static Assets Correctly
