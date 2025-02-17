@@ -114,8 +114,12 @@ app.use(
 //  setTimeout(() => redis.connect(), 5000);
 //});
 
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 2000; // 2 secondi
+const mongoURI = process.env.MONGO_URI;
+
+if (!mongoURI || !mongoURI.startsWith("mongodb")) {
+  logger.error("❌ MONGO_URI non valido o non definito. Controlla le variabili d'ambiente.");
+  process.exit(1); // Interrompe l'app se MONGO_URI è errato
+}
 
 const connectMongoDB = async () => {
   let attempts = 0;
@@ -126,26 +130,15 @@ const connectMongoDB = async () => {
       return mongoose.connection;
     }
 
-    if (mongoose.connection.readyState === 2) {
-      logger.warn("⚠️ MongoDB connection is stuck in 'connecting' state. Forcing disconnect...");
-      try {
-        await mongoose.disconnect();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        logger.info("✅ Forced disconnect successful.");
-      } catch (err) {
-        logger.error("❌ Error during forced disconnect: " + err.message);
-      }
-    }
-
     try {
       logger.info(`🔌 Attempting to connect to MongoDB (Attempt ${attempts + 1}/${MAX_RETRIES})...`);
-      await mongoose.connect(process.env.MONGO_URI, {
+      await mongoose.connect(mongoURI, {
         serverSelectionTimeoutMS: 3000,
         connectTimeoutMS: 10000,
         socketTimeoutMS: 45000
-    });
+      });
 
-      await mongoose.connection.asPromise(); // Attende il completamento della connessione
+      await mongoose.connection.asPromise();
 
       if (mongoose.connection.readyState === 1) {
         logger.info("📚 Connected to MongoDB successfully!");
@@ -168,8 +161,6 @@ const connectMongoDB = async () => {
   logger.error("🚨 Max retries reached. MongoDB connection failed.");
   throw new Error("MongoDB connection failed after multiple attempts.");
 };
-
-
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
 router.get("/health", async (req, res) => {
