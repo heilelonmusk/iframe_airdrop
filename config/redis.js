@@ -25,12 +25,6 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-// Test: Redis deve rispondere al PING
-test("Redis deve essere connesso", async () => {
-  const redisPing = await redis.ping();
-  expect(redisPing).toBe("PONG");
-});
-
 // === Middleware per Cache Redis ===
 const cacheMiddleware = async (req, res, next) => {
   const key = req.originalUrl;
