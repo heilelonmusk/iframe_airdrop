@@ -8,10 +8,6 @@ const mongoose = require("mongoose");
 const { logger } = require("../modules/logging/logger");
 logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
 
-beforeAll(async () => {
-  await redis.connect();
-});
-
 if (!process.env.REDIS_HOST || !process.env.REDIS_PORT || !process.env.REDIS_PASSWORD) {
   throw new Error("❌ Redis environment variables are missing.");
 }

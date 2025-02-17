@@ -25,4 +25,9 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
+afterAll(async () => {
+  await redis.quit();
+  redis.disconnect();
+});
+
 module.exports = redis;
