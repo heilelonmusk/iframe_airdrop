@@ -25,9 +25,31 @@ const redis = new Redis({
 redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
 redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
 
-afterAll(async () => {
-  await redis.quit();
-  redis.disconnect();
+/**
+ * 🔹 Chiude correttamente la connessione Redis
+ */
+const quitRedis = async () => {
+  if (!redis || redis.status === "end") return;
+  try {
+    logger.info("🛑 Chiusura connessione Redis...");
+    await redis.quit();
+    logger.info("✅ Redis disconnesso correttamente.");
+  } catch (error) {
+    logger.warn("⚠️ Errore durante la chiusura di Redis:", error.message);
+  }
+};
+
+// Chiude Redis in caso di terminazione del processo
+process.on("SIGINT", async () => {
+  logger.info("⚠️ SIGINT ricevuto, chiusura Redis...");
+  await quitRedis();
+  process.exit(0);
 });
 
-module.exports = redis;
+process.on("SIGTERM", async () => {
+  logger.info("⚠️ SIGTERM ricevuto, chiusura Redis...");
+  await quitRedis();
+  process.exit(0);
+});
+
+module.exports = { redis, quitRedis };

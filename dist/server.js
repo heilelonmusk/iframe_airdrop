@@ -576,5 +576,5 @@ module.exports = {
   app: app,
   handler: serverless(app),
   redis: redis,
-  connectMongoDB: connectMongoDB
+  connectMongoDB,
 };

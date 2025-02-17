@@ -9,7 +9,7 @@ const { NlpManager } = require('node-nlp');
 const manager = new NlpManager({ languages: ['en'], forceNER: true, autoSave: false });
 const { trainAndSaveNLP, loadNLPModel, saveNLPModel, NLPModel } = require("../modules/nlp/nlpModel");
 //const winston = require("winston");
-const redis = require("../config/redis");
+const { redis, quitRedis } = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
 const { logger } = require("../modules/logging/logger");
@@ -341,10 +341,5 @@ router.get("/fetch", async (req, res) => {
       process.exit(0);
     });
   });
-
-
-afterAll(async () => {
-  await redis.quit();
-});
 
 module.exports = { app, handler: serverless(app), redis, connectMongoDB };
