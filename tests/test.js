@@ -5,6 +5,7 @@ const { execSync } = require("child_process");
 const mongoose = require("mongoose");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 //logger.error("This is an error message");
+const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, processText } = require('../modules/nlp/nlpModel');
 
 jest.setTimeout(20000); // Evita blocchi nei test lunghi
 
