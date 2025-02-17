@@ -22,19 +22,6 @@ if (!process.env.CI && !process.env.NETLIFY && process.env.NODE_ENV !== "product
   console.log("ℹ️ Skipping MongoDB process check in production.");
 }
 
-// 🚀 Verifica se ci sono processi MongoDB attivi sulla porta 27017
-const checkMongoDBProcesses = () => {
-  try {
-    const runningProcesses = execSync("lsof -i :27017 || pgrep mongod").toString();
-    if (runningProcesses && runningProcesses.trim() !== "") {
-      logger.warn("⚠️ MongoDB è già in esecuzione sulla porta 27017. Procediamo comunque con i test.");
-    } else {
-      logger.info("✅ Nessun processo MongoDB attivo. Procediamo con i test.");
-    }
-  } catch (error) {
-    logger.error("❌ Errore durante il controllo di MongoDB:", error.message);
-  }
-};
 
 // ✅ Verifica delle variabili d’ambiente
 const checkEnvVariables = () => {
@@ -50,7 +37,7 @@ const checkEnvVariables = () => {
 let server; // Variabile per gestire il server
 
 beforeAll(() => {
-  const app = require("../server"); // Importa il server Express
+  const app = require("../api/server"); // Importa il server Express
   server = app.listen(5000, () => {
     logger.info("🚀 Test Server running on port 5000");
   });

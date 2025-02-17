@@ -58,7 +58,7 @@ MAX_RETRIES = "5"
 # 🔒 Enforce HTTPS
 [[redirects]]
   from = "/*"
-  to = "/"
+  to = "/.netlify/functions/server"
   status = 200
 
 # 🔧 Redirect Static Assets Correctly

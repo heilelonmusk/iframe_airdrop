@@ -19,25 +19,6 @@ jest.setTimeout(20000); // Evita blocchi nei test lunghi
 //  transports: [new winston.transports.Console()],
 //});
 
-if (!process.env.CI && !process.env.NETLIFY && process.env.NODE_ENV !== "production") {
-  checkActiveProcesses();
-}
-
-// Verifica processi attivi sulle porte 5000 o 8889
-const checkActiveProcesses = () => {
-  try {
-    // Esegue il comando per controllare processi attivi (nota: questo potrebbe non funzionare su tutti i sistemi)
-    const running = execSync("lsof -i :5000 || lsof -i :8889").toString();
-    if (running && running.trim() !== "") {
-      logger.warn("⚠️ Sono attivi processi sulla porta 5000 o 8889. Potrebbero interferire con i test.");
-      // Non terminiamo l'esecuzione, ma solo logghiamo l'avviso.
-    }
-  } catch (error) {
-    // Se il comando fallisce (ad esempio, se non ci sono processi o se il comando non esiste), logghiamo un messaggio informativo
-    logger.info("✅ Nessun processo attivo rilevato sulle porte 5000/8889.");
-  }
-};
-
 // Verifica delle variabili d'ambiente richieste
 const checkEnvVariables = () => {
   const requiredEnvVars = ["MY_GITHUB_OWNER", "MY_GITHUB_REPO", "MY_GITHUB_TOKEN"];
@@ -54,7 +35,6 @@ describe("🔍 API Tests", () => {
   let logQuestionEvent;
 
   beforeAll(async () => {
-    checkActiveProcesses();
     checkEnvVariables();
     logger.info("🛠 Setting up API tests...");
 
