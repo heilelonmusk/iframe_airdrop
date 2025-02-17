@@ -8,6 +8,11 @@ const NLPModelSchema = new mongoose.Schema({
   modelData: { type: Object, required: true }
 });
 
+const nlpInstance = await NLPModel.findOne();
+if (nlpInstance) {
+  const response = await nlpInstance.processText(input);
+}
+
 const NLPModel = mongoose.models.NLPModel || mongoose.model("NLPModel", NLPModelSchema);
 
 // ✅ Definizione del metodo `processText`

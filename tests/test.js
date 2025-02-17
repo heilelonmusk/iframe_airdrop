@@ -6,8 +6,14 @@ const mongoose = require("mongoose");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 //logger.error("This is an error message");
 const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, processText } = require('../modules/nlp/nlpModel');
-
+const { connectMongoDB } = require("../api/server");
 jest.setTimeout(20000); // Evita blocchi nei test lunghi
+
+if (!nlpInstance) {
+  console.warn("⚠️ No existing NLP Model found. Training a new one...");
+  const newModel = await trainNLPModel();
+  await newModel.save();
+}
 
 logger.info(`🔹 Fetching from GitHub: https://api.github.com/repos/${process.env.MY_GITHUB_OWNER}/${process.env.MY_GITHUB_REPO}/README.md`);
 //Configurazione del Logger con un formato leggermente più conciso
