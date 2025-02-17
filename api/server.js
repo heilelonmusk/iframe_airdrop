@@ -48,6 +48,9 @@ const { generateResponse } = require("../modules/nlp/transformer");
 // Crea l'app Express e il router
 
 const app = express();
+app.get("/", (req, res) => {
+  res.send("Hello from Serverless API!");
+});
 const router = express.Router();
 
 app.use(async (req, res, next) => {

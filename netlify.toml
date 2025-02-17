@@ -8,7 +8,7 @@ MONGO_URI="mongodb+srv://heilelon:aPrisse3100!s@heilelon.6ifty.mongodb.net/heile
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm run build && npm start"
+  command = "npm run buid"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
