@@ -9,21 +9,6 @@ const NLPModelSchema = new mongoose.Schema({
 
 const NLPModel = mongoose.models.NLPModel || mongoose.model('NLPModel', NLPModelSchema);
 
-// ✅ Funzione per processare il testo con il modello NLP
-async function processText(text) {
-  if (!text) throw new Error("Input text is required");
-
-  // Assicura che il modello sia caricato
-  const savedModel = await loadNLPModel();
-  if (!savedModel) {
-    throw new Error("❌ No NLP Model found in database. Train the model first.");
-  }
-
-  manager.import(savedModel); // Carica il modello salvato
-  const response = await manager.process("en", text);
-  return response.answer || "Unknown intent";
-}
-
 // ✅ Carica il modello NLP dal database
 async function processText(text) {
   if (!text) throw new Error("Input text is required");
