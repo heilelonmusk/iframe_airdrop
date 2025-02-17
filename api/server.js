@@ -99,6 +99,12 @@ if (!mongoURI || !mongoURI.startsWith("mongodb")) {
   process.exit(1); // Interrompe l'app se MONGO_URI è errato
 }
 
+// Avvia il server solo se non è in ambiente serverless
+if (!process.env.NETLIFY) {
+  const server = app.listen(port, () => {
+    logger.info(`🚀 Server running on port ${server.address().port}`);
+});
+
 // Connessione MongoDB con retry
 const connectMongoDB = async () => {
   let attempts = 0;
@@ -188,12 +194,6 @@ if (!process.env.NETLIFY) {
     });
   });
 }
-
-// Avvia il server solo se non è in ambiente serverless
-if (!process.env.NETLIFY) {
-  const server = app.listen(port, () => {
-    logger.info(`🚀 Server running on port ${server.address().port}`);
-});
 
   // Gestione della chiusura per evitare porte bloccate
   process.on("SIGTERM", () => {

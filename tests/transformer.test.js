@@ -1,3 +1,4 @@
+let server=null;
 require("dotenv").config();
 const mongoose = require("mongoose");
 const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema} = require('../modules/nlp/nlpModel');
@@ -34,35 +35,31 @@ const checkEnvVariables = () => {
   });
 };
 
-let server; // Variabile per gestire il server
-
-beforeAll(() => {
-  const app = require("../api/server"); // Importa il server Express
-  server = app.listen(5000, () => {
-    logger.info("🚀 Test Server running on port 5000");
-  });
-});
-
 // Setup prima di tutti i test
 beforeAll(async () => {
   checkEnvVariables();
 
-  logger.info("✅ Connecting to MongoDB for Transformer Tests...");
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
-    logger.info("✅ MongoDB Connected Successfully");
+    try {
+        if (mongoose.connection.readyState !== 1) {
+            await mongoose.connect(process.env.MONGO_URI, {
+                serverSelectionTimeoutMS: 5000,
+            });
+        }
+        logger.info("✅ Connessione a MongoDB riuscita.");
+    } catch (error) {
+        logger.error("❌ Errore nella connessione a MongoDB:", error.message);
+    }
+});
 
-    // Aggiungi i listener per il debug della connessione:
-    mongoose.connection.on("error", (err) => logger.error("MongoDB error:", err));
-    mongoose.connection.on("disconnected", () => logger.warn("MongoDB disconnected."));
-    mongoose.connection.on("reconnected", () => logger.info("MongoDB reconnected!"));
-  } catch (error) {
-    logger.error("❌ MongoDB Connection Error:", error.message);
-    process.exit(1);
-  }
+afterEach(async () => {
+    try {
+        if (mongoose.connection.db) {
+            await mongoose.connection.db.dropDatabase();
+            logger.info("🗑️ Database di test pulito con successo.");
+        }
+    } catch (error) {
+        logger.warn("⚠️ Errore nella pulizia del database, procediamo comunque.");
+    }
 });
 
 // Teardown dopo tutti i test

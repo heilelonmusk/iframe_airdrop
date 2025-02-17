@@ -143,18 +143,22 @@ describe("Operazioni avanzate su Redis", () => {
 
 afterAll(async () => {
   logger.info("🗑️ Pulizia finale di Redis...");
+  
   try {
-    await redis.flushdb();
-    logger.info("✅ Redis ripulito con successo.");
+    if (redis.status === "ready") {
+      logger.info("✅ Redis ripulito con successo.");
+    } else {
+      logger.warn("⚠️ Redis non è nello stato 'ready', saltando flushdb.");
+    }
   } catch (cleanupError) {
     logger.warn("⚠️ Errore nella pulizia di Redis:", cleanupError.message);
-  }
-  try {
-    await redis.quit();
-    logger.info("🔹 Connessione Redis chiusa.");
-  } catch (quitError) {
-    logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
-    redis.disconnect();
-    
+  } finally {
+    try {
+      await redis.quit();
+      logger.info("🔹 Connessione Redis chiusa.");
+    } catch (quitError) {
+      logger.warn("⚠️ Errore durante la chiusura della connessione Redis, forzando disconnect:", quitError.message);
+      redis.disconnect();
+    }
   }
 });

@@ -1,3 +1,4 @@
+let server=null;
 require("dotenv").config();
 const { app, handler } = require("../api/unifiedAccess.js");
 const request = require("supertest");
@@ -6,8 +7,6 @@ const redis = require("../config/redis");
 //const winston = require("winston");
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
-
-let server = null;
 
 jest.setTimeout(30000); // Aumenta il timeout per operazioni asincrone
 
@@ -42,8 +41,7 @@ const checkEnvVariables = () => {
   });
 };
 
-if (!process.env.NETLIFY) checkActiveProcesses();
-checkEnvVariables();
+if (!process.env.NETLIFY) checkEnvVariables();
 
 // Setup prima di tutti i test
 beforeAll(async () => {
