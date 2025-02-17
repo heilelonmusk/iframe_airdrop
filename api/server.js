@@ -12,7 +12,7 @@ const { trainAndSaveNLP, loadNLPModel, saveNLPModel, NLPModel } = require("../mo
 const redis = require("../config/redis");
 const fs = require("fs");
 const path = require("path");
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8891;
+const port = process.env.PORT || 0;
 const {logger, logConversation, getFrequentQuestions} = require("../modules/logging/logger");
 //logger.error("This is an error message");
 logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
@@ -223,8 +223,8 @@ app.use("/.netlify/functions/server", router);
 // Avvia il server solo se non è in ambiente serverless
 if (!process.env.NETLIFY) {
   const server = app.listen(port, () => {
-    logger.info(`🚀 Server running on port ${port}`);
-  });
+    logger.info(`🚀 Server running on port ${server.address().port}`);
+});
 
   // Gestione della chiusura per evitare porte bloccate
   process.on("SIGTERM", () => {
@@ -343,16 +343,16 @@ if (!process.env.NETLIFY) {
   });
   
   // Aggiungere gestione della chiusura per liberare la porta
-  process.on("SIGTERM", () => {
-    logger.warn("⚠️ SIGTERM received. Closing server...");
+  process.on("SIGINT", () => {
+    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
     server.close(() => {
       logger.info("✅ Server closed. Exiting process.");
       process.exit(0);
     });
   });
   
-  process.on("SIGINT", () => {
-    logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+  process.on("SIGTERM", () => {
+    logger.warn("⚠️ SIGTERM received. Closing server...");
     server.close(() => {
       logger.info("✅ Server closed. Exiting process.");
       process.exit(0);

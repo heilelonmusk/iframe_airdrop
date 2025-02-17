@@ -5,7 +5,7 @@ NODE_VERSION = "23.7.0"
 
 # 🚀 Netlify Build Settings
 [build]
-  command = "npm install"
+  command = "npm run build && npm start"
   functions = "api"
   publish = "./"
   ignore = "git diff --quiet HEAD^ HEAD"
@@ -14,8 +14,7 @@ NODE_VERSION = "23.7.0"
 [dev]
   command = "npm start"
   framework = "#custom"
-  targetPort = 8891  # Porta del tuo server locale
-  port = 3001        # Porta su cui Netlify Dev gira il proxy
+  port = 0        # Porta su cui Netlify Dev gira il proxy
   autoLaunch = false
 
 # ✅ Pass Environment Variables to Build (imposta i valori in Netlify senza virgolette)
