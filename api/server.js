@@ -260,11 +260,6 @@ const Question = mongoose.models.Question || mongoose.model("Question", question
   }
 })();
 
-NLPModelSchema.methods.processText = async function (text) {
-  if (!text) throw new Error("Input text is required");
-  return this.modelData[text] || "Unknown intent";
-};
-
 // Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", async (req, res) => {
   try {

@@ -43,6 +43,15 @@ const checkEnvVariables = () => {
   });
 };
 
+let server; // Variabile per gestire il server
+
+beforeAll(() => {
+  const app = require("../server"); // Importa il server Express
+  server = app.listen(5000, () => {
+    logger.info("🚀 Test Server running on port 5000");
+  });
+});
+
 // Setup prima di tutti i test
 beforeAll(async () => {
   checkMongoDBProcesses();
@@ -102,13 +111,10 @@ test("🔍 NLPModel should load from MongoDB", async () => {
 // Test: Verifica che il modello NLP elabori correttamente il testo
 test("💬 NLPModel should process text correctly", async () => {
   try {
+    await trainAndSaveNLP(); // Assicura che il modello sia presente
     const mockInput = "What is Helon?";
-    // L'output atteso deve contenere il termine "helon" (case-insensitive)
-    if (!NLPModel || typeof NLPModel.processText !== "function") {
-      throw new Error("❌ NLPModel.processText is not a function");
-    }
 
-    const modelResponse = await NLPModel.processText(mockInput);
+    const modelResponse = await processText(mockInput);
     expect(modelResponse).toBeDefined();
     expect(typeof modelResponse).toBe("string");
     expect(modelResponse.toLowerCase()).toContain("helon");
@@ -164,4 +170,13 @@ afterEach(async () => {
   } catch (error) {
     logger.error("❌ Error cleaning up test database:", error.message);
   }
+});
+afterAll(async () => {
+  if (server) {
+    server.close(() => {
+      logger.info("🛑 Express server closed after tests.");
+    });
+  }
+  await mongoose.connection.close();
+  await redis.quit();
 });

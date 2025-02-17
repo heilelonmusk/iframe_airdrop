@@ -25,20 +25,19 @@ async function processText(text) {
 }
 
 // ✅ Carica il modello NLP dal database
-async function loadNLPModel() {
-  try {
-    const savedModel = await NLPModel.findOne({});
-    console.log("🔍 NLPModel loaded:", savedModel);
-    if (savedModel) {
-      logger.info("✅ NLP Model loaded from MongoDB");
-      return savedModel.modelData;
-    }
-    logger.warn("⚠️ No NLP Model found in database. Training required.");
-    return null;
-  } catch (error) {
-    logger.error("❌ Error loading NLP model:", error.message);
-    throw error;
+async function processText(text) {
+  if (!text) throw new Error("Input text is required");
+
+  // Assicura che il modello sia caricato
+  const savedModel = await loadNLPModel();
+  if (!savedModel) {
+    throw new Error("❌ No NLP Model found in database. Train the model first.");
   }
+
+  // Importa e processa il testo con il modello NLP
+  manager.import(savedModel);
+  const response = await manager.process("en", text);
+  return response.answer || "Unknown intent";
 }
 
 // ✅ Funzione per salvare il modello NLP nel database
