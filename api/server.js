@@ -47,8 +47,14 @@ const { generateResponse } = require("../modules/nlp/transformer");
 // });
 
 // Crea l'app Express e il router
+
 const app = express();
 const router = express.Router();
+
+const nlpInstance = await NLPModel.findOne();
+if (!nlpInstance) {
+  throw new Error("❌ No NLP Model found in database. Train the model first.");
+}
 
 app.get("/", (req, res) => {
   res.send("✅ API is running on Netlify!");
@@ -285,13 +291,26 @@ router.post("/logQuestion", async (req, res) => {
 
 router.post("/api/nlp", async (req, res) => {
   const { question } = req.body;
+
   if (!question) {
     return res.status(400).json({ error: "Question is required" });
   }
-  
-  // Esegui il processamento NLP
-  const intent = await getIntent(question);
-  return res.json({ answer: intent.answer });
+
+  try {
+    // Recupera un'istanza del modello NLP
+    const nlpInstance = await NLPModel.findOne();
+    if (!nlpInstance) {
+      return res.status(404).json({ error: "❌ No NLP Model found in database. Train the model first." });
+    }
+
+    // Esegui il processamento NLP con il metodo corretto
+    const response = await nlpInstance.processText(question);
+
+    return res.json({ answer: response });
+  } catch (error) {
+    logger.error(`❌ Error processing NLP request: ${error.message}`);
+    return res.status(500).json({ error: "Server error", details: error.message });
+  }
 });
 
 // ✅ Nuovi endpoint: /fetch, /store, /download

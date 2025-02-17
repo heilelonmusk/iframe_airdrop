@@ -1,6 +1,6 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
-const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, processText } = require('../modules/nlp/nlpModel');
+const { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema} = require('../modules/nlp/nlpModel');
 const { execSync } = require("child_process");
 const { logger, logConversation, getFrequentQuestions } = require("../modules/logging/logger");
 const redis = require("../config/redis")
@@ -110,20 +110,18 @@ test("🔍 NLPModel should load from MongoDB", async () => {
 
 // Test: Verifica che il modello NLP elabori correttamente il testo
 test("💬 NLPModel should process text correctly", async () => {
-  try {
-    await trainAndSaveNLP(); // Assicura che il modello sia presente
-    const mockInput = "What is Helon?";
+  const mockInput = "What is Helon?";
 
-    const modelResponse = await processText(mockInput);
-    expect(modelResponse).toBeDefined();
-    expect(typeof modelResponse).toBe("string");
-    expect(modelResponse.toLowerCase()).toContain("helon");
+  const nlpInstance = await NLPModel.findOne();
+  if (!nlpInstance) throw new Error("❌ No NLP Model found in database. Train the model first.");
 
-    logger.info("✅ NLPModel processed text correctly.");
-  } catch (error) {
-    logger.error("❌ NLPModel processing test failed:", error.message);
-    throw error;
-  }
+  const modelResponse = await nlpInstance.processText(mockInput);
+  
+  expect(modelResponse).toBeDefined();
+  expect(typeof modelResponse).toBe("string");
+  expect(modelResponse.toLowerCase()).toContain("helon");
+
+  logger.info("✅ NLPModel processed text correctly.");
 });
 
 // Test: Verifica comportamento con input vuoto

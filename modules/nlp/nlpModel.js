@@ -71,4 +71,4 @@ async function trainAndSaveNLP() {
   })();
 })();
 
-module.exports = { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema, processText };
+module.exports = { loadNLPModel, saveNLPModel, NLPModel, trainAndSaveNLP, NLPModelSchema };
