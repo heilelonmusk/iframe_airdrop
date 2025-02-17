@@ -29,6 +29,7 @@ descriptions:
   ./example.json: "\U0001F680 Add a description here"
   ./file_tree.txt: Auto-generated file tracking real-time repository structure, ensuring
     documentation of all directories and files.
+  ./jest.config.js: "\U0001F680 Add a description here"
   ./netlify.toml: Configuration file managing Netlify deployments, routing, API function
     settings, and CORS policies.
   ./netlify_test.log: "\U0001F680 Add a description here"

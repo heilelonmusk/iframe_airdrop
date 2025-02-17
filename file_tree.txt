@@ -1,4 +1,4 @@
-  📁 node_modules/  [Hidden, 25354 files omitted] - External dependencies
+  📁 node_modules/  [Hidden, 25490 files omitted] - External dependencies
   📁 ./ - Root directory containing the main project files, configurations, and essential documentation.
      📄 .netlifyignore - 🚀 Add a description here
      📄 connectMongoDB.js - 🚀 Add a description here
@@ -8,6 +8,7 @@
      📄 netlify.toml - Configuration file managing Netlify deployments, routing, API function settings, and CORS policies.
      📄 descriptions.yaml - Metadata file storing structured descriptions for all repository files, keeping documentation updated.
      📄 TROUBLESHOOTING.md - In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
+     📄 jest.config.js - 🚀 Add a description here
      📄 nonexistent.json - 🚀 Add a description here
      📄 config.yaml - Global configuration file managing system-wide settings, service integrations, and environment variables.
      📄 example.json - 🚀 Add a description here
