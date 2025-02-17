@@ -4,7 +4,7 @@ NETLIFY_DISABLE_LAMBDA_FUNCTIONS = "true"
 NODE_VERSION = "23.7.0"
 
 [context.production.environment]
-MONGO_URI=mongodb+srv://heilelon:aPrisse3100%21s@heilelon.6ifty.mongodb.net/heilelonDB?retryWrites=true&w=majority&appName=heilelon
+MONGO_URI="mongodb+srv://heilelon:aPrisse3100!s@heilelon.6ifty.mongodb.net/heilelonDB?retryWrites=true&w=majority&appName=heilelon"
 
 # 🚀 Netlify Build Settings
 [build]
