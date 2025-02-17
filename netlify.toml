@@ -3,7 +3,7 @@ NODE_ENV = "development"
 NODE_VERSION = "23.7.0"
 
 [context.production.environment]
-MONGO_URI = "mongodb+srv://heilelon:aPrisse3100%21s@heilelon.6ifty.mongodb.net/heilelonDB?retryWrites=true&w=majority&appName=heilelon"
+MONGO_URI = "mongodb+srv://heilelon:aPrisse3100%21s@heilelon.6ifty.mongodb.net/test?retryWrites=true&w=majority&appName=heilelon"
 MAX_RETRIES = "5"
 MY_GITHUB_OWNER = "heilelonmusk"
 MY_GITHUB_REPO = "iframe_airdrop"
