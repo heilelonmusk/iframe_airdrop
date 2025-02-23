@@ -34,7 +34,7 @@ if (!fs.existsSync(logsDir)) {
 });
 
 // ✅ Verifica processi attivi su Redis (solo se il Redis host è locale)
-const checkRedisProcess = () => {
+//const checkRedisProcess = () => {
   if (process.env.REDIS_HOST === "localhost" || process.env.REDIS_HOST === "127.0.0.1") {
     try {
       const runningProcesses = execSync("ps aux | grep redis-server | grep -v grep").toString();
@@ -48,7 +48,7 @@ const checkRedisProcess = () => {
   } else {
     logger.info("✅ Redis host è remoto, saltiamo il controllo dei processi locali.");
   }
-};
+//};
 
 // ✅ Verifica delle Variabili d'Ambiente
 const checkEnvVariables = () => {
@@ -61,20 +61,6 @@ const checkEnvVariables = () => {
   });
 };
 
-checkEnvVariables();
-checkRedisProcess();
-
-// ✅ Connessione a Redis con TLS (necessario per Upstash)
-//const redis = new Redis({
-//  host: process.env.REDIS_HOST,
-//  port: Number(process.env.REDIS_PORT),
-//  password: process.env.REDIS_PASSWORD,
-//  tls: { rejectUnauthorized: false },
-//  enableOfflineQueue: false,
-//  connectTimeout: 5000,
-//  retryStrategy: (times) => Math.min(times * 100, 2000),
-//  family: 4,
-// });
 
 // Aspettiamo che Redis sia pronto prima di inviare comandi
 const waitForReady = () => {
@@ -88,7 +74,7 @@ const waitForReady = () => {
       };
       const timeoutId = setTimeout(() => {
         reject(new Error("Timeout waiting for Redis ready"));
-      }, 5000);
+      }, 15000);
       redis.once("ready", readyHandler);
     }
   });

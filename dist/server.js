@@ -22,13 +22,17 @@ var _require2 = require("../modules/nlp/nlpModel"),
   trainAndSaveNLP = _require2.trainAndSaveNLP,
   loadNLPModel = _require2.loadNLPModel,
   saveNLPModel = _require2.saveNLPModel,
-  NLPModel = _require2.NLPModel;
+  NLPModel = _require2.NLPModel,
+  nlprocessText = _require2.nlprocessText;
 //const winston = require("winston");
-var redis = require("../config/redis");
+var _require3 = require("../config/redis"),
+  redis = _require3.redis,
+  quitRedis = _require3.quitRedis,
+  cacheMiddleware = _require3.cacheMiddleware;
 var fs = require("fs");
 var path = require("path");
-var _require3 = require("../modules/logging/logger"),
-  logger = _require3.logger;
+var _require4 = require("../modules/logging/logger"),
+  logger = _require4.logger;
 //logger.error("This is an error message");
 logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
 // Import dei moduli
@@ -119,121 +123,150 @@ if (!mongoURI || !mongoURI.startsWith("mongodb")) {
 
 // Avvia il server solo se non è in ambiente serverless
 if (!process.env.NETLIFY) {
-  var _server = app.listen(port, function () {
+  var _server = app.listen(_port, function () {
     logger.info("\uD83D\uDE80 Server running on port ".concat(_server.address().port));
   });
 
   // Connessione MongoDB con retry
-  var _connectMongoDB = /*#__PURE__*/function () {
-    var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-      var attempts;
-      return _regeneratorRuntime().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            attempts = 0;
-          case 1:
-            if (!(attempts < MAX_RETRIES)) {
-              _context.next = 21;
+  var _ref = /*#__PURE__*/function () {
+      var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var attempts;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              attempts = 0;
+            case 1:
+              if (!(attempts < MAX_RETRIES)) {
+                _context.next = 21;
+                break;
+              }
+              if (!(mongoose.connection.readyState === 1)) {
+                _context.next = 5;
+                break;
+              }
+              logger.info("🔄 MongoDB already connected.");
+              return _context.abrupt("return");
+            case 5:
+              _context.prev = 5;
+              _context.next = 8;
+              return mongoose.connect(mongoURI, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true
+              });
+            case 8:
+              logger.info("📚 Connected to MongoDB successfully!");
+              return _context.abrupt("return");
+            case 12:
+              _context.prev = 12;
+              _context.t0 = _context["catch"](5);
+              logger.error("\u274C MongoDB connection error: ".concat(_context.t0.message));
+            case 15:
+              attempts++;
+              logger.warn("\uD83D\uDD01 Retrying in ".concat(RETRY_DELAY / 1000, " seconds..."));
+              _context.next = 19;
+              return new Promise(function (resolve) {
+                return setTimeout(resolve, RETRY_DELAY);
+              });
+            case 19:
+              _context.next = 1;
               break;
-            }
-            if (!(mongoose.connection.readyState === 1)) {
-              _context.next = 5;
-              break;
-            }
-            logger.info("🔄 MongoDB already connected.");
-            return _context.abrupt("return");
-          case 5:
-            _context.prev = 5;
-            _context.next = 8;
-            return mongoose.connect(mongoURI, {
-              useNewUrlParser: true,
-              useUnifiedTopology: true
-            });
-          case 8:
-            logger.info("📚 Connected to MongoDB successfully!");
-            return _context.abrupt("return");
-          case 12:
-            _context.prev = 12;
-            _context.t0 = _context["catch"](5);
-            logger.error("\u274C MongoDB connection error: ".concat(_context.t0.message));
-          case 15:
-            attempts++;
-            logger.warn("\uD83D\uDD01 Retrying in ".concat(RETRY_DELAY / 1000, " seconds..."));
-            _context.next = 19;
-            return new Promise(function (resolve) {
-              return setTimeout(resolve, RETRY_DELAY);
-            });
-          case 19:
-            _context.next = 1;
-            break;
-          case 21:
-            logger.error("🚨 Max retries reached. MongoDB connection failed.");
-            throw new Error("MongoDB connection failed.");
-          case 23:
-          case "end":
-            return _context.stop();
-        }
-      }, _callee, null, [[5, 12]]);
-    }));
-    return function _connectMongoDB() {
-      return _ref.apply(this, arguments);
-    };
-  }();
+            case 21:
+              logger.error("🚨 Max retries reached. MongoDB connection failed.");
+              throw new Error("MongoDB connection failed.");
+            case 23:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, null, [[5, 12]]);
+      }));
+      return function _ref() {
+        return _ref2.apply(this, arguments);
+      };
+    }(),
+    _connectMongoDB = _ref.connectMongoDB;
   app.use(/*#__PURE__*/function () {
-    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res, next) {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res, next) {
+      var modelData, _manager;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
             _context2.prev = 0;
             if (!(mongoose.connection.readyState !== 1)) {
-              _context2.next = 4;
+              _context2.next = 5;
               break;
             }
-            _context2.next = 4;
+            logger.warn("⚠️ MongoDB not connected, attempting to reconnect...");
+            _context2.next = 5;
             return _connectMongoDB();
-          case 4:
+          case 5:
             if (global.nlpModelCache) {
-              _context2.next = 8;
+              _context2.next = 23;
               break;
             }
-            _context2.next = 7;
-            return NLPModel.findOne();
-          case 7:
+            logger.info("🔄 Loading NLP Model from database...");
+            _context2.next = 9;
+            return loadNLPModel();
+          case 9:
+            modelData = _context2.sent;
+            if (!modelData) {
+              _context2.next = 17;
+              break;
+            }
+            _manager = new NlpManager({
+              languages: ['en'],
+              forceNER: true,
+              autoSave: false
+            });
+            _manager["import"](modelData); // Importa i dati del modello
+            global.nlpModelCache = _manager;
+            logger.info("✅ NLP Model loaded into global cache.");
+            _context2.next = 23;
+            break;
+          case 17:
+            logger.warn("⚠️ No NLP Model found in database, training a new one...");
+            _context2.next = 20;
+            return trainAndSaveNLP();
+          case 20:
+            _context2.next = 22;
+            return loadNLPModel();
+          case 22:
             global.nlpModelCache = _context2.sent;
-          case 8:
-            req.nlpInstance = global.nlpModelCache;
-            if (req.nlpInstance) {
-              _context2.next = 11;
+          case 23:
+            if (global.nlpModelCache) {
+              _context2.next = 26;
               break;
             }
+            logger.error("❌ No NLP Model found in database. Train the model first.");
             return _context2.abrupt("return", res.status(500).json({
               error: "❌ No NLP Model found in database. Train the model first."
             }));
-          case 11:
+          case 26:
+            req.nlpInstance = global.nlpModelCache;
             next();
-            _context2.next = 18;
+            _context2.next = 34;
             break;
-          case 14:
-            _context2.prev = 14;
+          case 30:
+            _context2.prev = 30;
             _context2.t0 = _context2["catch"](0);
             logger.error("❌ Error loading NLP Model:", _context2.t0.message);
             return _context2.abrupt("return", res.status(500).json({
-              error: "Internal Server Error"
+              error: "Internal Server Error",
+              details: _context2.t0.message
             }));
-          case 18:
+          case 34:
           case "end":
             return _context2.stop();
         }
-      }, _callee2, null, [[0, 14]]);
+      }, _callee2, null, [[0, 30]]);
     }));
     return function (_x, _x2, _x3) {
-      return _ref2.apply(this, arguments);
+      return _ref3.apply(this, arguments);
     };
   }());
 
   // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
   router.get("/health", /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
+    var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
       var mongoStatus;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) switch (_context3.prev = _context3.next) {
@@ -267,15 +300,18 @@ if (!process.env.NETLIFY) {
       }, _callee3, null, [[1, 8]]);
     }));
     return function (_x4, _x5) {
-      return _ref3.apply(this, arguments);
+      return _ref4.apply(this, arguments);
     };
   }());
   app.use("/.netlify/functions/server", router);
+  var _port = process.env.PORT || 3000; // Imposta un valore di default
+  console.log("\uD83D\uDE80 Server running on port ".concat(_port));
   if (!process.env.NETLIFY) {
-    var _port = process.env.PORT || 3000;
     var _server2 = app.listen(_port, function () {
-      logger.info("\uD83D\uDE80 Server running on port ".concat(_port));
+      logger.info("\uD83D\uDE80 Server running on port ".concat(_server2.address().port));
     });
+
+    // Gestione della chiusura
     process.on("SIGTERM", function () {
       logger.warn("⚠️ SIGTERM received. Closing server...");
       _server2.close(function () {
@@ -386,7 +422,7 @@ _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4() {
 
 // Endpoint per gestire le domande degli utenti
 router.post("/logQuestion", /*#__PURE__*/function () {
-  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
+  var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
     var question, storedAnswer, intentResult, finalAnswer;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) switch (_context5.prev = _context5.next) {
@@ -457,14 +493,14 @@ router.post("/logQuestion", /*#__PURE__*/function () {
     }, _callee5, null, [[0, 20]]);
   }));
   return function (_x6, _x7) {
-    return _ref5.apply(this, arguments);
+    return _ref6.apply(this, arguments);
   };
 }());
 
 // Endpoint per NLP
 router.post("/api/nlp", /*#__PURE__*/function () {
-  var _ref6 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
-    var question, response;
+  var _ref7 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
+    var question;
     return _regeneratorRuntime().wrap(function _callee6$(_context6) {
       while (1) switch (_context6.prev = _context6.next) {
         case 0:
@@ -478,35 +514,31 @@ router.post("/api/nlp", /*#__PURE__*/function () {
             error: "Question is required"
           }));
         case 4:
-          _context6.next = 6;
-          return req.nlpInstance.processText(question);
-        case 6:
-          response = _context6.sent;
           return _context6.abrupt("return", res.json({
             answer: response
           }));
-        case 10:
-          _context6.prev = 10;
+        case 7:
+          _context6.prev = 7;
           _context6.t0 = _context6["catch"](0);
           logger.error("\u274C Error processing NLP request: ".concat(_context6.t0.message));
           return _context6.abrupt("return", res.status(500).json({
             error: "Server error",
             details: _context6.t0.message
           }));
-        case 14:
+        case 11:
         case "end":
           return _context6.stop();
       }
-    }, _callee6, null, [[0, 10]]);
+    }, _callee6, null, [[0, 7]]);
   }));
   return function (_x8, _x9) {
-    return _ref6.apply(this, arguments);
+    return _ref7.apply(this, arguments);
   };
 }());
 
 // ✅ Nuovi endpoint: /fetch, /store, /download
 router.get("/fetch", /*#__PURE__*/function () {
-  var _ref7 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
+  var _ref8 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
     var _req$query, source, file, query;
     return _regeneratorRuntime().wrap(function _callee7$(_context7) {
       while (1) switch (_context7.prev = _context7.next) {
@@ -541,7 +573,7 @@ router.get("/fetch", /*#__PURE__*/function () {
     }, _callee7);
   }));
   return function (_x10, _x11) {
-    return _ref7.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }());
 
@@ -560,21 +592,9 @@ process.on("SIGTERM", function () {
     process.exit(0);
   });
 });
-afterAll(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee8() {
-  return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-    while (1) switch (_context8.prev = _context8.next) {
-      case 0:
-        _context8.next = 2;
-        return redis.quit();
-      case 2:
-      case "end":
-        return _context8.stop();
-    }
-  }, _callee8);
-})));
 module.exports = {
   app: app,
   handler: serverless(app),
   redis: redis,
-  connectMongoDB,
+  connectMongoDB: connectMongoDB
 };

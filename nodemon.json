@@ -1,5 +1,0 @@
-{
-    "watch": ["api", "modules"],
-    "ext": "js,json",
-    "ignore": ["node_modules"]
-  }

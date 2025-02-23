@@ -19,7 +19,7 @@ logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
 //const { getIntent } = require("../modules/intent/intentRecognizer");
 //const { generateResponse } = require("../modules/nlp/transformer");
 //const { logConversation } = require("../modules/logging/logger");
-if (!process.env.NETLIFY) console.log(`🚀 Server running on port ${port}`);
+//if (!process.env.NETLIFY) console.log(`🚀 Server running on port ${port}`);
 
 // Inizializza il manager NLP
 //const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });

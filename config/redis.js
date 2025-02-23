@@ -11,7 +11,8 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-const redis = new Redis({
+ //✅ Connessione a Redis con TLS (necessario per Upstash)
+ const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: Number(process.env.REDIS_PORT),
   password: process.env.REDIS_PASSWORD,
@@ -20,10 +21,7 @@ const redis = new Redis({
   connectTimeout: 5000,
   retryStrategy: (times) => Math.min(times * 100, 2000),
   family: 4,
-});
-
-redis.on("connect", () => logger.info("✅ Redis connesso con successo."));
-redis.on("error", (err) => logger.error("❌ Errore connessione Redis:", err.message));
+ });
 
 // === Middleware per Cache Redis ===
 const cacheMiddleware = async (req, res, next) => {

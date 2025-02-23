@@ -9,15 +9,18 @@ var express = require("express");
 var serverless = require("serverless-http");
 var axios = require("axios");
 var mongoose = require("mongoose");
+var _require = require("../config/redis"),
+  redis = _require.redis,
+  quitRedis = _require.quitRedis,
+  cacheMiddleware = _require.cacheMiddleware;
 var cors = require("cors");
 var fs = require("fs");
 var path = require("path");
 var rateLimit = require("express-rate-limit");
-var redis = require("../config/redis");
-var _require = require("../modules/logging/logger"),
-  logger = _require.logger,
-  logConversation = _require.logConversation,
-  getFrequentQuestions = _require.getFrequentQuestions;
+var _require2 = require("../modules/logging/logger"),
+  logger = _require2.logger,
+  logConversation = _require2.logConversation,
+  getFrequentQuestions = _require2.getFrequentQuestions;
 var app = express();
 var router = express.Router();
 
@@ -100,97 +103,98 @@ app.use(express.json());
 
 // === Connessione a MongoDB ===
 // Funzione per connettersi a MongoDB con gestione forzata se rimane in stato "connecting"
-var connectMongoDB = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-    return _regeneratorRuntime().wrap(function _callee$(_context) {
-      while (1) switch (_context.prev = _context.next) {
-        case 0:
-          if (!(mongoose.connection.readyState === 1)) {
-            _context.next = 3;
-            break;
-          }
-          logger.info("🔄 MongoDB already connected, reusing existing connection.");
-          return _context.abrupt("return", mongoose.connection);
-        case 3:
-          if (!(mongoose.connection.readyState === 2)) {
+var _ref = /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            if (!(mongoose.connection.readyState === 1)) {
+              _context.next = 3;
+              break;
+            }
+            logger.info("🔄 MongoDB already connected, reusing existing connection.");
+            return _context.abrupt("return", mongoose.connection);
+          case 3:
+            if (!(mongoose.connection.readyState === 2)) {
+              _context.next = 16;
+              break;
+            }
+            logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
+            _context.prev = 5;
+            _context.next = 8;
+            return mongoose.disconnect();
+          case 8:
+            _context.next = 10;
+            return new Promise(function (resolve, reject) {
+              var start = Date.now();
+              var _checkState = function checkState() {
+                if (mongoose.connection.readyState === 0) {
+                  resolve();
+                } else if (Date.now() - start > 5000) {
+                  reject(new Error("Timeout waiting for mongoose to disconnect."));
+                } else {
+                  setTimeout(_checkState, 500); // Ritardo aumentato a 500ms
+                }
+              };
+              _checkState();
+            });
+          case 10:
+            logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
             _context.next = 16;
             break;
-          }
-          logger.warn("Mongoose connection is stuck in 'connecting' state. Forcing disconnect...");
-          _context.prev = 5;
-          _context.next = 8;
-          return mongoose.disconnect();
-        case 8:
-          _context.next = 10;
-          return new Promise(function (resolve, reject) {
-            var start = Date.now();
-            var _checkState = function checkState() {
-              if (mongoose.connection.readyState === 0) {
-                resolve();
-              } else if (Date.now() - start > 5000) {
-                reject(new Error("Timeout waiting for mongoose to disconnect."));
-              } else {
-                setTimeout(_checkState, 500); // Ritardo aumentato a 500ms
-              }
-            };
-            _checkState();
-          });
-        case 10:
-          logger.info("Forced disconnect successful. ReadyState is now: " + mongoose.connection.readyState);
-          _context.next = 16;
-          break;
-        case 13:
-          _context.prev = 13;
-          _context.t0 = _context["catch"](5);
-          logger.error("Error during forced disconnect: " + _context.t0.message);
-        case 16:
-          _context.prev = 16;
-          _context.next = 19;
-          return mongoose.connect(process.env.MONGO_URI, {
-            // Le opzioni deprecate possono essere omesse con il driver 4.x
-          });
-        case 19:
-          logger.info("📚 Connected to MongoDB");
+          case 13:
+            _context.prev = 13;
+            _context.t0 = _context["catch"](5);
+            logger.error("Error during forced disconnect: " + _context.t0.message);
+          case 16:
+            _context.prev = 16;
+            _context.next = 19;
+            return mongoose.connect(process.env.MONGO_URI, {
+              // Le opzioni deprecate possono essere omesse con il driver 4.x
+            });
+          case 19:
+            logger.info("📚 Connected to MongoDB");
 
-          // Aggiungi i listener di connessione
-          mongoose.connection.on("error", function (err) {
-            return logger.error("MongoDB error:", err);
-          });
-          mongoose.connection.on("disconnected", function () {
-            return logger.warn("MongoDB disconnected.");
-          });
-          mongoose.connection.on("reconnected", function () {
-            return logger.info("MongoDB reconnected!");
-          });
-          _context.next = 28;
-          break;
-        case 25:
-          _context.prev = 25;
-          _context.t1 = _context["catch"](16);
-          logger.error("\u274C MongoDB connection error: ".concat(_context.t1.message));
-        case 28:
-          _context.next = 30;
-          return new Promise(function (resolve) {
-            return setTimeout(resolve, 1000);
-          });
-        case 30:
-          logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
-          return _context.abrupt("return", mongoose.connection);
-        case 32:
-        case "end":
-          return _context.stop();
-      }
-    }, _callee, null, [[5, 13], [16, 25]]);
-  }));
-  return function connectMongoDB() {
-    return _ref.apply(this, arguments);
-  };
-}();
+            // Aggiungi i listener di connessione
+            mongoose.connection.on("error", function (err) {
+              return logger.error("MongoDB error:", err);
+            });
+            mongoose.connection.on("disconnected", function () {
+              return logger.warn("MongoDB disconnected.");
+            });
+            mongoose.connection.on("reconnected", function () {
+              return logger.info("MongoDB reconnected!");
+            });
+            _context.next = 28;
+            break;
+          case 25:
+            _context.prev = 25;
+            _context.t1 = _context["catch"](16);
+            logger.error("\u274C MongoDB connection error: ".concat(_context.t1.message));
+          case 28:
+            _context.next = 30;
+            return new Promise(function (resolve) {
+              return setTimeout(resolve, 1000);
+            });
+          case 30:
+            logger.info("Final mongoose.connection.readyState: " + mongoose.connection.readyState);
+            return _context.abrupt("return", mongoose.connection);
+          case 32:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[5, 13], [16, 25]]);
+    }));
+    return function _ref() {
+      return _ref2.apply(this, arguments);
+    };
+  }(),
+  connectMongoDB = _ref.connectMongoDB;
 
 // Endpoint /health aggiornato con log dettagliati (il resto rimane invariato)
 router.get("/health", /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
-    var currentState, mongoStatus, pingResult, redisStatus, redisPing;
+  var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
+    var currentState, mongoStatus, pingResult;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
@@ -246,55 +250,29 @@ router.get("/health", /*#__PURE__*/function () {
           mongoStatus = "Disconnected";
         case 28:
           logger.info("\uD83D\uDD39 MongoDB Status: ".concat(mongoStatus));
-          redisStatus = "Disconnected";
-          _context2.prev = 30;
-          if (!(redis.status === "ready")) {
-            _context2.next = 40;
-            break;
-          }
-          logger.info("Performing Redis ping...");
-          _context2.next = 35;
-          return redis.ping();
-        case 35:
-          redisPing = _context2.sent;
-          logger.info("Redis ping result: " + redisPing);
-          redisStatus = redisPing === "PONG" ? "Connected" : "Disconnected";
-          _context2.next = 41;
-          break;
-        case 40:
-          logger.warn("Redis status not ready: ".concat(redis.status));
-        case 41:
-          _context2.next = 47;
-          break;
-        case 43:
-          _context2.prev = 43;
-          _context2.t1 = _context2["catch"](30);
-          logger.error("Redis ping error: " + _context2.t1.message);
-          redisStatus = "Disconnected";
-        case 47:
           res.json({
             status: "✅ Healthy",
             mongo: mongoStatus,
             redis: redisStatus
           });
-          _context2.next = 54;
+          _context2.next = 36;
           break;
-        case 50:
-          _context2.prev = 50;
-          _context2.t2 = _context2["catch"](0);
-          logger.error("\u274C Health check failed: ".concat(_context2.t2.message));
+        case 32:
+          _context2.prev = 32;
+          _context2.t1 = _context2["catch"](0);
+          logger.error("\u274C Health check failed: ".concat(_context2.t1.message));
           res.status(500).json({
             error: "Service is unhealthy",
-            details: _context2.t2.message
+            details: _context2.t1.message
           });
-        case 54:
+        case 36:
         case "end":
           return _context2.stop();
       }
-    }, _callee2, null, [[0, 50], [11, 24], [30, 43]]);
+    }, _callee2, null, [[0, 32], [11, 24]]);
   }));
   return function (_x, _x2) {
-    return _ref2.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }());
 app.use("/.netlify/functions/server", router);
@@ -310,135 +288,87 @@ var KnowledgeSchema = new mongoose.Schema({
 });
 var Knowledge = mongoose.models.Knowledge || mongoose.model("Knowledge", KnowledgeSchema);
 
-// === Middleware per Cache Redis ===
-var cacheMiddleware = /*#__PURE__*/function () {
-  var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res, next) {
-    var key, cachedData;
+// === Endpoint: Health Check ===
+router.get("/health", /*#__PURE__*/function () {
+  var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
+    var mongoStatus, _redisStatus;
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) switch (_context3.prev = _context3.next) {
         case 0:
-          key = req.originalUrl;
-          _context3.prev = 1;
-          _context3.next = 4;
-          return redis.get(key);
-        case 4:
-          cachedData = _context3.sent;
-          if (!cachedData) {
-            _context3.next = 8;
-            break;
-          }
-          logger.info("\uD83D\uDD39 Serving from Redis cache: ".concat(key));
-          return _context3.abrupt("return", res.json(JSON.parse(cachedData)));
-        case 8:
-          _context3.next = 13;
-          break;
-        case 10:
-          _context3.prev = 10;
-          _context3.t0 = _context3["catch"](1);
-          logger.warn("⚠️ Redis error, proceeding without cache:", _context3.t0.message);
-        case 13:
-          res.sendResponse = res.json;
-          res.json = function (body) {
-            if (!res.headersSent) {
-              redis.setex(key, 60, JSON.stringify(body))["catch"](function (err) {
-                logger.warn("⚠️ Failed to store response in Redis cache:", err.message);
-              });
-              res.sendResponse(body);
-            }
-          };
-          next();
-        case 16:
-        case "end":
-          return _context3.stop();
-      }
-    }, _callee3, null, [[1, 10]]);
-  }));
-  return function cacheMiddleware(_x3, _x4, _x5) {
-    return _ref3.apply(this, arguments);
-  };
-}();
-
-// === Endpoint: Health Check ===
-router.get("/health", /*#__PURE__*/function () {
-  var _ref4 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
-    var mongoStatus, redisStatus;
-    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-      while (1) switch (_context4.prev = _context4.next) {
-        case 0:
-          _context4.prev = 0;
+          _context3.prev = 0;
           logger.info("🔹 Health check started...");
           mongoStatus = "Disconnected";
           if (!(mongoose.connection.readyState === 1)) {
-            _context4.next = 7;
+            _context3.next = 7;
             break;
           }
           mongoStatus = "Connected";
-          _context4.next = 8;
+          _context3.next = 8;
           break;
         case 7:
           throw new Error("MongoDB not connected");
         case 8:
-          redisStatus = "Disconnected";
-          _context4.next = 11;
+          _redisStatus = "Disconnected";
+          _context3.next = 11;
           return redis.ping().then(function () {
-            redisStatus = "Connected";
+            _redisStatus = "Connected";
           })["catch"](function (err) {
             throw new Error("Redis not connected: " + err.message);
           });
         case 11:
-          logger.info("\u2705 MongoDB: ".concat(mongoStatus, ", Redis: ").concat(redisStatus));
+          logger.info("\u2705 MongoDB: ".concat(mongoStatus, ", Redis: ").concat(_redisStatus));
           res.json({
             status: "✅ Healthy",
             mongo: mongoStatus,
-            redis: redisStatus
+            redis: _redisStatus
           });
-          _context4.next = 19;
+          _context3.next = 19;
           break;
         case 15:
-          _context4.prev = 15;
-          _context4.t0 = _context4["catch"](0);
-          logger.error("\u274C Health check failed: ".concat(_context4.t0.message));
+          _context3.prev = 15;
+          _context3.t0 = _context3["catch"](0);
+          logger.error("\u274C Health check failed: ".concat(_context3.t0.message));
           res.status(500).json({
             error: "Service is unhealthy",
-            details: _context4.t0.message
+            details: _context3.t0.message
           });
         case 19:
         case "end":
-          return _context4.stop();
+          return _context3.stop();
       }
-    }, _callee4, null, [[0, 15]]);
+    }, _callee3, null, [[0, 15]]);
   }));
-  return function (_x6, _x7) {
+  return function (_x3, _x4) {
     return _ref4.apply(this, arguments);
   };
 }());
 
 // === Endpoint: Recupero Dati da GitHub o MongoDB ===
 router.get("/fetch", cacheMiddleware, /*#__PURE__*/function () {
-  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
+  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
     var _req$query, source, file, query, repoUrl, response, fileResponse, data;
-    return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-      while (1) switch (_context5.prev = _context5.next) {
+    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
         case 0:
           _req$query = req.query, source = _req$query.source, file = _req$query.file, query = _req$query.query;
-          _context5.prev = 1;
+          _context4.prev = 1;
           if (source) {
-            _context5.next = 4;
+            _context4.next = 4;
             break;
           }
-          return _context5.abrupt("return", res.status(400).json({
+          return _context4.abrupt("return", res.status(400).json({
             error: "Missing source parameter."
           }));
         case 4:
           if (!(source === "github")) {
-            _context5.next = 29;
+            _context4.next = 29;
             break;
           }
           if (file) {
-            _context5.next = 7;
+            _context4.next = 7;
             break;
           }
-          return _context5.abrupt("return", res.status(400).json({
+          return _context4.abrupt("return", res.status(400).json({
             error: "Missing file parameter."
           }));
         case 7:
@@ -448,17 +378,17 @@ router.get("/fetch", cacheMiddleware, /*#__PURE__*/function () {
 
           // Controlla se le variabili sono effettivamente valorizzate
           if (!(!process.env.MY_GITHUB_OWNER || !process.env.MY_GITHUB_REPO)) {
-            _context5.next = 11;
+            _context4.next = 11;
             break;
           }
-          return _context5.abrupt("return", res.status(500).json({
+          return _context4.abrupt("return", res.status(500).json({
             error: "Missing GitHub environment variables"
           }));
         case 11:
           repoUrl = "https://api.github.com/repos/".concat(process.env.MY_GITHUB_OWNER.trim(), "/").concat(process.env.MY_GITHUB_REPO.trim(), "/contents/").concat(file);
           logger.info("\uD83D\uDD39 Fetching from GitHub: ".concat(repoUrl));
-          _context5.prev = 13;
-          _context5.next = 16;
+          _context4.prev = 13;
+          _context4.next = 16;
           return axios.get(repoUrl, {
             headers: {
               Authorization: "token ".concat(process.env.MY_GITHUB_TOKEN)
@@ -466,86 +396,102 @@ router.get("/fetch", cacheMiddleware, /*#__PURE__*/function () {
             timeout: 5000
           });
         case 16:
-          response = _context5.sent;
+          response = _context4.sent;
           if (response.data.download_url) {
-            _context5.next = 19;
+            _context4.next = 19;
             break;
           }
-          return _context5.abrupt("return", res.status(404).json({
+          return _context4.abrupt("return", res.status(404).json({
             error: "GitHub API Error: File not found."
           }));
         case 19:
-          _context5.next = 21;
+          _context4.next = 21;
           return axios.get(response.data.download_url, {
             timeout: 5000
           });
         case 21:
-          fileResponse = _context5.sent;
-          return _context5.abrupt("return", res.json({
+          fileResponse = _context4.sent;
+          return _context4.abrupt("return", res.json({
             file: file,
             content: fileResponse.data
           }));
         case 25:
-          _context5.prev = 25;
-          _context5.t0 = _context5["catch"](13);
-          logger.error("❌ Fetch Error:", _context5.t0.message);
-          return _context5.abrupt("return", res.status(500).json({
+          _context4.prev = 25;
+          _context4.t0 = _context4["catch"](13);
+          logger.error("❌ Fetch Error:", _context4.t0.message);
+          return _context4.abrupt("return", res.status(500).json({
             error: "Unexpected error fetching data",
-            details: _context5.t0.message
+            details: _context4.t0.message
           }));
         case 29:
           if (!(source === "mongodb")) {
-            _context5.next = 38;
+            _context4.next = 38;
             break;
           }
           if (query) {
-            _context5.next = 32;
+            _context4.next = 32;
             break;
           }
-          return _context5.abrupt("return", res.status(400).json({
+          return _context4.abrupt("return", res.status(400).json({
             error: "Missing query parameter."
           }));
         case 32:
-          _context5.next = 34;
+          _context4.next = 34;
           return Knowledge.findOne({
             key: query
           });
         case 34:
-          data = _context5.sent;
+          data = _context4.sent;
           if (data) {
-            _context5.next = 37;
+            _context4.next = 37;
             break;
           }
-          return _context5.abrupt("return", res.status(404).json({
+          return _context4.abrupt("return", res.status(404).json({
             error: "No data found in MongoDB"
           }));
         case 37:
-          return _context5.abrupt("return", res.json(data));
+          return _context4.abrupt("return", res.json(data));
         case 38:
-          return _context5.abrupt("return", res.status(400).json({
+          return _context4.abrupt("return", res.status(400).json({
             error: "Invalid source parameter."
           }));
         case 41:
-          _context5.prev = 41;
-          _context5.t1 = _context5["catch"](1);
-          logger.error("❌ Fetch Error:", _context5.t1.message);
+          _context4.prev = 41;
+          _context4.t1 = _context4["catch"](1);
+          logger.error("❌ Fetch Error:", _context4.t1.message);
           res.status(500).json({
             error: "Unexpected error fetching data",
-            details: _context5.t1.message
+            details: _context4.t1.message
           });
         case 45:
         case "end":
-          return _context5.stop();
+          return _context4.stop();
       }
-    }, _callee5, null, [[1, 41], [13, 25]]);
+    }, _callee4, null, [[1, 41], [13, 25]]);
   }));
-  return function (_x8, _x9) {
+  return function (_x5, _x6) {
     return _ref5.apply(this, arguments);
   };
 }());
 
 // === Esposizione dell'Endpoint Unified Access ===
 app.use("/.netlify/functions/unifiedAccess", router);
+
+// Aggiungere gestione della chiusura per liberare la porta
+process.on("SIGINT", function () {
+  logger.warn("⚠️ SIGINT received (CTRL+C). Closing server...");
+  server.close(function () {
+    logger.info("✅ Server closed. Exiting process.");
+    process.exit(0);
+  });
+});
+process.on("SIGTERM", function () {
+  logger.warn("⚠️ SIGTERM received. Closing server...");
+  server.close(function () {
+    logger.info("✅ Server closed. Exiting process.");
+    process.exit(0);
+  });
+});
 module.exports = {
   app: app,
   handler: serverless(app),
