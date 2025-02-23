@@ -3,8 +3,8 @@
      📄 .netlifyignore - 🚀 Add a description here
      📄 connectMongoDB.js - 🚀 Add a description here
      📄 .babelrc - 🚀 Add a description here
-     📄 nodemon.json - Configuration file for `nodemon`, enabling automatic server restarts during development.
      📄 AI_DEVELOPER_NOTES.md - Comprehensive technical documentation for AI development, covering model integrations, architecture, and debugging strategies.
+     📄 .DS_Store - 🚀 Add a description here
      📄 netlify.toml - Configuration file managing Netlify deployments, routing, API function settings, and CORS policies.
      📄 descriptions.yaml - Metadata file storing structured descriptions for all repository files, keeping documentation updated.
      📄 TROUBLESHOOTING.md - In-depth guide for debugging known issues, resolving API failures, database connectivity, and deployment problems.
