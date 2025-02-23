@@ -11,17 +11,36 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
- //✅ Connessione a Redis con TLS (necessario per Upstash)
- const redis = new Redis({
+// ✅ Connessione a Redis
+console.log("🔹 REDIS_HOST:", process.env.REDIS_HOST);
+console.log("🔹 REDIS_PORT:", process.env.REDIS_PORT);
+console.log("🔹 REDIS_PASSWORD:", process.env.REDIS_PASSWORD ? "********" : "Not Set");
+
+const redis = new Redis({
   host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
+  port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
-  tls: { rejectUnauthorized: false },
-  enableOfflineQueue: false,
-  connectTimeout: 5000,
-  retryStrategy: (times) => Math.min(times * 100, 2000),
-  family: 4,
- });
+  tls: {}, // Upstash richiede TLS
+  reconnectOnError: (err) => {
+    logger.warn(`⚠️ Redis error: ${err.message}, attempting reconnect...`);
+    return true;
+  },
+  retryStrategy: (times) => {
+    if (times > 10) {
+      logger.error("❌ Too many Redis reconnection attempts. Stopping...");
+      return null;
+    }
+    return Math.min(times * 1000, 30000);
+  },
+});
+
+redis.on("connect", () => logger.info("✅ Connected to Redis successfully!"));
+redis.on("ready", () => logger.info("✅ Redis Ready!"));
+redis.on("error", (err) => logger.error(`❌ Redis connection error: ${err.message}`));
+redis.on("end", () => {
+  logger.warn("⚠️ Redis connection closed. Reconnecting...");
+  setTimeout(() => redis.connect(), 5000);
+});
 
 // === Middleware per Cache Redis ===
 const cacheMiddleware = async (req, res, next) => {
