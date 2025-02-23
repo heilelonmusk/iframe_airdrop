@@ -16,7 +16,7 @@ console.log("🔹 REDIS_HOST:", process.env.REDIS_HOST);
 console.log("🔹 REDIS_PORT:", process.env.REDIS_PORT);
 console.log("🔹 REDIS_PASSWORD:", process.env.REDIS_PASSWORD ? "********" : "Not Set");
 
-const redis = new Redis({
+const redis = new Redis(("rediss://default:********@communal-puma-15051.upstash.io:6379"),{
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,

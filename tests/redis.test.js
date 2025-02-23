@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ debug: true });
 const { redis, quitRedis, cacheMiddleware } = require("../config/redis");
 const winston = require("winston");
 const fs = require("fs");
