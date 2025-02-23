@@ -39,7 +39,7 @@ logger.info("🔍 Using MONGO_URI:", process.env.MONGO_URI);
 //const { getIntent } = require("../modules/intent/intentRecognizer");
 //const { generateResponse } = require("../modules/nlp/transformer");
 //const { logConversation } = require("../modules/logging/logger");
-if (!process.env.NETLIFY) console.log("\uD83D\uDE80 Server running on port ".concat(port));
+//if (!process.env.NETLIFY) console.log(`🚀 Server running on port ${port}`);
 
 // Inizializza il manager NLP
 //const manager = new NlpManager({ languages: ["en"], autoSave: false, autoLoad: false });
@@ -123,7 +123,7 @@ if (!mongoURI || !mongoURI.startsWith("mongodb")) {
 
 // Avvia il server solo se non è in ambiente serverless
 if (!process.env.NETLIFY) {
-  var _server = app.listen(_port, function () {
+  var _server = app.listen(port, function () {
     logger.info("\uD83D\uDE80 Server running on port ".concat(_server.address().port));
   });
 
@@ -304,10 +304,10 @@ if (!process.env.NETLIFY) {
     };
   }());
   app.use("/.netlify/functions/server", router);
-  var _port = process.env.PORT || 3000; // Imposta un valore di default
-  console.log("\uD83D\uDE80 Server running on port ".concat(_port));
+  var port = process.env.PORT || 3000; // Imposta un valore di default
+  console.log("\uD83D\uDE80 Server running on port ".concat(port));
   if (!process.env.NETLIFY) {
-    var _server2 = app.listen(_port, function () {
+    var _server2 = app.listen(port, function () {
       logger.info("\uD83D\uDE80 Server running on port ".concat(_server2.address().port));
     });
 
