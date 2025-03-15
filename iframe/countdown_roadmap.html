@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
 <head>
-  <meta charset='UTF-8'>
-  <title>Fluid Countdown + Roadmap</title>
+  <meta charset="UTF-8" />
+  <title>Fluid Countdown + Desktop Animations</title>
   <style>
     /* ===============================
        BASE & GLOBAL STYLES
@@ -22,10 +22,7 @@
       color: #F1E1D4;
     }
 
-    /* Contenitore principale: 
-       - riduce font e margini su schermi > 480px
-       - mantiene layout maneggevole su mobile (≤480px)
-    */
+    /* Contenitore principale del countdown */
     .countdown-container {
       display: flex;
       flex-direction: column;
@@ -35,11 +32,10 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 1rem;
+      box-sizing: border-box;
     }
 
-    /* ===============================
-       TITOLO
-    =============================== */
+    /* Titolo */
     .title {
       font-size: 2.4rem; 
       text-transform: uppercase;
@@ -49,7 +45,7 @@
     }
 
     /* ===============================
-       CONTAINER COUNTDOWN
+       COUNTDOWN
     =============================== */
     .countdown {
       display: flex;
@@ -66,7 +62,7 @@
       min-width: 120px;
     }
     .number {
-      font-size: 3.2rem;
+      font-size: 3.2rem; 
       font-weight: bold;
       line-height: 1;
       text-shadow: 0 0 5px #F1E1D4;
@@ -79,26 +75,25 @@
       box-sizing: border-box;
     }
     .label {
-      font-size: 0.7rem;  /* ridotto da 0.8rem */
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: 0.3rem;
     }
 
-    /* Messaggio finale (quando scade) */
     .ended {
       margin-top: 0.8rem;
-      font-size: 1rem;   /* ridotto da 1.2rem */
+      font-size: 1rem;
       letter-spacing: 1px;
       text-shadow: 0 0 5px #F1E1D4;
     }
 
     /* ===============================
-       ROADMAP NOTE (piccolo pannello)
+       ROADMAP NOTE
     =============================== */
     .roadmap-note {
-      margin-top: 1rem;     /* meno spazio sopra */
-      font-size: 1rem;      
+      margin-top: 1rem; 
+      font-size: 1rem; 
       letter-spacing: 1px;
       line-height: 1.4;
       color: #F1E1D4;
@@ -106,7 +101,7 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid #F1E1D4;
       border-radius: 6px;
-      padding: 0.8rem;      /* meno padding */
+      padding: 0.8rem; 
       max-width: 80%;
       position: relative;
     }
@@ -116,7 +111,7 @@
       position: relative;
       font-weight: 500;
     }
-    /* effetto underline animato */
+    /* Effetto hover underline animato */
     .roadmap-link::after {
       content: '';
       position: absolute;
@@ -135,8 +130,56 @@
     }
 
     /* ===============================
-       RESPONSIVE su (max-width: 480px)
-       => Mobile
+       ANIMAZIONI SPAZIALI SOLO DESKTOP
+    =============================== */
+    .desktop-only {
+      display: none; /* su mobile = hidden */
+    }
+    @media (min-width: 769px) {
+      .desktop-only {
+        display: block; 
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto 1rem auto;
+        position: relative; 
+        height: 100px; /* altezza dell'area animata */
+        overflow: hidden;
+      }
+    }
+    .star {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #F1E1D4;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #F1E1D4;
+      opacity: 0.8;
+      animation: drift linear infinite;
+    }
+    @keyframes drift {
+      0% {
+        transform: translateX(120%);
+      }
+      100% {
+        transform: translateX(-20%);
+      }
+    }
+    /* Diversi top/durata per le stelline */
+    .star-1 {
+      top: 20px;
+      animation-duration: 10s;
+    }
+    .star-2 {
+      top: 50px;
+      animation-duration: 15s;
+    }
+    .star-3 {
+      top: 70px;
+      animation-duration: 12s;
+    }
+
+    /* ===============================
+       RESPONSIVE MOBILE (≤ 480px)
     =============================== */
     @media (max-width: 480px) {
       .title {
@@ -148,10 +191,10 @@
         gap: 1rem;
       }
       .time-box {
-        min-width: 90px; 
+        min-width: 90px;
       }
       .number {
-        font-size: 2.4rem;  /* ancora più ridotto */
+        font-size: 2.4rem; 
         padding: 0.2rem 0;
       }
       .label {
@@ -168,56 +211,73 @@
     }
   </style>
 </head>
-
 <body>
-  <div class='countdown-container'>
-    <div class='title'>WAITING FOR THE LAUNCH</div>
 
-    <div class='countdown'>
+  <!-- Animazione spaziale in alto (solo desktop) -->
+  <div class="desktop-only">
+    <div class="star star-1"></div>
+    <div class="star star-2"></div>
+    <div class="star star-3"></div>
+  </div>
+
+  <div class="countdown-container">
+
+    <div class="title">WAITING FOR THE LAUNCH</div>
+
+    <div class="countdown">
       <!-- DAYS -->
-      <div class='time-box'>
-        <div class='number' id='days'>--</div>
-        <div class='label'>Days</div>
+      <div class="time-box">
+        <div class="number" id="days">--</div>
+        <div class="label">Days</div>
       </div>
 
       <!-- HOURS -->
-      <div class='time-box'>
-        <div class='number' id='hours'>--</div>
-        <div class='label'>Hours</div>
+      <div class="time-box">
+        <div class="number" id="hours">--</div>
+        <div class="label">Hours</div>
       </div>
 
       <!-- MINUTES -->
-      <div class='time-box'>
-        <div class='number' id='minutes'>--</div>
-        <div class='label'>Minutes</div>
+      <div class="time-box">
+        <div class="number" id="minutes">--</div>
+        <div class="label">Minutes</div>
       </div>
 
-      <!-- SECONDS (parte intera) -->
-      <div class='time-box'>
-        <div class='number' id='seconds-int'>--</div>
-        <div class='label'>Sec</div>
+      <!-- SECONDS (interi) -->
+      <div class="time-box">
+        <div class="number" id="seconds-int">--</div>
+        <div class="label">Sec</div>
       </div>
 
-      <!-- SECONDS (parte decimale) -->
-      <div class='time-box'>
-        <div class='number' id='seconds-frac'>--</div>
-        <div class='label'>Frac</div>
+      <!-- SECONDS (decimali) -->
+      <div class="time-box">
+        <div class="number" id="seconds-frac">--</div>
+        <div class="label">Frac</div>
       </div>
     </div>
 
-    <div class='ended' id='ended'></div>
+    <div class="ended" id="ended"></div>
 
-    <!-- Pannello Roadmap sotto il countdown -->
-    <div class='roadmap-note'>
-      Look at the <a href='#' class='roadmap-link'>roadmap</a>
+    <!-- Pannello roadmap sotto -->
+    <div class="roadmap-note">
+      Look at the <a href="#" class="roadmap-link">roadmap</a>
       to see the completion of the goals in view of the launch.
     </div>
   </div>
 
+  <!-- Animazione spaziale in basso (solo desktop) -->
+  <div class="desktop-only">
+    <!-- Aggiungiamo altre stelline con parametri diversi -->
+    <div class="star star-1" style="top: 10px; animation-duration: 9s;"></div>
+    <div class="star star-2" style="top: 50px; animation-duration: 14s;"></div>
+    <div class="star star-3" style="top: 75px; animation-duration: 11s;"></div>
+  </div>
+
   <script>
-    /* 
-      LOGICA COUNTDOWN
-      Aggiorna i numeri in tempo reale.
+    /*
+      COUNTDOWN LOGIC
+      - aggiorna giorni, ore, minuti, secondi
+      - secondi con parte decimale
     */
     const targetDate = new Date('October 1, 2025 00:00:00').getTime();
 
@@ -234,8 +294,8 @@
         : Date.now();
       const distance = targetDate - now;
 
-      // Se scaduto
       if (distance <= 0) {
+        // Countdown terminato
         daysEl.textContent       = '0';
         hoursEl.textContent      = '0';
         minutesEl.textContent    = '0';
@@ -245,7 +305,7 @@
         return;
       }
 
-      // Calcolo di giorni, ore, minuti
+      // Calcolo canonico di giorni / ore / minuti
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const remainderAfterDays = distance % (1000 * 60 * 60 * 24);
 
@@ -255,21 +315,21 @@
       const minutes = Math.floor(remainderAfterHours / (1000 * 60));
       const remainderAfterMinutes = remainderAfterHours % (1000 * 60);
 
-      // Seconds con decimali
+      // seconds con parte decimale
       const secondsFloat = remainderAfterMinutes / 1000;
       const secInteger   = Math.floor(secondsFloat);
       let secFraction    = Math.floor((secondsFloat - secInteger) * 100);
-      secFraction        = secFraction.toString().padStart(2, '0');
+      secFraction = secFraction.toString().padStart(2, '0');
 
-      // Aggiorna testo
+      // Aggiorna il DOM
       daysEl.textContent       = days;
-      hoursEl.textContent      = hours < 10   ? '0' + hours : hours;
-      minutesEl.textContent    = minutes < 10 ? '0' + minutes : minutes;
-      secondsIntEl.textContent = secInteger < 10 ? '0' + secInteger : secInteger;
+      hoursEl.textContent      = (hours   < 10 ? '0' : '') + hours;
+      minutesEl.textContent    = (minutes < 10 ? '0' : '') + minutes;
+      secondsIntEl.textContent = (secInteger < 10 ? '0' : '') + secInteger;
       secondsFracEl.textContent= secFraction;
     }
 
-    // Chiamata ~60 FPS per un effetto fluido
+    // Aggiornamento ~60 FPS per l'effetto fluido
     function animate() {
       updateCountdown();
       requestAnimationFrame(animate);
@@ -277,4 +337,4 @@
     requestAnimationFrame(animate);
   </script>
 </body>
-</html>">
+</html>
