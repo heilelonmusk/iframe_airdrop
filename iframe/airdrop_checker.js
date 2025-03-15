@@ -47,7 +47,7 @@ async function checkAirdrop() {
     }
 
     if (isWhitelisted) {
-      resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by 23:59 CET on Feb. 28.";
+      resultElem.innerHTML = "✅ You are eligible!<br>Final airdrop details will be announced by the end of countdown period.";
       triggerWorkflow(wallet, "update_whitelist");
       if (window.innerWidth > 600) {
         confetti({
