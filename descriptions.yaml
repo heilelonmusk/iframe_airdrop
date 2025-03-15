@@ -126,6 +126,7 @@ descriptions:
     system.
   iframe/airdrop_checker.js: JavaScript logic handling blockchain wallet verification
     and eligibility confirmation.
+  iframe/countdown_roadmap.html: "\U0001F680 Add a description here"
   lib/: "\U0001F680 Add a description here"
   lib/redis.js: "\U0001F680 Add a description here"
   logs/: "\U0001F680 Add a description here"

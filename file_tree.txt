@@ -28,6 +28,7 @@
   📁 iframe/ - Module managing airdrop verification via blockchain wallet interactions.
      📄 airdrop_checker.js - JavaScript logic handling blockchain wallet verification and eligibility confirmation.
      📄 airdrop_checker.html - HTML page for UI rendering of the airdrop verification system.
+     📄 countdown_roadmap.html - 🚀 Add a description here
   📁 dist/ - 🚀 Add a description here
      📄 seedKnowledge.js - 🚀 Add a description here
      📄 server.js - 🚀 Add a description here
