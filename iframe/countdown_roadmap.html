@@ -12,7 +12,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      background: transparent; /* Sfondi trasparente */
+      background: transparent; /* Sfondo trasparente */
     }
     body {
       display: flex;
@@ -22,7 +22,7 @@
       color: #F1E1D4;
     }
 
-    /* Contenitore principale del countdown */
+    /* Contenitore principale */
     .countdown-container {
       display: flex;
       flex-direction: column;
@@ -62,7 +62,7 @@
       min-width: 120px;
     }
     .number {
-      font-size: 3.2rem; 
+      font-size: 3.2rem;
       font-weight: bold;
       line-height: 1;
       text-shadow: 0 0 5px #F1E1D4;
@@ -75,7 +75,7 @@
       box-sizing: border-box;
     }
     .label {
-      font-size: 0.7rem;  
+      font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: 0.3rem;
@@ -164,47 +164,46 @@
 </head>
 
 <body>
-  <div class='countdown-container'>
+  <div class="countdown-container">
+    <div class="title">WAITING FOR THE LAUNCH</div>
 
-    <div class='title'>WAITING FOR THE LAUNCH</div>
-
-    <div class='countdown'>
+    <div class="countdown">
       <!-- DAYS -->
-      <div class='time-box'>
-        <div class='number' id='days'>--</div>
-        <div class='label'>Days</div>
+      <div class="time-box">
+        <div class="number" id="days">--</div>
+        <div class="label">Days</div>
       </div>
 
       <!-- HOURS -->
-      <div class='time-box'>
-        <div class='number' id='hours'>--</div>
-        <div class='label'>Hours</div>
+      <div class="time-box">
+        <div class="number" id="hours">--</div>
+        <div class="label">Hours</div>
       </div>
 
       <!-- MINUTES -->
-      <div class='time-box'>
-        <div class='number' id='minutes'>--</div>
-        <div class='label'>Minutes</div>
+      <div class="time-box">
+        <div class="number" id="minutes">--</div>
+        <div class="label">Minutes</div>
       </div>
 
-      <!-- SECONDS (parte intera) -->
-      <div class='time-box'>
-        <div class='number' id='seconds-int'>--</div>
-        <div class='label'>Sec</div>
+      <!-- SECONDS (interi) -->
+      <div class="time-box">
+        <div class="number" id="seconds-int">--</div>
+        <div class="label">Sec</div>
       </div>
 
-      <!-- SECONDS (parte decimale) -->
-      <div class='time-box'>
-        <div class='number' id='seconds-frac'>--</div>
-        <div class='label'>Frac</div>
+      <!-- SECONDS (decimali) -->
+      <div class="time-box">
+        <div class="number" id="seconds-frac">--</div>
+        <div class="label">Frac</div>
       </div>
     </div>
 
-    <div class='ended' id='ended'></div>
+    <div class="ended" id="ended"></div>
 
-    <!-- Pannello “Roadmap” sotto il countdown -->
-    <div class='roadmap-note'>
-      Look at the <a href='#' class='roadmap-link'>roadmap</a>
+    <!-- Pannello Roadmap -->
+    <div class="roadmap-note">
+      Look at the <a href="#" class="roadmap-link">roadmap</a>
       to see the completion of the goals in view of the launch.
     </div>
   </div>
@@ -212,17 +211,17 @@
   <script>
     /*
       COUNTDOWN LOGIC
-      - Giorni, ore, minuti
-      - Secondi con parte decimale
+      - Days, hours, minutes
+      - Seconds with fraction
     */
-    const targetDate = new Date('October 1, 2025 00:00:00').getTime();
+    const targetDate = new Date("October 1, 2025 00:00:00").getTime();
 
-    const daysEl       = document.getElementById('days');
-    const hoursEl      = document.getElementById('hours');
-    const minutesEl    = document.getElementById('minutes');
-    const secondsIntEl = document.getElementById('seconds-int');
-    const secondsFracEl= document.getElementById('seconds-frac');
-    const endedEl      = document.getElementById('ended');
+    const daysEl       = document.getElementById("days");
+    const hoursEl      = document.getElementById("hours");
+    const minutesEl    = document.getElementById("minutes");
+    const secondsIntEl = document.getElementById("seconds-int");
+    const secondsFracEl= document.getElementById("seconds-frac");
+    const endedEl      = document.getElementById("ended");
 
     function updateCountdown() {
       const now = performance.now
@@ -232,16 +231,16 @@
 
       if (distance <= 0) {
         // Se scaduto
-        daysEl.textContent       = '0';
-        hoursEl.textContent      = '0';
-        minutesEl.textContent    = '0';
-        secondsIntEl.textContent = '0';
-        secondsFracEl.textContent= '00';
-        endedEl.textContent      = 'LAUNCH TIME!';
+        daysEl.textContent       = "0";
+        hoursEl.textContent      = "0";
+        minutesEl.textContent    = "0";
+        secondsIntEl.textContent = "0";
+        secondsFracEl.textContent= "00";
+        endedEl.textContent      = "LAUNCH TIME!";
         return;
       }
 
-      // Calcolo giorni
+      // Giorni
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const remainderAfterDays = distance % (1000 * 60 * 60 * 24);
 
@@ -253,21 +252,21 @@
       const minutes = Math.floor(remainderAfterHours / (1000 * 60));
       const remainderAfterMinutes = remainderAfterHours % (1000 * 60);
 
-      // Secondi con parte decimale
+      // Secondi decimali
       const secondsFloat = remainderAfterMinutes / 1000;
       const secInteger   = Math.floor(secondsFloat);
       let secFraction    = Math.floor((secondsFloat - secInteger) * 100);
-      secFraction = secFraction.toString().padStart(2, '0');
+      secFraction = secFraction.toString().padStart(2, "0");
 
-      // Aggiorna i vari campi
+      // Aggiorna nel DOM
       daysEl.textContent       = days;
-      hoursEl.textContent      = hours < 10 ? '0' + hours : hours;
-      minutesEl.textContent    = minutes < 10 ? '0' + minutes : minutes;
-      secondsIntEl.textContent = secInteger < 10 ? '0' + secInteger : secInteger;
+      hoursEl.textContent      = hours   < 10 ? "0" + hours : hours;
+      minutesEl.textContent    = minutes < 10 ? "0" + minutes : minutes;
+      secondsIntEl.textContent = secInteger < 10 ? "0" + secInteger : secInteger;
       secondsFracEl.textContent= secFraction;
     }
 
-    // Aggiorna ~60 volte al secondo, dando effetto fluido
+    // Aggiorna ~60 volte al secondo
     function animate() {
       updateCountdown();
       requestAnimationFrame(animate);
