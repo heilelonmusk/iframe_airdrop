@@ -2,79 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Countdown + Roadmap</title>
+  <title>Countdown Desktop-Only Test</title>
   <style>
-    /* ========================
-       RESET & BASE
-    ======================== */
+    /* Base reset */
     html, body {
-      margin: 0;
+      margin: 0; 
       padding: 0;
       width: 100%;
       height: 100%;
-      background: transparent; /* Sfondo trasparente */
-    }
-
-    /* Allineiamo in alto su desktop; su mobile puoi variare se vuoi vertical center */
-    body {
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
-      font-family: 'Poppins', sans-serif;
+      background: #222; /* sfondo scuro per debug */
       color: #F1E1D4;
+      font-family: 'Poppins', sans-serif;
     }
 
-    /* Contenitore principale: countdown + sezioni extra */
+    /* Contenitore Principale */
     .container {
-      display: flex;
-      flex-direction: column;
-      text-align: center;
-      width: 100%;
       max-width: 800px;
       margin: 0 auto;
       padding: 1rem;
-      box-sizing: border-box;
-      align-items: center;
+      text-align: center;
     }
 
-    /* ========================
-       DESKTOP-ONLY
-       (visibile su schermi > 768px)
-    ======================== */
-    .desktop-only {
-      display: block; /* visibile di default */
-      margin: 1rem 0;
-      font-size: 1rem;
-      line-height: 1.4;
-    }
-    @media (max-width: 768px) {
-      /* se la larghezza ≤ 768px, li nascondiamo */
-      .desktop-only {
-        display: none; 
-      }
-    }
-
-    /* ========================
-       TITOLO
-    ======================== */
+    /* Titolo */
     .title {
       font-size: 2.4rem;
+      margin-bottom: 1rem;
       text-transform: uppercase;
-      margin-bottom: 0.8rem;
-      letter-spacing: 2px;
       text-shadow: 0 0 5px #F1E1D4;
     }
 
-    /* ========================
-       CONTAINER COUNTDOWN
-    ======================== */
+    /* Countdown */
     .countdown {
       display: flex;
       flex-wrap: wrap;
       gap: 1.5rem;
       justify-content: center;
-      align-items: center;
-      margin: 0.8rem 0;
+      margin: 1rem 0;
     }
     .time-box {
       display: flex;
@@ -84,16 +47,13 @@
     }
     .number {
       font-size: 3.2rem;
-      font-weight: bold;
-      line-height: 1;
-      text-shadow: 0 0 5px #F1E1D4;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255,255,255,0.1);
       border: 2px solid #F1E1D4;
       border-radius: 8px;
-      width: 100%;
-      min-width: 70px;
       padding: 0.3rem 0;
+      min-width: 70px;
       box-sizing: border-box;
+      text-shadow: 0 0 5px #F1E1D4;
     }
     .label {
       font-size: 0.7rem;
@@ -102,72 +62,48 @@
       margin-top: 0.3rem;
     }
     .ended {
-      margin-top: 0.8rem;
-      font-size: 1rem;
-      letter-spacing: 1px;
-      text-shadow: 0 0 5px #F1E1D4;
-    }
-
-    /* ========================
-       ROADMAP “NOTE”
-       (pannello sotto il countdown)
-    ======================== */
-    .roadmap-note {
       margin-top: 1rem;
       font-size: 1rem;
-      letter-spacing: 1px;
-      line-height: 1.4;
-      color: #F1E1D4;
-      text-shadow: 0 0 2px #F1E1D4;
-      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Roadmap note */
+    .roadmap-note {
+      margin-top: 1rem;
+      background: rgba(255,255,255,0.08);
       border: 1px solid #F1E1D4;
       border-radius: 6px;
       padding: 0.8rem;
       max-width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-      position: relative;
+      margin: 1rem auto 0 auto;
+      text-shadow: 0 0 2px #F1E1D4;
     }
-    .roadmap-link {
+    .roadmap-note a {
       color: #F1E1D4;
-      text-decoration: none;
-      position: relative;
-      font-weight: 500;
-    }
-    .roadmap-link::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -2px;
-      width: 100%;
-      height: 1px;
-      background: #F1E1D4;
-      transform: scaleX(0);
-      transform-origin: right;
-      transition: transform 0.3s ease;
-    }
-    .roadmap-link:hover::after {
-      transform: scaleX(1);
-      transform-origin: left;
+      text-decoration: underline;
     }
 
-    /* ========================
-       RESPONSIVE Mobile
-       max-width: 480px
-    ======================== */
+    /* Desktop-only blocks => visibili di default */
+    .desktop-only {
+      margin: 1rem auto;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #F1E1D4;
+      border-radius: 6px;
+    }
+    /* ...ma nascosti se viewport <= 768px */
+    @media (max-width: 768px) {
+      .desktop-only {
+        display: none;
+      }
+    }
+
+    /* Mobile (max-width: 480px) => font più piccoli */
     @media (max-width: 480px) {
-      /* Se vuoi centrarlo anche verticalmente su mobile:
-         body { align-items: center; } */
       .title {
-        font-size: 2rem;
-        margin-bottom: 0.6rem;
+        font-size: 1.8rem;
       }
       .countdown {
         flex-direction: column;
-        gap: 1rem;
-      }
-      .time-box {
-        min-width: 90px;
       }
       .number {
         font-size: 2.4rem;
@@ -177,13 +113,11 @@
         font-size: 0.8rem;
       }
       .ended {
-        margin-top: 0.5rem;
         font-size: 0.9rem;
       }
       .roadmap-note {
         font-size: 0.9rem;
         padding: 0.6rem;
-        margin-top: 0.8rem;
       }
     }
   </style>
@@ -192,38 +126,36 @@
 
   <div class="container">
 
-    <!-- BLOCCHI EXTRA SOPRA IL COUNTDOWN (desktop only) -->
+    <!-- Sezione desktop-only sopra -->
     <div class="desktop-only">
-      <h3>Extra Desktop-Only Section (Top)</h3>
-      <p>Add text or images here to fill space on larger screens.</p>
+      <h3>Desktop Only (Top)</h3>
+      <p>This block is hidden on screens ≤768px</p>
     </div>
 
-    <!-- TITOLO COUNTDOWN -->
     <div class="title">WAITING FOR THE LAUNCH</div>
 
-    <!-- COUNTDOWN -->
     <div class="countdown">
-      <!-- DAYS -->
+      <!-- days -->
       <div class="time-box">
         <div class="number" id="days">--</div>
         <div class="label">Days</div>
       </div>
-      <!-- HOURS -->
+      <!-- hours -->
       <div class="time-box">
         <div class="number" id="hours">--</div>
         <div class="label">Hours</div>
       </div>
-      <!-- MINUTES -->
+      <!-- minutes -->
       <div class="time-box">
         <div class="number" id="minutes">--</div>
         <div class="label">Minutes</div>
       </div>
-      <!-- SECONDS (integers) -->
+      <!-- seconds (integer) -->
       <div class="time-box">
         <div class="number" id="seconds-int">--</div>
         <div class="label">Sec</div>
       </div>
-      <!-- SECONDS (decimals) -->
+      <!-- seconds (decimal) -->
       <div class="time-box">
         <div class="number" id="seconds-frac">--</div>
         <div class="label">Frac</div>
@@ -232,28 +164,21 @@
 
     <div class="ended" id="ended"></div>
 
-    <!-- ROADMAP NOTE SOTTO IL COUNTDOWN -->
     <div class="roadmap-note">
-      Look at the 
-      <a href="#" class="roadmap-link">roadmap</a>
-      to see the completion of the goals in view of the launch.
+      Look at the <a href="#">roadmap</a> to see the completion of goals in view of the launch.
     </div>
 
-    <!-- BLOCCHI EXTRA SOTTO IL COUNTDOWN (desktop only) -->
+    <!-- Sezione desktop-only sotto -->
     <div class="desktop-only">
-      <h3>Extra Desktop-Only Section (Bottom)</h3>
-      <p>More text or images to avoid leaving empty space on large screens.</p>
+      <h4>Desktop Only (Bottom)</h4>
+      <p>Hidden on screens ≤768px as well</p>
     </div>
 
-  </div><!-- /container -->
+  </div><!-- container -->
 
   <script>
-    /*
-      COUNTDOWN LOGIC
-      Aggiorna i valori (Days, Hours, etc.) in tempo reale
-    */
+    /* COUNTDOWN LOGIC */
     const targetDate = new Date('October 1, 2025 00:00:00').getTime();
-
     const daysEl       = document.getElementById('days');
     const hoursEl      = document.getElementById('hours');
     const minutesEl    = document.getElementById('minutes');
@@ -265,11 +190,9 @@
       const now = performance.now
         ? performance.timing.navigationStart + performance.now()
         : Date.now();
-
       const distance = targetDate - now;
 
       if (distance <= 0) {
-        // Se il countdown è scaduto
         daysEl.textContent       = '0';
         hoursEl.textContent      = '0';
         minutesEl.textContent    = '0';
@@ -279,7 +202,6 @@
         return;
       }
 
-      // Calcoli
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const remainderAfterDays = distance % (1000 * 60 * 60 * 24);
 
@@ -289,13 +211,11 @@
       const minutes = Math.floor(remainderAfterHours / (1000 * 60));
       const remainderAfterMinutes = remainderAfterHours % (1000 * 60);
 
-      // secondsFloat con decimali
       const secondsFloat = remainderAfterMinutes / 1000;
       const secInteger   = Math.floor(secondsFloat);
       let secFraction    = Math.floor((secondsFloat - secInteger) * 100);
       secFraction = secFraction.toString().padStart(2, '0');
 
-      // Aggiorna DOM
       daysEl.textContent       = days;
       hoursEl.textContent      = hours   < 10 ? '0' + hours : hours;
       minutesEl.textContent    = minutes < 10 ? '0' + minutes : minutes;
@@ -303,7 +223,7 @@
       secondsFracEl.textContent= secFraction;
     }
 
-    // Aggiorna ~60 volte al secondo, per un effetto fluido
+    // Animazione ~60FPS
     function animate() {
       updateCountdown();
       requestAnimationFrame(animate);
